@@ -11,11 +11,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import lifecycleevent
 
-from nti.appserver.interfaces import IApplicationSettings
-from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
+from nti.app.products.courseware.utils import drop_any_other_enrollments
 
 from nti.app.store.subscribers import safe_send_purchase_confirmation
 from nti.app.store.subscribers import store_purchase_attempt_successful
+
+from nti.appserver.interfaces import IApplicationSettings
+from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -31,8 +33,6 @@ from nti.store.interfaces import IPurchaseAttemptRefunded
 from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
-
-from ..courseware.utils import drop_any_other_enrollments
 
 def _enroll(course, user):
 	drop_any_other_enrollments(course, user)
@@ -98,7 +98,7 @@ def _purchase_attempt_refunded(purchase, event):
 
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_email_notification(purchase, event):
-	package='nti.app.products.ou.store'
+	package='nti.app.products.courseware_store'
 	settings = component.queryUtility(IApplicationSettings) or {}
 	store_purchase_attempt_successful(event, package=package)
 	email_line = settings.get('purchase_additional_confirmation_addresses', '')

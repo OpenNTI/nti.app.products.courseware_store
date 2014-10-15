@@ -88,6 +88,7 @@ def _course_to_purchasable_ntiid(course):
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
+	##from IPython.core.debugger import Tracer; Tracer()()
 	public = is_course_enabled_for_purchase(course)
 	entry = ICourseCatalogEntry(course)
 	giftable = is_course_giftable(course)

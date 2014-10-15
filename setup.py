@@ -35,6 +35,8 @@ setup(
 	namespace_packages=['nti', 'nti.app', 'nti.app.products'],
 	install_requires=[
 		'setuptools',
+        'nti.store',
+        'nti.app.products.courseware'
 	],
 	entry_points=entry_points
 )
