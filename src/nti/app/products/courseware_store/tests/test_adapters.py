@@ -47,14 +47,9 @@ class TestAdapters(ApplicationLayerTest):
 				return entry
 
 	@WithSharedApplicationMockDS(testapp=True,users=True)
-	@fudge.patch('nti.app.products.courseware_store.adapters.get_course_price',
-				 'nti.app.products.courseware_store.adapters.is_course_enabled_for_purchase')
-	def test_adapter(self, mock_gcp, mock_isce):
+	@fudge.patch('nti.app.products.courseware_store.adapters.is_course_enabled_for_purchase')
+	def test_adapter(self, mock_isce):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			# fake price
-			price = mock_gcp.is_callable().with_args().returns_fake()
-			price.has_attr(Amount=100)
-			price.has_attr(Currency='EUR')
 			# is enabled
 			mock_isce.is_callable().with_args().returns(True)
 			# test
@@ -63,8 +58,8 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that(purchasable, is_not(none()))
 			assert_that(purchasable, has_property('NTIID', is_('tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403')))
 			assert_that(purchasable, has_property('Items', has_length(1)))
-			assert_that(purchasable, has_property('Amount', is_(100)))
-			assert_that(purchasable, has_property('Currency', is_('EUR')))
+			assert_that(purchasable, has_property('Amount', is_(599.0)))
+			assert_that(purchasable, has_property('Currency', is_('USD')))
 			items = list(purchasable.Items)
 			assert_that(items, is_(['tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice']))
 
