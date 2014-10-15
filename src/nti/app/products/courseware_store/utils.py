@@ -10,21 +10,13 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 from zope.traversing.api import traverse
-from zope.component.interfaces import IComponents
-from zope.component.hooks import site as current_site
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
-from nti.processlifetime import IApplicationTransactionOpenedEvent
-
-from nti.site.interfaces import IHostPolicyFolder
-from nti.site.site import get_site_for_site_names
-
 from nti.store.interfaces import IPurchasableCourse
 
-from .. import sites as ou_sites
-from ..courseware.interfaces import ICoursePrice
+from .interfaces import ICoursePrice
 
 def get_vendor_info(course):
 	return ICourseInstanceVendorInfo(course, {})
@@ -49,23 +41,14 @@ def get_course_price(course):
 	return result
 
 def register_purchasables():
+	result = []
 	catalog = component.getUtility(ICourseCatalog)
 	for catalog_entry in catalog.iterCatalogEntries():
 		purchasable = IPurchasableCourse(catalog_entry, None)
 		name = getattr(purchasable, 'NTIID', None)
-		if 	purchasable is not None and \
+		if 	purchasable is not None and name and \
 			component.queryUtility(IPurchasableCourse, name=name) is None:
 			logger.info("Registering course purchasable %s", purchasable.NTIID)
 			component.provideUtility(purchasable, IPurchasableCourse, name=name)
-
-@component.adapter(IApplicationTransactionOpenedEvent)
-def register_site_purchasables(*args, **kwargs):
-	for v in ou_sites.__dict__.values():
-		if not IComponents.providedBy(v):
-			continue
-		name  = v.__name__
-		site = get_site_for_site_names((name,))
-		if not IHostPolicyFolder.providedBy(site):
-			continue
-		with current_site(site):
-			register_purchasables()
+			result.append(purchasable)
+	return result

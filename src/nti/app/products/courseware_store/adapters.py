@@ -30,13 +30,48 @@ from nti.ntiids.ntiids import make_specific_safe
 from nti.store.course import create_course
 from nti.store.interfaces import IPurchasableCourse
 
-from ..courseware.interfaces import get_course_publishable_vendor_info
+from ..interfaces import get_course_publishable_vendor_info
 
 from .utils import get_course_price
 from .utils import is_course_giftable
 from .utils import is_course_enabled_for_purchase
 from .utils import get_course_purchasable_provider
 	
+from zope import component
+from zope import interface
+from zope.traversing.api import traverse
+
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
+
+from nti.utils.maps import CaseInsensitiveDict
+
+from .model import CoursePrice
+
+from .interfaces import ICoursePrice
+
+TIMEOUT = 30
+
+def get_vendor_info(course):
+	return ICourseInstanceVendorInfo(course, {})
+
+@interface.implementer(ICoursePrice)
+@component.adapter(ICourseInstance)
+def _nti_course_price_finder(course):
+	vendor_info = get_vendor_info(course)
+	amount = traverse(vendor_info, 'NTI/Purchasable/Price', default=None)
+	currency = traverse(vendor_info, 'NTI/Purchasable/Currency', default='USD')
+	if amount:
+		result = CoursePrice(Amount=float(amount), Currency=currency)
+		return result
+	return None
+
+@interface.implementer(ICoursePrice)
+@component.adapter(ICourseCatalogEntry)
+def _nti_catalog_entry_price_finder(entry):
+	return _nti_course_price_finder(ICourseInstance(entry))
+
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):

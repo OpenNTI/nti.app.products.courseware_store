@@ -2,275 +2,70 @@
 <configure	xmlns="http://namespaces.zope.org/zope"
 			xmlns:i18n="http://namespaces.zope.org/i18n"
 			xmlns:zcml="http://namespaces.zope.org/zcml"
-			xmlns:ldap="http://nextthought.com/ntp/ldap"
-			xmlns:ext="http://nextthought.com/ntp/ext"
-			xmlns:z3c="http://namespaces.zope.org/z3c"
-			xmlns:logon="http://nextthought.com/ntp/logon"
-			xmlns:link="http://nextthought.com/ntp/link_providers"
-			xmlns:tdb="http://nextthought.com/ntp/tahrir"
-			i18n:domain="nti.app.products.ou"
-			i18n_domain="nti.app.products.ou">
+			xmlns:stripe="http://nextthought.com/ntp/stripe">
 
 	<include package="zope.component" file="meta.zcml" />
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
 	
-	<include package="z3c.baseregistry" file="meta.zcml" />
-	<include package="z3c.macro" file="meta.zcml" /> <!-- z3c:macro -->
+	<adapter factory=".adapters._entry_to_purchasable" />
+	<adapter factory=".adapters._course_to_purchasable" />
+				 
+	<adapter factory=".adapters._course_to_purchasable_ntiid" 
+	 		 for="nti.contenttypes.courses.interfaces.ICourseInstance"
+			 provides="dolmen.builtins.interfaces.IString"
+			 name="purchasable_course_ntiid" />
 
-	<include package="nti.utils" file="meta.zcml" />
-	<include package="nti.store" file="meta.zcml" />
+	<adapter factory=".adapters._entry_to_purchasable_ntiid"
+			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
+			 provides="dolmen.builtins.interfaces.IString"
+			 name="purchasable_course_ntiid" />
+			 						
+	<!-- Price Finders -->
+		
+	<adapter factory=".adapters._nti_course_price_finder"
+			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
+			 provides=".interfaces.ICoursePrice"
+			 name="nti" />
+
+	<adapter factory=".adapters._nti_catalog_entry_price_finder"
+			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
+			 provides=".interfaces.ICoursePrice"
+			 name="nti" />	
+			 	 
+	<adapter factory=".adapters._course_price_finder"
+			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
+			 provides=".interfaces.ICoursePrice" />
+
+	<adapter factory=".adapters._catalog_entry_price_finder"
+			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
+			 provides=".interfaces.ICoursePrice" />		
+			 
+	<!-- Subscribers -->
+
+	<subscriber handler=".subscribers._purchase_attempt_refunded" />
+	<subscriber handler=".subscribers._purchase_attempt_successful" />
+	<subscriber handler=".subscribers._purchase_invitation_accepted" />
+	<subscriber handler=".subscribers._purchase_attempt_email_notification" />
 	
-	<include package="nti.app.authentication" file="meta.zcml" /> <!-- logon:whitelist -->
-	<include package="nti.appserver.link_providers" file="meta.zcml" />
-
-	<i18n:registerTranslations directory="locales" />
-
-	<!-- Externalization -->
-	<include package="nti.externalization" file="meta.zcml" />
-	<include package="nti.externalization" />
-
-	<utility factory=".generations.install.SchemaManager"
-			 name="nti.dataserver:nti.app.products.ou" />
-
-	<configure zcml:condition="installed nti.app.products.courseware">
-		<class class=".legacy.OUCourseCatalogLegacyEntryInstancePolicy">
-			<implements interface="nti.app.products.courseware.legacy_course.ICourseCatalogLegacyEntryInstancePolicy" />
-		</class>
-		<utility
-			factory=".legacy.OUCourseCatalogLegacyEntryInstancePolicy"
-			name="OU"
-			provides="nti.app.products.courseware.legacy_course.ICourseCatalogLegacyEntryInstancePolicy" />
+	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
+				provides=".interfaces.ICoursePublishableVendorInfo"/>
+				
+	<!-- Decorators -->
+	
+	<subscriber factory=".decorators._StoreCourseEntryLinkDecorator"
+				provides="nti.externalization.interfaces.IExternalMappingDecorator"
+				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry
+					 pyramid.interfaces.IRequest" />
+					 
+	<configure zcml:condition="have devmode">
+		<include package="nti.store.payments.stripe" file="meta.zcml" />
+		<stripe:registerStripeKey
+			alias="Janux"
+			live_mode="False"
+			stripe_user_id="Janux"
+			public_key="pk_test_LIpQyLD7p5FmspOs6pPW9gWG"
+			private_key="sk_test_3K9VJFyfj0oGIMi7Aeg3HNBp" />
 	</configure>
-
-	<configure zcml:condition="installed nti.app.products.courseware_badges">
-		<include package="nti.badges.tahrir" file="meta.zcml" />
-		<tdb:registerTahrirIssuer
-					id="Janux"
-			 		name="Janux"
-			 		contact="janux@ou.edu"
-			 		org="https://janux.ou.edu"
-			 		origin="https://janux.ou.edu"/>
-	</configure>
-
-	<!--
-	Register outside the site to listen to 
-	IApplicationTransactionOpenedEvent 
-	-->
-	<subscriber handler=".store.utils.register_site_purchasables" />
-	
-	<utility
-		component=".sites.OU"
-		provides="zope.component.interfaces.IComponents"
-		name="platform.ou.edu" />
-
-	<registerIn registry=".sites.OU">
-
-		<adapter name="janux"
-				 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
-				 factory=".views.JanuxPathAdapter"
-				 provides="zope.traversing.interfaces.IPathAdapter" />
-
-		<utility factory=".policies.OUSitePolicyEventListener" />
-
-		<include package=".store" />
-		<include package=".courseware" />
-		<include package=".enrollment" />
-		<include package=".fiveminuteaep" />
-
-		<!-- LDAP registration -->
-		<ldap:registerLDAP
-			id="ou-ldap"
-			url="ldaps://ldaps.ou.edu:636"
-			username="it-ldap-nextthought"
-			password="Crimson%26Cream#1"
-			encoding="urlquote"
-			baseDN="OU=Accounts,DC=sooner,DC=net,DC=ou,DC=edu" />
-	
-		<!-- Disable username searches -->
-		<adapter factory="nti.appserver._adapters._RealnameAliasUserSearchPolicy"
-				 for="nti.dataserver.interfaces.IUser"
-				 provides="nti.appserver.interfaces.IUserSearchPolicy" />
-
-		<!-- Our profile in this site overrides that for all users -->
-		<adapter factory=".profile.OUUserProfileFactory"
-				 zcml:condition="not-have devmode"/>
-
-		<adapter factory=".profile.DevmodeOUUserProfileFactory"
-				 zcml:condition="have devmode"/>
-
-		<!-- Logon -->
-		<subscriber factory=".logon._SimpleMissingUserOULinkProvider"
-					provides="nti.appserver.interfaces.ILogonLinkProvider" />
-
-		<subscriber factory=".logon._SimpleExistingUserOULinkProvider"
-					provides="nti.appserver.interfaces.ILogonLinkProvider" />
-
-		<subscriber factory=".logon._UserResearchLogonLinkProvider"
-					provides="nti.appserver.interfaces.IAuthenticatedUserLinkProvider" />
-
-		<!-- Research -->
-		<adapter factory=".users._UserResearchStatus" />
-
-		<!-- Capabilities -->
-		<adapter factory=".policies.NoChangePasswordCapabilityFilter"
-			 	 for=".interfaces.IOUUser"
-			 	 provides="nti.appserver.interfaces.IUserCapabilityFilter" />
-
-		<!-- Username censoring is disabled -->
-		<utility factory="nti.contentfragments.censor.NoOpCensoredContentPolicy"
-				 name="username" />
-
-		<!-- Externalization -->
-		<subscriber factory=".decorators.OUUserDecorator"
-					provides="nti.externalization.interfaces.IExternalMappingDecorator" />
-		
-		<subscriber factory=".decorators.OpenEnrollmentCourseEntryDecorator"
-					provides="nti.externalization.interfaces.IExternalMappingDecorator"
-					for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry
-						 pyramid.interfaces.IRequest" />
-
-		<!-- Enrollment emails -->
-		<subscriber handler=".subscribers._enrollment_added" />
-
-		<!-- Macros -->
-		<z3c:macro
-			template="templates/macros.pt"
-			name="header"
-			for="zope.interface.Interface"
-			view="zope.interface.Interface"
-			layer="zope.interface.Interface" />
-
-		<z3c:macro
-			template="templates/macros.pt"
-			name="style"
-			for="zope.interface.Interface"
-			view="zope.interface.Interface"
-			layer="zope.interface.Interface" />
-
-		<!-- CSS for OU -->
-		<utility component=".views.SiteCssView" />
-		<utility component=".views.StringsJsView" />
-
-		<!-- Reporting -->
-		<z3c:macro
-			template="templates/std_report_macros.pt"
-			name="header_graphic"
-			for="zope.interface.Interface"
-			view="nti.app.products.coursewarereports.interfaces.IPDFReportView"
-			layer="pyramid.interfaces.IRequest"
-			zcml:condition="installed nti.app.products.coursewarereports"/>
-
-		<!-- OU Landing Page -->
-		<utility factory="nti.appserver.policies.site_policy_views.SiteLandingMarker" />
-
-		<link:userLink	named='nti.appserver.logon.REL_INITIAL_TOS_PAGE'
-						minGeneration='20130501'
-						url='https://docs.google.com/document/d/1FYdsBDFfD3i1WRmzxig-o9po6xTSgbLE4Ahe7bwNwuQ/pub'
-						mimeType='text/html'/>
-
-		<link:userLink	named='nti.appserver.logon.REL_PERMANENT_TOS_PAGE'
-						url='https://docs.google.com/document/d/1FYdsBDFfD3i1WRmzxig-o9po6xTSgbLE4Ahe7bwNwuQ/pub'
-						mimeType='text/html'/>
-
-		<!-- Course-by-course grading policies. This will move to the course instance. -->
-		<utility factory="nti.app.products.gradebook.autograde_policies.TrivialFixedScaleAutoGradePolicy"
-				 name="tag:nextthought.com,2011-10:OU-HTML-CHEM4970_Chemistry_of_Beer.chem_4970_001_chemistry_of_beer" />
-
-		<utility factory=".gradebook._OU4x4UsernameSortSubstitutionPolicy" />
-		
-	</registerIn>
-
-	<utility
-		component=".sites.OUTEST"
-		provides="zope.component.interfaces.IComponents"
-		name="ou-test.nextthought.com" />
-
-	<registerIn registry=".sites.OUTEST">
-
-		<utility factory=".policies.OUTestSitePolicyEventListener" />
-
-		<!--
-			Account creation endpoints are disabled because it's
-			internal testing only; we expect to whitelist the accounts
-			that can be used.
-		-->
-		<!--
-			JAM: For some unknown/undocumented reason these were
-			turned back on; (why?) They must still be disabled for
-			test purposes though, see test_create_disabled_outest
-		-->
-		<configure zcml:condition="have testmode">
-			<adapter name="account.create"
-					 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
-					 factory="nti.appserver.account_creation_views.DenyAccountCreatePathAdapter"
-					 provides="zope.traversing.interfaces.IPathAdapter" />
-	
-			<adapter name="account.preflight.create"
-					 for="nti.dataserver.interfaces.IDataserverFolder pyramid.interfaces.IRequest"
-					 factory="nti.appserver.account_creation_views.DenyAccountCreatePreflightPathAdapter"
-					 provides="zope.traversing.interfaces.IPathAdapter" />
-		</configure>
-
-		<!--
-		<logon:whitelist
-			entities="black9783
-					  calton3652
-					  cham7816
-					  croo8276
-					  damp8528
-					  demi3826
-					  dunb8859
-					  elmo3302
-					  fitz6668
-					  lewi7532
-					  lin3788
-					  magr9201
-					  mcgo2121
-					  megg4758
-					  morv1533
-					  nels7657
-					  port2106
-					  puls2013
-					  saba3508
-					  tryt3968
-					  wert4649
-					  swan3561
-					  "/>
-		-->
-	</registerIn>
-
-	<utility
-		component=".sites.OUALPHA"
-		provides="zope.component.interfaces.IComponents"
-		name="ou-alpha.nextthought.com" />
-
-	<registerIn registry=".sites.OUALPHA">
-		<utility factory=".policies.OUTestSitePolicyEventListener" />
-		<!-- Only send email to nextthought.com -->
-		<utility factory="nti.mailer.filtered_template_mailer.NextThoughtOnlyMailer" />
-	</registerIn>
-
-	<utility
-		component=".sites.PERFORMANCE"
-		provides="zope.component.interfaces.IComponents"
-		name="performance.nextthought.com" />
-		
-	<registerIn registry=".sites.PERFORMANCE">
-		<utility factory=".policies.PerformanceSitePolicyEventListener" />
-		<!-- Only send email to nextthought.com -->
-		<utility factory="nti.mailer.filtered_template_mailer.NextThoughtOnlyMailer" />
-	</registerIn>
-	
-	<utility
-		component=".sites.JANUX"
-		provides="zope.component.interfaces.IComponents"
-		name="janux.ou.edu" />
-
-	<!--
-	<registerIn registry=".sites.JANUX">
-		<utility factory=".policies.JanuxSitePolicyEventListener" />
-	</registerIn>
-	-->
 </configure>
