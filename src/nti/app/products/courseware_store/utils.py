@@ -8,6 +8,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from itertools import chain
+
 from zope import component
 from zope.traversing.api import traverse
 
@@ -40,7 +42,7 @@ def get_course_purchasable_provider(course):
 	return result
 
 def get_course_price(course, *names):
-	names = names + ['nti'] if names else ('nti',)
+	names = chain(names, ('nti',)) if names else ('nti',)
 	for name in names:
 		result = component.queryAdapter(course,  ICoursePrice, name=name)
 		if result is not None:
