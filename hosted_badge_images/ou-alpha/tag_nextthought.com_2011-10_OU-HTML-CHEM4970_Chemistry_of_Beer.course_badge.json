@@ -1,0 +1,8 @@
+{
+	"name": "OU \"Chemistry of Beer\" Course Completion",
+	"description": "Completion of \"Chemistry of Beer,\" a chemistry course on Janux, an interactive learning community at the University of Oklahoma.",
+	"issuer": "https://ou-alpha.nextthought.com/hosted_badge_images/ou-alpha.json",
+	"criteria": "https://ou-alpha.nextthought.com/hosted_badge_images/CHEM4970/criteria.html",
+	"tags": ["Chemistry", "Organic Chemistry", "Biochemistry", "University of Oklahoma", "Beer", "Homebrewing", "Janux"],
+	"image": "tag_nextthought.com_2011-10_OU-HTML-CHEM4970_Chemistry_of_Beer.course_badge.png"
+}

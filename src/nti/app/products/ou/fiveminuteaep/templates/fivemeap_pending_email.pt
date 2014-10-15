@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:metal="http://xml.zope.org/namespaces/metal"
+	  xmlns:tal="http://xml.zope.org/namespaces/tal">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>An update on your admittance status</title>
+		<style metal:use-macro="macro:style">
+		</style>
+	</head>
+	<body>
+		<div metal:use-macro="macro:header">
+		</div>
+
+		<p>Dear <span tal:content="options/informal_username" class="realname tterm">John</span>,</p>
+
+		<p>
+			We are very sorry for any inconvenience, but we are unable to continue
+			processing your application at this time.  Your application has been
+			submitted for further review, and you will be contacted at this email
+			address in one to two business days.
+		</p>
+
+		<p>
+			If you have any questions or would like any additional information,
+			please contact our Office of Admissions at (405) 325-2252 or by email
+			at <a href="mailto:pending@ou.edu">pending@ou.edu</a>.
+		</p>
+
+		<p>
+			Sincerely,
+			<br />
+			<br />
+			<span>
+				Jeffrey Blahnik<br />
+				Director of Admissions<br />
+				University of Oklahoma<br />
+			</span>
+		</p>
+
+		<div id="logo-bar nti">
+			<img src="http://d2ixlfeu83tci.cloudfront.net/images/email_logo.png" width="177" height="25" alt="NextThought Logo" />
+		</div>
+
+		<p class="footer" style="font-size: smaller">
+			If you feel this email was sent in error, or this account was created
+			without your consent, you may email
+			<a href="mailto:support@nextthought.com">support@nextthought.com</a>.
+		</p>
+
+	</body>
+</html>

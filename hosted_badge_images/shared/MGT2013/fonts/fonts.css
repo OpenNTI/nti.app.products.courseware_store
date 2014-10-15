@@ -1,0 +1,189 @@
+@font-face {
+    font-family: 'Open Sans Condensed';
+    src: url('opensanscond/opensans-condlight-webfont.eot');
+    src: url('opensanscond/opensans-condlight-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensanscond/opensans-condlight-webfont.woff') format('woff'),
+         url('opensanscond/opensans-condlight-webfont.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans Condensed';
+    src: url('opensanscond/opensans-condlighttalic-webfont.eot');
+    src: url('opensanscond/opensans-condlighttalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensanscond/opensans-condlighttalic-webfont.woff') format('woff'),
+         url('opensanscond/opensans-condlighttalic-webfont.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+
+}
+@font-face {
+    font-family: 'Open Sans Condensed';
+    src: url('opensanscond/opensans-condbold-webfont.eot');
+    src: url('opensanscond/opensans-condbold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensanscond/opensans-condbold-webfont.woff') format('woff'),
+         url('opensanscond/opensans-condbold-webfont.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+
+}
+
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-light-webfont.eot');
+    src: url('opensans/opensans-light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-light-webfont.woff') format('woff'),
+         url('opensans/opensans-light-webfont.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-lightitalic-webfont.eot');
+    src: url('opensans/opensans-lightitalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-lightitalic-webfont.woff') format('woff'),
+         url('opensans/opensans-lightitalic-webfont.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-regular-webfont.eot');
+    src: url('opensans/opensans-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-regular-webfont.woff') format('woff'),
+         url('opensans/opensans-regular-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-italic-webfont.eot');
+    src: url('opensans/opensans-italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-italic-webfont.woff') format('woff'),
+         url('opensans/opensans-italic-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+
+}
+
+
+
+
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-semibold-webfont.eot');
+    src: url('opensans/opensans-semibold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-semibold-webfont.woff') format('woff'),
+         url('opensans/opensans-semibold-webfont.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-semibolditalic-webfont.eot');
+    src: url('opensans/opensans-semibolditalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-semibolditalic-webfont.woff') format('woff'),
+         url('opensans/opensans-semibolditalic-webfont.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+
+}
+
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-bold-webfont.eot');
+    src: url('opensans/opensans-bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-bold-webfont.woff') format('woff'),
+         url('opensans/opensans-bold-webfont.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-bolditalic-webfont.eot');
+    src: url('opensans/opensans-bolditalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-bolditalic-webfont.woff') format('woff'),
+         url('opensans/opensans-bolditalic-webfont.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+
+}
+
+
+
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-extrabold-webfont.eot');
+    src: url('opensans/opensans-extrabold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-extrabold-webfont.woff') format('woff'),
+         url('opensans/opensans-extrabold-webfont.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('opensans/opensans-extrabolditalic-webfont.eot');
+    src: url('opensans/opensans-extrabolditalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('opensans/opensans-extrabolditalic-webfont.woff') format('woff'),
+         url('opensans/opensans-extrabolditalic-webfont.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+
+@font-face {
+    font-family: 'Droid Serif';
+    src: url('droidserif/droidserif-webfont.eot');
+    src: url('droidserif/droidserif-webfont.eot?#iefix') format('embedded-opentype'),
+         url('droidserif/droidserif-webfont.woff') format('woff'),
+         url('droidserif/droidserif-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Droid Serif';
+    src: url('droidserif/droidserif-italic-webfont.eot');
+    src: url('droidserif/droidserif-italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('droidserif/droidserif-italic-webfont.woff') format('woff'),
+         url('droidserif/droidserif-italic-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+
+}
+
+@font-face {
+    font-family: 'Droid Serif';
+    src: url('droidserif/droidserif-bold-webfont.eot');
+    src: url('droidserif/droidserif-bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('droidserif/droidserif-bold-webfont.woff') format('woff'),
+         url('droidserif/droidserif-bold-webfont.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Droid Serif';
+    src: url('droidserif/droidserif-bolditalic-webfont.eot');
+    src: url('droidserif/droidserif-bolditalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('droidserif/droidserif-bolditalic-webfont.woff') format('woff'),
+         url('droidserif/droidserif-bolditalic-webfont.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+
+}

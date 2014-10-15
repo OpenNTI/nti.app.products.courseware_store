@@ -1,0 +1,20 @@
+Dear ${informal_username},
+
+Thank you for signing up for "${course.Title}," an open version of
+the popular course taken by incoming freshmen during their first
+semester at the University of Oklahoma. You are welcome to join us to
+experience the lectures and discussions available through Janux.
+
+The course begins August 18, 2014. Feel free to spread the word about
+the course by forwarding this email or sharing about it through social
+media. If you are an incoming OU student, you have the option to
+enroll in the Gateway to College Learning course for credit. Enroll at
+ozone.ou.edu with the corresponding course number: UCOL 102.
+
+I look forward to seeing you in our community,
+
+${course.InstructorsSignature}
+
+
+If you feel this email was sent in error, or this account was created
+without your consent, you may email support@nextthought.com.

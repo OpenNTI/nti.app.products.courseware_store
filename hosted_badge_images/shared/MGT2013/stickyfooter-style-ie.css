@@ -1,0 +1,11 @@
+@charset "UTF-8";
+/* CSS Document */
+
+/*  
+Sticky Footer Solution
+by Steve Hatcher 
+http://stever.ca
+http://www.cssstickyfooter.com
+*/
+
+#wrapper-all { display:table; height:100%; }

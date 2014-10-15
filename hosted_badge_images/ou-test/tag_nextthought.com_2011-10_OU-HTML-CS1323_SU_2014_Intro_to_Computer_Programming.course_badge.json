@@ -1,0 +1,8 @@
+{
+	"name": "Introduction to Computer Programming",
+	"description": "Completed all of the quizes with a 70% or more.",
+	"issuer": "https://ou-test.nextthought.com/hosted_badge_images/janux.json",
+	"criteria": "https://janux.ou.edu/course.cs1323.html",
+	"tags": ["computer", "programming","introduction"],
+	"image": "tag_nextthought.com_2011-10_OU-HTML-CS1323_SU_2014_Intro_to_Computer_Programming.course_badge.png"
+}

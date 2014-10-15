@@ -1,0 +1,18 @@
+Dear ${informal_username},
+
+Thank you for your interest in the University of Oklahoma.  I
+regret to inform you that you are not eligible for admission
+to the University at this time.   We invite you to sign up for
+the free, open version of the course available on Janux.
+
+If you have any questions or would like any additional information,
+please contact our Office of Admissions at (405) 325-2252.
+
+Sincerely,
+
+Jeffrey Blahnik
+Director of Admissions
+University of Oklahoma
+
+If you feel this email was sent in error, or this account was created
+without your consent, you may email support@nextthought.com.

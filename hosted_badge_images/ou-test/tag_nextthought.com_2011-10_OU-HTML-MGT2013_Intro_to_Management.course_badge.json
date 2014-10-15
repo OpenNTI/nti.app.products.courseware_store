@@ -1,0 +1,8 @@
+{
+	"name": "OU \"Introduction to Management\" Course Completion",
+	"description": "Completion of \"Introduction to Management,\" a course on Janux, an interactive learning community at the University of Oklahoma",
+	"issuer": "https://ou-test.nextthought.com/hosted_badge_images/ou-test.json",
+	"criteria": "https://ou-test.nextthought.com/hosted_badge_images/MGT2013/criteria.html",
+	"tags": ["management", "business", "university of oklahoma", "atlas black", "price college of business", "Janux"],
+	"image": "tag_nextthought.com_2011-10_OU-HTML-MGT2013_Intro_to_Management.course_badge.png"
+}

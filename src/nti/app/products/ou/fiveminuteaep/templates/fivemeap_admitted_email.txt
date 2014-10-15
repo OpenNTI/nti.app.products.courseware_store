@@ -1,0 +1,25 @@
+Dear ${informal_username},
+
+CONGRATULATIONS on your admission to the University
+of Oklahoma!  On behalf of our administration, faculty,
+and staff, welcome!
+
+As a member of the Janux interactive learning
+community, we care about you and your personal success.
+Our faculty and staff members are here
+to serve as mentors and to encourage your academic and personal growth.
+We understand that it is our responsibility to help prepare you to excel
+now and in the future.
+
+We hope you will find your educational experience on Janux to be rewarding.
+Our staff is available to assist you in anyway possible.  We look
+forward to welcoming you for the ${term}.
+
+Sincerely,
+
+Jeffrey Blahnik
+Director of Admissions
+University of Oklahoma
+
+If you feel this email was sent in error, or this account was created
+without your consent, you may email support@nextthought.com.

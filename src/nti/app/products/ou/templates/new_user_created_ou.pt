@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:metal="http://xml.zope.org/namespaces/metal"
+	  xmlns:tal="http://xml.zope.org/namespaces/tal">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>Welcome To NextThought</title>
+		<style metal:use-macro="macro:style">
+		</style>
+	</head>
+	<body>
+		<div metal:use-macro="macro:header">
+		</div>
+		<p>Dear <span tal:content="options/profile/realname" class="realname tterm">John Doe</span>,</p>
+
+		<p>
+			Welcome to <a href="https://janux.ou.edu"
+			title="JANUX">JANUX</a>, a new interactive learning
+			community that connects learners and teachers everywhere
+			through high-quality OU courses.
+		</p>
+		<p>
+			<strong>Username:</strong> <span tal:content="options/user/username" class="tterm-color">username</span> <br />
+			<strong>Log in at:</strong> <a href="https://janux.ou.edu"
+										   tal:attributes="href request/application_url"
+										   tal:content="request/application_url">https://janux.ou.edu</a>
+		</p>
+
+		<h3><strong>Engage with Course Content NOW</strong></h3>
+		<p class="point">
+			Multiple courses are already ongoing. Don't worry&mdash;Jump
+			in! Experiment with the different tools offered on JANUX
+			such as an interactive whiteboard where you are able to
+			visualize a concept directly in the content.
+			<a href="https://janux.ou.edu">Get started.</a>
+		</p>
+		<h3><strong>Sign Up for an Upcoming Course</strong></h3>
+		<p class="point">
+			JANUX is offering several courses that will be starting
+			soon. Check
+			out <a href="https://janux.ou.edu">janux.ou.edu</a> for
+			the most up-to-date course list. All courses are open in a
+			not-for-credit environment. Registered students have full
+			access to content and the power to participate in the
+			learning community with the social learning features of
+			the platform.
+		</p>
+		<p class="point">
+			If you are a current OU student, you can enroll in JANUX
+			courses on <a href="https://ozone.ou.edu">oZone</a> to
+			earn credit. Some courses are fully online, others are
+			face-to-face. If you are not an OU student but want to
+			enroll for credit, see about becoming a
+			<a href="http://www.ou.edu/admissions/nondegree/">Special
+			Student.</a>
+		</p>
+		<h3><strong>Get Social</strong></h3>
+		<p class="point">
+			Get to know your fellow learners. Fill out your profile,
+			add friends, create groups, use the live chat features,
+			and share notes.
+		</p>
+
+		<p>
+			&mdash;The Janux Team
+		</p>
+
+		<br/>
+		<div id="logo-bar nti">
+			<img src="http://d2ixlfeu83tci.cloudfront.net/images/email_logo.png" width="177" height="25"
+			alt="NextThought Logo" />
+		</div>
+
+		<p class="footer" style="font-size: smaller">
+			If you feel this email was sent in error, or this account was created
+			without your consent, you may email
+			<a href="mailto:support@nextthought.com">support@nextthought.com</a>.
+		</p>
+
+	</body>
+</html>

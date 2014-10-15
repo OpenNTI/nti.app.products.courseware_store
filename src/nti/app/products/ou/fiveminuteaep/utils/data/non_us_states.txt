@@ -1,0 +1,29 @@
+VI	Virgin Islands
+PR	Puerto Rico
+GU	Guam
+CZ	Canal Zone
+AS	American Samoa
+ON	Ontario
+AB	Alberta
+NF	Newfoundland
+MB	Manitoba
+NB	New Brunswick
+NT	Northwest Territories
+PE	Prince Edward Island
+SA	South Australia
+PQ	Provence of Quebec
+NS	Nova Scotia
+NSW	New South Wales
+QLD	Queensland
+AP	Military - Pacific
+AE	Military - Europe
+AA	Military - Americas
+FR	Foreign State
+MP	Northern Mariana Islands
+FM	Federated States of Micronesia
+MH	Marshall Islands
+PW	Palau
+ZZ	Non-US-location
+NU	Nunavut
+SK	Saskatchewan
+YT	Yukon

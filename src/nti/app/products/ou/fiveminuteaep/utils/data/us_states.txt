@@ -1,0 +1,51 @@
+DE	Delaware
+NJ	New Jersey
+PA	Pennsylvania
+DC	District of Columbia
+NY	New York
+CA	California
+VA	Virginia
+NC	North Carolina
+TX	Texas
+FL	Florida
+HI	Hawaii
+WV	West Virginia
+MT	Montana
+GA	Georgia
+MD	Maryland
+OH	Ohio
+IN	Indiana
+AK	Alaska
+AL	Alabama
+AR	Arkansas
+AZ	Arizona
+CO	Colorado
+CT	Connecticut
+IA	Iowa
+ID	Idaho
+IL	Illinois
+KS	Kansas
+KY	Kentucky
+LA	Louisiana
+MA	Massachusetts
+ME	Maine
+MI	Michigan
+MN	Minnesota
+MO	Missouri
+MS	Mississippi
+ND	North Dakota
+NE	Nebraska
+NH	New Hampshire
+NM	New Mexico
+NV	Nevada
+OK	Oklahoma
+OR	Oregon
+RI	Rhode Island
+SC	South Carolina
+SD	South Dakota
+TN	Tennessee
+UT	Utah
+VT	Vermont
+WA	Washington
+WI	Wisconsin
+WY	Wyoming

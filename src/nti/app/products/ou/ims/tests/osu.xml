@@ -1,0 +1,82 @@
+<?xml version="1.0"?>                                              
+<enterprise>
+   <group>
+      <sourcedid>
+         <id>G_BIOL1311LAB_WH3_146</id>
+      </sourcedid>
+      <description>
+         <short>G_BIOL1311LAB_WH3_146</short>
+         <long>BIOL1311-PRIN OF BIOL LAB-WEST HTS-SEC LAB WH3</long>
+      </description>
+      <timeframe>
+         <begin>2014-08-11</begin>
+         <end>2015-01-03</end>
+      </timeframe>
+      <enrollcontrol>
+         <enrollaccept>0</enrollaccept>
+      </enrollcontrol>
+   </group>
+   <person>
+      <sourcedid>
+         <id>XXXXXXXX</id>
+      </sourcedid>
+      <userid>jobs</userid>
+      <name>
+         <n>
+            <family>Jobs</family>
+            <given>Steve</given>
+            <partname partnametype="Middle"/>
+         </n>
+      </name>
+      <email>sjobs@okstate.edu</email>
+      <extension>
+         <userrole>FACULTY</userrole>
+      </extension>
+   </person>
+   <person>
+      <sourcedid>
+         <id>YYYYYYYYY</id>
+      </sourcedid>
+      <userid>griffch</userid>
+      <name>
+         <n>
+            <family>HEMPHILL</family>
+            <given>GRIFFIN</given>
+            <partname partnametype="Middle"/>
+         </n>
+      </name>
+      <email>griffch@okstate.edu</email>
+      <extension>
+         <userrole>STUDENT</userrole>
+      </extension>
+   </person>
+   <membership>
+      <sourcedid>
+         <id>G_BIOL1311LAB_WH3_146</id>
+      </sourcedid>
+      <member>
+         <sourcedid>
+            <id>XXXXXXXX</id>
+         </sourcedid>
+         <role roletype="FACULTY">
+            <status>1</status>
+         </role>
+      </member>
+      <member>
+         <sourcedid>
+            <id>YYYYYYYYY</id>
+         </sourcedid>
+         <role roletype="STUDENT">
+            <status>0</status>
+         </role>
+      </member>
+      <member>
+         <sourcedid>
+            <id>ZZZZZZZZ</id>
+         </sourcedid>
+         <role roletype="STUDENT">
+            <status>0</status>
+         </role>
+      </member>
+   </membership>
+</enterprise>

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<enterprise>
+	<properties>
+		<datasource>SIS</datasource>
+		<datetime>2013-08-04T09:23:47.200</datetime>
+	</properties>
+	<group>
+		<sourcedid>
+			<source>SIS</source>
+			<id>26235.20131</id>
+		</sourcedid>
+		<grouptype>
+			<typevalue level="0">CLASSES</typevalue>
+		</grouptype>
+		<description>
+			<short>CL C-3403-001 - Law and Justice</short>
+			<long>CL C-3403-001 - Law and Justice</long>
+		</description>
+		<timeframe>
+			<end>2013-11-28T00:00:00</end>
+		</timeframe>
+		<datasource>SIS</datasource>
+	</group>
+	<person>
+		<sourcedid>
+			<source>SIS</source>
+			<id>112133307</id>
+		</sourcedid>
+		<userid>cald3307</userid>
+		<name>
+			<fn>Ichigo Kurosaki</fn>
+		</name>
+		<email>ichigo@ou.edu</email>
+		<datasource>SIS</datasource>
+	</person>
+	<membership>
+		<sourcedid>
+			<source>SIS</source>
+			<id>26235.20131</id>
+		</sourcedid>
+		<member>
+			<sourcedid>
+				<source>SIS</source>
+				<id>112133307</id>
+			</sourcedid>
+			<idtype>1</idtype>
+			<role roletype="01">
+				<status>0</status>
+				<userid>cald3307</userid>
+				<datasource>SIS</datasource>
+			</role>
+		</member>
+		<member>
+			<sourcedid>
+				<source>SIS</source>
+				<id>112133307</id>
+			</sourcedid>
+			<idtype>1</idtype>
+			<role roletype="01">
+				<status>1</status>
+				<userid>cald3307</userid>
+				<datasource>SIS</datasource>
+			</role>
+		</member>
+	</membership>
+</enterprise>
