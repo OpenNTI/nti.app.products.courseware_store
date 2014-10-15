@@ -1,8 +1,0 @@
-{
-	"name": "Physical Geology",
-	"description": "Completed all of the quizes with a 70% or more.",
-	"issuer": "https://ou-test.nextthought.com/hosted_badge_images/janux.json",
-	"criteria": "https://janux.ou.edu/course.geol1114.html",
-	"tags": ["geology", "physics"],
-	"image": "tag_nextthought.com_2011-10_OU-HTML-GEOL1114_Physical_Geology.course_badge.png"
-}
