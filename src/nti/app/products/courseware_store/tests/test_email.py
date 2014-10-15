@@ -25,8 +25,6 @@ from zope.component import eventtesting
 
 from pyramid.testing import DummyRequest
 
-from nti.app.products.ou.store.utils import register_purchasables
-
 from nti.appserver.interfaces import IApplicationSettings
 
 from nti.dataserver.users import User
@@ -38,11 +36,14 @@ from nti.store.interfaces import IPurchaseAttemptSuccessful
 
 from nti.store.payment_charge import UserAddress
 from nti.store.payment_charge import PaymentCharge
-from nti.store.pricing import create_pricing_results
 from nti.store.purchase_order import create_purchase_item
 from nti.store.purchase_order import create_purchase_order
 from nti.store.purchase_attempt import create_purchase_attempt
 from nti.store.purchase_history import register_purchase_attempt
+
+from nti.store.pricing import create_pricing_results
+
+from nti.app.products.courseware_store.utils import register_purchasables
 
 from nti.dataserver.tests import mock_dataserver
 

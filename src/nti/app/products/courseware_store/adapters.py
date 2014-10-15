@@ -14,6 +14,7 @@ from datetime import datetime
 
 from zope import component
 from zope import interface
+from zope.traversing.api import traverse
 
 from dolmen.builtins.interfaces import IString
 
@@ -21,6 +22,7 @@ from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.ntiids.ntiids import get_parts
@@ -30,28 +32,16 @@ from nti.ntiids.ntiids import make_specific_safe
 from nti.store.course import create_course
 from nti.store.interfaces import IPurchasableCourse
 
-from ..interfaces import get_course_publishable_vendor_info
-
-from .utils import get_course_price
-from .utils import is_course_giftable
-from .utils import is_course_enabled_for_purchase
-from .utils import get_course_purchasable_provider
-	
-from zope import component
-from zope import interface
-from zope.traversing.api import traverse
-
-from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
-
-from nti.utils.maps import CaseInsensitiveDict
+from .interfaces import ICoursePrice
+from .interfaces import get_course_publishable_vendor_info
 
 from .model import CoursePrice
 
-from .interfaces import ICoursePrice
-
-TIMEOUT = 30
+from .utils import get_course_price
+from .utils import is_course_giftable
+from .utils import get_course_purchasable_ntiid
+from .utils import is_course_enabled_for_purchase
+from .utils import get_course_purchasable_provider
 
 def get_vendor_info(course):
 	return ICourseInstanceVendorInfo(course, {})
@@ -99,21 +89,21 @@ def _course_to_purchasable_ntiid(course):
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
 	public = is_course_enabled_for_purchase(course)
-	price = get_course_price(course)
-	if price is None:
-		return
-	
-	giftable = is_course_giftable(course)
 	entry = ICourseCatalogEntry(course)
-	amount = price.Amount
-	currency = price.Currency
-	
-	ntiid = component.queryAdapter(entry, IString, name="purchasable_course_ntiid")
-	if ntiid is None:
-		ntiid = _entry_to_purchasable_ntiid(entry)
+	giftable = is_course_giftable(course)
 	
 	parts = get_parts(entry.ntiid)
 	provider = get_course_purchasable_provider(course) or parts.provider
+	
+	price = get_course_price(course, provider)	
+	if price is None:
+		logger.debug("No price found for course %s", entry.ntiid)
+		return None
+	amount = price.Amount
+	currency = price.Currency
+	
+	ntiid = get_course_purchasable_ntiid(entry, provider)
+	assert ntiid, 'No purchasable NTIID was derived for course'
 	
 	preview = False
 	icon = thumbnail = None

@@ -11,7 +11,10 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope.traversing.api import traverse
 
+from dolmen.builtins.interfaces import IString
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
 from nti.store.interfaces import IPurchasableCourse
@@ -36,8 +39,21 @@ def get_course_purchasable_provider(course):
 	result = traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
 	return result
 
-def get_course_price(course):
-	result = ICoursePrice(course, None)
+def get_course_price(course, *names):
+	names = names + ['nti'] if names else ('nti',)
+	for name in names:
+		result = component.queryAdapter(course,  ICoursePrice, name=name)
+		if result is not None:
+			return result
+	return None
+
+def get_course_purchasable_ntiid(entry, name=None):
+	result = None
+	entry = ICourseCatalogEntry(entry)
+	if name:
+		result = component.queryAdapter(entry, IString, name=name)
+	if not result:
+		result = component.getAdapter(entry, IString, name="purchasable_course_ntiid")
 	return result
 
 def register_purchasables():

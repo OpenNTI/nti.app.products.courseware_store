@@ -17,12 +17,16 @@ from hamcrest import has_property
 import fudge
 
 from zope import component
+from zope import interface
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.store.interfaces import IPurchasableCourse
 
 from nti.dataserver.tests import mock_dataserver
+
+from nti.app.products.courseware_store.interfaces import ICoursePrice
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 from nti.app.testing.application_webtest import ApplicationLayerTest
@@ -43,8 +47,8 @@ class TestAdapters(ApplicationLayerTest):
 				return entry
 
 	@WithSharedApplicationMockDS(testapp=True,users=True)
-	@fudge.patch('nti.app.products.ou.store.adapters.get_course_price',
-				 'nti.app.products.ou.store.adapters.is_course_enabled_for_purchase')
+	@fudge.patch('nti.app.products.courseware_store.adapters.get_course_price',
+				 'nti.app.products.courseware_store.adapters.is_course_enabled_for_purchase')
 	def test_adapter(self, mock_gcp, mock_isce):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			# fake price
@@ -63,3 +67,22 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that(purchasable, has_property('Currency', is_('EUR')))
 			items = list(purchasable.Items)
 			assert_that(items, is_(['tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice']))
+
+	@fudge.patch('nti.app.products.courseware_store.adapters.get_vendor_info')
+	def test_nti_course_price_finder(self, mock_vi):
+		fake_course = fudge.Fake()
+		interface.alsoProvides(fake_course, ICourseInstance)
+		
+		mock_vi.is_callable().with_args().returns(
+		{
+			"NTI": {
+				"Purchasable":{
+					'Price':300,
+					'Currency':'COP'
+				}
+			}
+		})
+		course_price = component.queryAdapter(fake_course, ICoursePrice, name="nti")
+		assert_that(course_price, is_not(none()))
+		assert_that(course_price, has_property(u'Amount', is_(300)))
+		assert_that(course_price, has_property(u'Currency', is_('COP')))
