@@ -48,7 +48,7 @@ def get_vendor_info(course):
 
 @interface.implementer(ICoursePrice)
 @component.adapter(ICourseInstance)
-def _nti_course_price_finder(course):
+def nti_course_price_finder(course):
 	vendor_info = get_vendor_info(course)
 	amount = traverse(vendor_info, 'NTI/Purchasable/Price', default=None)
 	currency = traverse(vendor_info, 'NTI/Purchasable/Currency', default='USD')
@@ -59,8 +59,8 @@ def _nti_course_price_finder(course):
 
 @interface.implementer(ICoursePrice)
 @component.adapter(ICourseCatalogEntry)
-def _nti_catalog_entry_price_finder(entry):
-	return _nti_course_price_finder(ICourseInstance(entry))
+def nti_catalog_entry_price_finder(entry):
+	return nti_course_price_finder(ICourseInstance(entry))
 
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
