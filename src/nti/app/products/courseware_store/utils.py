@@ -42,7 +42,7 @@ def get_course_purchasable_provider(course):
 	return result
 
 def get_course_price(course, *names):
-	names = chain(names, ('nti',)) if names else ('nti',)
+	names = chain(names, ('',)) if names else ('',)
 	for name in names:
 		result = component.queryAdapter(course,  ICoursePrice, name=name)
 		if result is not None:
