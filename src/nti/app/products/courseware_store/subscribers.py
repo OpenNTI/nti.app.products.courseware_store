@@ -13,10 +13,6 @@ from zope import lifecycleevent
 
 from nti.app.products.courseware.utils import drop_any_other_enrollments
 
-from nti.app.store.subscribers import safe_send_purchase_confirmation
-from nti.app.store.subscribers import store_purchase_attempt_successful
-
-from nti.appserver.interfaces import IApplicationSettings
 from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -95,12 +91,3 @@ def _process_refunded_purchase(purchase):
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):
 	_process_refunded_purchase(purchase)
-
-@component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
-def _purchase_attempt_email_notification(purchase, event):
-	package='nti.app.products.courseware_store'
-	settings = component.queryUtility(IApplicationSettings) or {}
-	store_purchase_attempt_successful(event, package=package)
-	email_line = settings.get('purchase_additional_confirmation_addresses', '')
-	for email in email_line.split():
-		safe_send_purchase_confirmation(event, email, package=package)

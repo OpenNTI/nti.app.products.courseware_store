@@ -41,11 +41,7 @@
 	<subscriber handler=".subscribers._purchase_attempt_refunded" />
 	<subscriber handler=".subscribers._purchase_attempt_successful" />
 	<subscriber handler=".subscribers._purchase_invitation_accepted" />
-		
-	<configure zcml:condition="have testmode">
-		<subscriber handler=".subscribers._purchase_attempt_email_notification" />
-	</configure>
-	
+
 	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>
 				
