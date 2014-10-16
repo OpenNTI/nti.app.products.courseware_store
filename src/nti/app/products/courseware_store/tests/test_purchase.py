@@ -23,7 +23,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ES_CREDIT_NONDEGREE
 
-from nti.app.products.ou.store.utils import register_purchasables
+from nti.app.products.courseware_store.utils import register_purchasables
 
 from nti.dataserver.users import User
 

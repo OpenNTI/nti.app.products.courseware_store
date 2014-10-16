@@ -20,9 +20,12 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
+from nti.ntiids.ntiids import get_parts
+
 from nti.store.interfaces import IPurchasableCourse
 
 from .model import CoursePrice
+
 from .interfaces import ICoursePrice
 
 def get_vendor_info(course):
@@ -43,6 +46,12 @@ def get_course_purchasable_provider(course):
 	result = traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
 	return result
 
+def get_entry_purchasable_provider(entry):
+	course = ICourseInstance(entry)
+	parts = get_parts(entry.ntiid)
+	provider = get_course_purchasable_provider(course) or parts.provider
+	return provider
+
 def get_course_price(course, *names):
 	names = chain(names, ('',)) if names else ('',)
 	for name in names:
@@ -59,6 +68,7 @@ def get_course_purchasable_ntiid(entry, name=None):
 	if not result:
 		result = component.getAdapter(entry, IString, name="purchasable_course_ntiid")
 	return result
+get_entry_purchasable_ntiid = get_course_purchasable_ntiid
 
 def get_nti_course_price(context):
 	course = ICourseInstance(context, None)
@@ -70,9 +80,9 @@ def get_nti_course_price(context):
 		return result
 	return None
 
-def register_purchasables():
+def register_purchasables(catalog=None):
 	result = []
-	catalog = component.getUtility(ICourseCatalog)
+	catalog = catalog or component.getUtility(ICourseCatalog)
 	for catalog_entry in catalog.iterCatalogEntries():
 		purchasable = IPurchasableCourse(catalog_entry, None)
 		name = getattr(purchasable, 'NTIID', None)

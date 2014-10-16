@@ -2,6 +2,7 @@
 <configure	xmlns="http://namespaces.zope.org/zope"
 			xmlns:i18n="http://namespaces.zope.org/i18n"
 			xmlns:zcml="http://namespaces.zope.org/zcml"
+			xmlns:ext="http://nextthought.com/ntp/ext"
 			xmlns:stripe="http://nextthought.com/ntp/stripe">
 
 	<include package="zope.component" file="meta.zcml" />
@@ -53,6 +54,10 @@
 	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>
 				
+	<subscriber	factory=".enrollment.StoreEnrollmentOptionProvider"
+				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
+				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
+				
 	<!-- Decorators -->
 	
 	<subscriber factory=".decorators._StoreCourseEntryLinkDecorator"
@@ -60,6 +65,15 @@
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry
 					 pyramid.interfaces.IRequest" />
 					 
+	<!-- Externalization -->
+
+	<include package="nti.externalization" file="meta.zcml" />
+	<include package="nti.externalization" />
+
+	<ext:registerAutoPackageIO
+		root_interfaces=".interfaces.IStoreEnrollmentOption"
+		modules=".enrollment" />
+
 	<configure zcml:condition="have devmode">
 		<include package="nti.store.payments.stripe" file="meta.zcml" />
 		<stripe:registerStripeKey

@@ -40,7 +40,8 @@ class TestAdapters(ApplicationLayerTest):
 	default_origin = str('http://janux.ou.edu')
 	course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
 
-	def _catalog_entry(self):
+	@classmethod
+	def catalog_entry(self):
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():
 			if entry.ntiid == self.course_ntiid:
@@ -53,7 +54,7 @@ class TestAdapters(ApplicationLayerTest):
 			# is enabled
 			mock_isce.is_callable().with_args().returns(True)
 			# test
-			entry = self._catalog_entry()
+			entry = self.catalog_entry()
 			purchasable = IPurchasableCourse(entry, None)
 			assert_that(purchasable, is_not(none()))
 			assert_that(purchasable, has_property('NTIID', is_('tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403')))

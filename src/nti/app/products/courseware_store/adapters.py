@@ -38,7 +38,7 @@ from .utils import is_course_giftable
 from .utils import get_nti_course_price
 from .utils import get_course_purchasable_ntiid
 from .utils import is_course_enabled_for_purchase
-from .utils import get_course_purchasable_provider
+from .utils import get_entry_purchasable_provider
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
@@ -74,9 +74,7 @@ def _course_to_purchasable(course):
 	public = is_course_enabled_for_purchase(course)
 	entry = ICourseCatalogEntry(course)
 	giftable = is_course_giftable(course)
-	
-	parts = get_parts(entry.ntiid)
-	provider = get_course_purchasable_provider(course) or parts.provider
+	provider = get_entry_purchasable_provider(entry)
 	
 	price = get_course_price(course, provider)	
 	if price is None:
