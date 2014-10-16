@@ -26,20 +26,20 @@
 			 						
 	<!-- Price Finders -->
 		
-	<adapter factory=".adapters.nti_course_price_finder"
+	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
 			 provides=".interfaces.ICoursePrice" />
 
-	<adapter factory=".adapters.nti_course_price_finder"
+	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
 			 provides=".interfaces.ICoursePrice" 
 			 name="nti" />
 			 
-	<adapter factory=".adapters.nti_catalog_entry_price_finder"
+	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 			 provides=".interfaces.ICoursePrice" />	
 
-	<adapter factory=".adapters.nti_catalog_entry_price_finder"
+	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 			 provides=".interfaces.ICoursePrice"
 			 name="nti" />	

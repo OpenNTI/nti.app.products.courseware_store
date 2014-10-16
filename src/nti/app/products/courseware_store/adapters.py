@@ -14,7 +14,6 @@ from datetime import datetime
 
 from zope import component
 from zope import interface
-from zope.traversing.api import traverse
 
 from dolmen.builtins.interfaces import IString
 
@@ -22,7 +21,6 @@ from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.ntiids.ntiids import get_parts
@@ -35,33 +33,18 @@ from nti.store.interfaces import IPurchasableCourse
 from .interfaces import ICoursePrice
 from .interfaces import get_course_publishable_vendor_info
 
-from .model import CoursePrice
-
 from .utils import get_course_price
 from .utils import is_course_giftable
+from .utils import get_nti_course_price
 from .utils import get_course_purchasable_ntiid
 from .utils import is_course_enabled_for_purchase
 from .utils import get_course_purchasable_provider
 
-def get_vendor_info(course):
-	return ICourseInstanceVendorInfo(course, {})
-
 @interface.implementer(ICoursePrice)
-@component.adapter(ICourseInstance)
-def nti_course_price_finder(course):
-	vendor_info = get_vendor_info(course)
-	amount = traverse(vendor_info, 'NTI/Purchasable/Price', default=None)
-	currency = traverse(vendor_info, 'NTI/Purchasable/Currency', default='USD')
-	if amount:
-		result = CoursePrice(Amount=float(amount), Currency=currency)
-		return result
-	return None
-
-@interface.implementer(ICoursePrice)
-@component.adapter(ICourseCatalogEntry)
-def nti_catalog_entry_price_finder(entry):
-	return nti_course_price_finder(ICourseInstance(entry))
-
+def _nti_course_price_finder(context):
+	result = get_nti_course_price(context)
+	return result
+	
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):

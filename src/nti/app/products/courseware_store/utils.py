@@ -16,11 +16,13 @@ from zope.traversing.api import traverse
 from dolmen.builtins.interfaces import IString
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
 from nti.store.interfaces import IPurchasableCourse
 
+from .model import CoursePrice
 from .interfaces import ICoursePrice
 
 def get_vendor_info(course):
@@ -57,6 +59,16 @@ def get_course_purchasable_ntiid(entry, name=None):
 	if not result:
 		result = component.getAdapter(entry, IString, name="purchasable_course_ntiid")
 	return result
+
+def get_nti_course_price(context):
+	course = ICourseInstance(context, None)
+	vendor_info = get_vendor_info(course)
+	amount = traverse(vendor_info, 'NTI/Purchasable/Price', default=None)
+	currency = traverse(vendor_info, 'NTI/Purchasable/Currency', default='USD')
+	if amount:
+		result = CoursePrice(Amount=float(amount), Currency=currency)
+		return result
+	return None
 
 def register_purchasables():
 	result = []

@@ -63,7 +63,7 @@ class TestAdapters(ApplicationLayerTest):
 			items = list(purchasable.Items)
 			assert_that(items, is_(['tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice']))
 
-	@fudge.patch('nti.app.products.courseware_store.adapters.get_vendor_info')
+	@fudge.patch('nti.app.products.courseware_store.utils.get_vendor_info')
 	def test_nti_course_price_finder(self, mock_vi):
 		fake_course = fudge.Fake()
 		interface.alsoProvides(fake_course, ICourseInstance)
