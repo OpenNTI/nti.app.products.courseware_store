@@ -11,17 +11,16 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from dolmen.builtins.interfaces import IString
-
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.externalization.externalization import to_external_object
 from nti.externalization.interfaces import IExternalMappingDecorator
-
-from nti.store.purchasable import get_purchasable
 	
+from nti.store.purchasable import get_purchasable
+from nti.store.interfaces import IPurchasableCourse
+
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IExternalMappingDecorator)
 class _StoreCourseEntryLinkDecorator(AbstractAuthenticatedRequestAwareDecorator):
@@ -30,8 +29,8 @@ class _StoreCourseEntryLinkDecorator(AbstractAuthenticatedRequestAwareDecorator)
 		return self._is_authenticated
 	
 	def _do_decorate_external(self, context, result):
-		ntiid = component.queryAdapter(context, IString, name="purchasable_course_ntiid")
-		purchasable = get_purchasable(ntiid) if ntiid else None
+		purchasable = IPurchasableCourse(context, None)
+		purchasable = get_purchasable(purchasable.NTIID) if purchasable else None
 		if purchasable is not None and not purchasable.Public:
 			options = result.setdefault('EnrollmentOptions', {})
 			store_enrollment = options.setdefault('StoreEnrollment', {})
