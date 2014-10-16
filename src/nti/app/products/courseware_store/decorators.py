@@ -31,7 +31,7 @@ class _StoreCourseEntryLinkDecorator(AbstractAuthenticatedRequestAwareDecorator)
 	def _do_decorate_external(self, context, result):
 		purchasable = IPurchasableCourse(context, None)
 		purchasable = get_purchasable(purchasable.NTIID) if purchasable else None
-		if purchasable is not None and not purchasable.Public:
+		if purchasable is not None and purchasable.Public:
 			options = result.setdefault('EnrollmentOptions', {})
 			store_enrollment = options.setdefault('StoreEnrollment', {})
 			# set purchasable
