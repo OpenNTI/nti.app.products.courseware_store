@@ -10,6 +10,7 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 from zope import interface
+from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 
@@ -23,6 +24,7 @@ from nti.externalization.externalization import to_external_object
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
 from nti.schema.schema import EqHash
+from nti.schema.field import SchemaConfigured
 
 from nti.store.purchasable import get_purchasable
 
@@ -38,20 +40,24 @@ MIMETYPE = StandardExternalFields.MIMETYPE
 @WithRepr
 @NoPickle
 @EqHash('Name')
-class StoreEnrollmentOption(object):
+class StoreEnrollmentOption(SchemaConfigured):
 
 	__parent__ = None
 	__external_can_create__ = False
 	__external_class_name__ = "StoreEnrollment"
 	mime_type = mimeType = 'application/vnd.nextthought.courseware.storeenrollmentoption'
 
-	Purchasable = None
+	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
 	
 	@property
 	def Name(self):
 		return 'StoreEnrollment'
 	__name__ = Name
 		
+	@Name.setter
+	def Name(self, value):
+		pass
+	
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
 		result[MIMETYPE] = self.mimeType
