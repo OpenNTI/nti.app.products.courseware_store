@@ -77,7 +77,7 @@ class TestAdapters(ApplicationLayerTest):
 				}
 			}
 		})
-		course_price = component.queryAdapter(fake_course, ICoursePrice, name="nti")
+		course_price = component.queryAdapter(fake_course, ICoursePrice)
 		assert_that(course_price, is_not(none()))
 		assert_that(course_price, has_property(u'Amount', is_(300)))
 		assert_that(course_price, has_property(u'Currency', is_('COP')))
