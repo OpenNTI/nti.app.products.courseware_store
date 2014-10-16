@@ -7,10 +7,12 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
+from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import has_entry
 from hamcrest import assert_that
+from hamcrest import has_entries
 from hamcrest import has_property
 does_not = is_not
 
@@ -19,6 +21,8 @@ from zope import component
 from nti.app.products.courseware_store.utils import register_purchasables
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
+
+from nti.externalization.externalization import to_external_object
 
 from nti.app.products.courseware.utils import get_enrollment_options
 
@@ -52,3 +56,12 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 			assert_that(options, has_entry('StoreEnrollment', 
 										   has_property('Purchasable', is_not(none()))))
 
+			ext_obj = to_external_object(options)
+			assert_that(ext_obj, 
+				has_entry('StoreEnrollment',
+						   has_entries(	'Purchasable', is_not(none()),
+										'Price', is_not(none()),
+										'Currency', is_not(none()),
+										'RequiresAdmission', is_(False),
+										'IsEnrolled', is_not(none()),
+							  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption')))
