@@ -20,6 +20,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ES_CREDIT_NONDEGREE
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
+from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
+from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecordCreatedEvent
 
 from nti.store.purchasable import get_purchasable
 
@@ -30,13 +32,13 @@ from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
 
-def _enroll(course, user):
+def _enroll(course, user, purchasable=None):
 	drop_any_other_enrollments(course, user)
 	enrollments = ICourseEnrollments(course)
 	enrollment_manager = ICourseEnrollmentManager(course)
 	enrollment = enrollments.get_enrollment_for_principal(user)
 	if enrollment is None: 	# Never before been enrolled
-		enrollment_manager.enroll(user, scope=ES_CREDIT_NONDEGREE)
+		enrollment_manager.enroll(user, scope=ES_CREDIT_NONDEGREE, context=purchasable)
 	else:
 		logger.info("User %s now paying for course (old_scope %s)",
 					user, enrollment.Scope)
@@ -44,7 +46,7 @@ def _enroll(course, user):
 		lifecycleevent.modified(enrollment)
 	return True
 
-def _unenroll(course, user):
+def _unenroll(course, user, purchasable=None):
 	enrollments = ICourseEnrollments(course)
 	enrollment = enrollments.get_enrollment_for_principal(user)
 	if enrollment is not None:
@@ -63,15 +65,19 @@ def _get_courses_from_purchase(purchase):
 			try:
 				entry = catalog.getCatalogEntry(name)
 				course = ICourseInstance(entry)
-				yield course
+				yield course, purchasable
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
 def _process_successful_purchase(purchase):
 	user = purchase.creator
-	for course in _get_courses_from_purchase(purchase):
-		_enroll(course, user)
+	for course, purchasable in _get_courses_from_purchase(purchase):
+		_enroll(course, user, purchasable)
 
+@component.adapter(ICourseInstanceEnrollmentRecord, ICourseInstanceEnrollmentRecordCreatedEvent)
+def _on_course_enrollment_record_created(purchase, event):
+	pass
+	
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
 	_process_successful_purchase(purchase)
@@ -85,8 +91,8 @@ def _purchase_invitation_accepted(invitation, event):
 
 def _process_refunded_purchase(purchase):
 	user = purchase.creator
-	for course in _get_courses_from_purchase(purchase):
-		_unenroll(course, user)
+	for course, purchasable in _get_courses_from_purchase(purchase):
+		_unenroll(course, user, purchasable)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):

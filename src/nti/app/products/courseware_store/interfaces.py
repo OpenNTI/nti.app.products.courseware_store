@@ -47,3 +47,10 @@ def get_course_publishable_vendor_info(course):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
+
+class IPurchasableCourseEnrollmentRecord(interface.Interface):
+	"""
+	marker interface for :class:`nti.contenttypes.courses.ICourseInstanceEnrollmentRecord`
+	to signal this is an course purchase enrollemnt
+	"""
+	pass
