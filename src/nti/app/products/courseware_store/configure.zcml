@@ -50,7 +50,6 @@
 	<subscriber handler=".subscribers._purchase_attempt_refunded" />
 	<subscriber handler=".subscribers._purchase_attempt_successful" />
 	<subscriber handler=".subscribers._purchase_invitation_accepted" />
-	<subscriber handler=".subscribers._on_course_enrollment_record_created" /> 
 	
 	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>

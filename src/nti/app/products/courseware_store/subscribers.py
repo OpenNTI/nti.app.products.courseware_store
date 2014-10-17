@@ -9,7 +9,6 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 from zope import component
-from zope import interface
 from zope import lifecycleevent
 
 from nti.app.products.courseware.utils import drop_any_other_enrollments
@@ -21,8 +20,6 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
-from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
-from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecordCreatedEvent
 
 from nti.store.purchasable import get_purchasable
 
@@ -32,8 +29,6 @@ from nti.store.interfaces import IPurchaseAttemptRefunded
 from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
-
-from .interfaces import IPurchasableCourseEnrollmentRecord
 
 def _enroll(course, user, purchasable=None):
 	drop_any_other_enrollments(course, user)
@@ -47,7 +42,6 @@ def _enroll(course, user, purchasable=None):
 					user, enrollment.Scope)
 		## change scope and mark record
 		enrollment.Scope = ES_PURCHASED
-		interface.alsoProvides(enrollment, IPurchasableCourseEnrollmentRecord)
 		## notify to reflect changes
 		lifecycleevent.modified(enrollment)
 	return True
@@ -79,11 +73,6 @@ def _process_successful_purchase(purchase):
 	user = purchase.creator
 	for course, purchasable in _get_courses_from_purchase(purchase):
 		_enroll(course, user, purchasable)
-
-@component.adapter(ICourseInstanceEnrollmentRecord, ICourseInstanceEnrollmentRecordCreatedEvent)
-def _on_course_enrollment_record_created(record, event):
-	if IPurchasableCourse.providedBy(event.context):
-		interface.alsoProvides(record, IPurchasableCourseEnrollmentRecord)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
