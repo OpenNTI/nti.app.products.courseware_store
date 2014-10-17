@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 from zope import component
+from zope import interface
 from zope import lifecycleevent
 
 from nti.app.products.courseware.utils import drop_any_other_enrollments
@@ -32,6 +33,8 @@ from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
 
+from .interfaces import IPurchasableCourseEnrollmentRecord
+
 def _enroll(course, user, purchasable=None):
 	drop_any_other_enrollments(course, user)
 	enrollments = ICourseEnrollments(course)
@@ -42,7 +45,10 @@ def _enroll(course, user, purchasable=None):
 	else:
 		logger.info("User %s now paying for course (old_scope %s)",
 					user, enrollment.Scope)
+		## change scope and mark record
 		enrollment.Scope = ES_CREDIT_NONDEGREE
+		interface.alsoProvides(enrollment, IPurchasableCourseEnrollmentRecord)
+		## notify to reflect changes
 		lifecycleevent.modified(enrollment)
 	return True
 
@@ -75,9 +81,10 @@ def _process_successful_purchase(purchase):
 		_enroll(course, user, purchasable)
 
 @component.adapter(ICourseInstanceEnrollmentRecord, ICourseInstanceEnrollmentRecordCreatedEvent)
-def _on_course_enrollment_record_created(purchase, event):
-	pass
-	
+def _on_course_enrollment_record_created(record, event):
+	if IPurchasableCourse.providedBy(event.context):
+		interface.alsoProvides(record, IPurchasableCourseEnrollmentRecord)
+		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
 	_process_successful_purchase(purchase)
