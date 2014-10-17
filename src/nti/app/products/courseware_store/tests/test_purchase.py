@@ -18,10 +18,10 @@ from zope.event import notify
 
 from nti.appserver.interfaces import IApplicationSettings
 
+from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
-from nti.contenttypes.courses.interfaces import ES_CREDIT_NONDEGREE
 
 from nti.app.products.courseware_store.utils import register_purchasables
 
@@ -98,7 +98,7 @@ class TestPurchase(ApplicationLayerTest):
 			enrollments = ICourseEnrollments(course)
 			enrollment = enrollments.get_enrollment_for_principal(user)
 			assert_that(enrollment, is_not(none()))
-			assert_that(enrollment, has_property('Scope', ES_CREDIT_NONDEGREE))
+			assert_that(enrollment, has_property('Scope', ES_PURCHASED))
 			
 			notify(PurchaseAttemptRefunded(purchase))
 			assert_that(purchase.State, is_(PA_STATE_REFUNDED))

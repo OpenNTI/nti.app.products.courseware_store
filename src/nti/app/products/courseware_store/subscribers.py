@@ -16,10 +16,10 @@ from nti.app.products.courseware.utils import drop_any_other_enrollments
 
 from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
 
+from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
-from nti.contenttypes.courses.interfaces import ES_CREDIT_NONDEGREE
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecordCreatedEvent
@@ -41,12 +41,12 @@ def _enroll(course, user, purchasable=None):
 	enrollment_manager = ICourseEnrollmentManager(course)
 	enrollment = enrollments.get_enrollment_for_principal(user)
 	if enrollment is None: 	# Never before been enrolled
-		enrollment_manager.enroll(user, scope=ES_CREDIT_NONDEGREE, context=purchasable)
+		enrollment_manager.enroll(user, scope=ES_PURCHASED, context=purchasable)
 	else:
 		logger.info("User %s now paying for course (old_scope %s)",
 					user, enrollment.Scope)
 		## change scope and mark record
-		enrollment.Scope = ES_CREDIT_NONDEGREE
+		enrollment.Scope = ES_PURCHASED
 		interface.alsoProvides(enrollment, IPurchasableCourseEnrollmentRecord)
 		## notify to reflect changes
 		lifecycleevent.modified(enrollment)
