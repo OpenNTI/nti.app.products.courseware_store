@@ -78,7 +78,6 @@ def _course_to_purchasable(course):
 	
 	price = get_course_price(course, provider)	
 	if price is None:
-		logger.debug("No price found for course %s", entry.ntiid)
 		return None
 	amount = price.Amount
 	currency = price.Currency
