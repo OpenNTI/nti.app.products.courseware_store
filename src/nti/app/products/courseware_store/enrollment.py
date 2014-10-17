@@ -12,6 +12,7 @@ from zope import component
 from zope import interface
 from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 
+from nti.app.products.courseware.enrollment import EnrollmentOption
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -22,9 +23,6 @@ from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.externalization import to_external_object
 from nti.externalization.interfaces import IInternalObjectExternalizer
-
-from nti.schema.schema import EqHash
-from nti.schema.field import SchemaConfigured
 
 from nti.store.purchasable import get_purchasable
 
@@ -39,24 +37,12 @@ MIMETYPE = StandardExternalFields.MIMETYPE
 @interface.implementer(IStoreEnrollmentOption, IInternalObjectExternalizer)
 @WithRepr
 @NoPickle
-@EqHash('Name')
-class StoreEnrollmentOption(SchemaConfigured):
+class StoreEnrollmentOption(EnrollmentOption):
 
-	__parent__ = None
-	__external_can_create__ = False
 	__external_class_name__ = "StoreEnrollment"
 	mime_type = mimeType = 'application/vnd.nextthought.courseware.storeenrollmentoption'
 
 	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
-	
-	@property
-	def Name(self):
-		return 'StoreEnrollment'
-	__name__ = Name
-		
-	@Name.setter
-	def Name(self, value):
-		pass
 	
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
@@ -84,5 +70,6 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasable is not None and purchasable.Public:
 			result = StoreEnrollmentOption()
 			result.Purchasable = purchasable
+			result.CatalogEntryNTIID = self.context.ntiid
 			return (result,)
 		return ()
