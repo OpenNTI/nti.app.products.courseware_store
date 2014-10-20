@@ -74,7 +74,7 @@
 		root_interfaces=".interfaces.IStoreEnrollmentOption"
 		modules=".enrollment" />
 
-	<configure zcml:condition="have devmode">
+	<configure zcml:condition="have testmode">
 		<include package="nti.store.payments.stripe" file="meta.zcml" />
 		<stripe:registerStripeKey
 			alias="Janux"
