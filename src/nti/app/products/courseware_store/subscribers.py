@@ -27,6 +27,7 @@ from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IGiftPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptRefunded
+from nti.store.interfaces import IRedeemedPurchaseAttempt
 from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
@@ -87,8 +88,8 @@ def _purchase_invitation_accepted(invitation, event):
 		original = invitation.purchase
 		_process_successful_purchase(original)
 
-def _process_refunded_purchase(purchase):
-	user = purchase.creator
+def _process_refunded_purchase(purchase, user=None):
+	user = user or purchase.creator
 	for course, purchasable in _get_courses_from_purchase(purchase):
 		_unenroll(course, user, purchasable)
 		
@@ -100,6 +101,6 @@ def _purchase_attempt_refunded(purchase, event):
 def _gift_purchase_attempt_redeemed(purchase, event):
 	_process_successful_purchase(purchase, event.user)
 
-@component.adapter(IGiftPurchaseAttempt, IPurchaseAttemptRefunded)
-def _gift_purchase_attempt_refunded(purchase, event):
+@component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
+def _redeemed_purchase_attempt_refunded(purchase, event):
 	_process_refunded_purchase(purchase)
