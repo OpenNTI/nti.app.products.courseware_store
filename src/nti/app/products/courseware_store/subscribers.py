@@ -25,10 +25,12 @@ from nti.store.purchasable import get_purchasable
 
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourse
+from nti.store.interfaces import IGiftPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptRefunded
 from nti.store.interfaces import IStorePurchaseInvitation
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
+from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 
 def _enroll(course, user, purchasable=None):
 	drop_any_other_enrollments(course, user)
@@ -69,8 +71,8 @@ def _get_courses_from_purchase(purchase):
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
-def _process_successful_purchase(purchase):
-	user = purchase.creator
+def _process_successful_purchase(purchase, user=None):
+	user = user or purchase.creator
 	for course, purchasable in _get_courses_from_purchase(purchase):
 		_enroll(course, user, purchasable)
 		
@@ -92,4 +94,12 @@ def _process_refunded_purchase(purchase):
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):
+	_process_refunded_purchase(purchase)
+
+@component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
+def _gift_purchase_attempt_redeemed(purchase, event):
+	_process_successful_purchase(purchase, event.user)
+
+@component.adapter(IGiftPurchaseAttempt, IPurchaseAttemptRefunded)
+def _gift_purchase_attempt_refunded(purchase, event):
 	_process_refunded_purchase(purchase)
