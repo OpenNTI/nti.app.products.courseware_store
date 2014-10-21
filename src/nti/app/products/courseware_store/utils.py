@@ -11,6 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 from itertools import chain
 
 from zope import component
+from zope import lifecycleevent
 from zope.traversing.api import traverse
 
 from dolmen.builtins.interfaces import IString
@@ -88,7 +89,8 @@ def register_purchasables(catalog=None):
 		name = getattr(purchasable, 'NTIID', None)
 		if 	purchasable is not None and name and \
 			component.queryUtility(IPurchasableCourse, name=name) is None:
-			logger.info("Registering course purchasable %s", purchasable.NTIID)
 			component.provideUtility(purchasable, IPurchasableCourse, name=name)
 			result.append(purchasable)
+			lifecycleevent.created(purchasable)
+			logger.debug("Course purchasable %s registered", purchasable.NTIID)
 	return result
