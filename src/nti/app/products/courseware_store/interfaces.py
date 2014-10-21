@@ -9,7 +9,11 @@ __docformat__ = "restructuredtext en"
 from zope import component
 from zope import interface
 
+from pyramid.interfaces import IRequest
+
 from nti.app.products.courseware.interfaces import IEnrollmentOption
+
+from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
 from nti.store.interfaces import IPurchasableCourse
 
@@ -47,3 +51,17 @@ def get_course_publishable_vendor_info(course):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
+
+
+class IStoreEnrollmentEvent(interface.Interface):
+	request = Object(IRequest, title="the request", required=False) 
+	purchasable = Object(IPurchasableCourse, title="purchasable course", required=False)
+	record = Object(ICourseInstanceEnrollmentRecord, title="enrollemnt record", required=True)
+	
+@interface.implementer(IStoreEnrollmentEvent)
+class StoreEnrollmentEvent(object):
+	
+	def __init__(self, record, purchasable=None, request=None):
+		self.record = record
+		self.request = request
+		self.purchasable = purchasable

@@ -9,7 +9,10 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 from zope import component
+from zope.event import notify
 from zope import lifecycleevent
+
+from pyramid.threadlocal import get_current_request
 
 from nti.app.products.courseware.utils import drop_any_other_enrollments
 
@@ -33,13 +36,16 @@ from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
 from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 
-def _enroll(course, user, purchasable=None):
+from .interfaces import StoreEnrollmentEvent
+
+def _enroll(course, user, purchasable=None, request=None):
 	drop_any_other_enrollments(course, user)
 	enrollments = ICourseEnrollments(course)
 	enrollment_manager = ICourseEnrollmentManager(course)
 	enrollment = enrollments.get_enrollment_for_principal(user)
 	if enrollment is None: 	# Never before been enrolled
-		enrollment_manager.enroll(user, scope=ES_PURCHASED, context=purchasable)
+		enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
+											   context=purchasable)
 	else:
 		logger.info("User %s now paying for course (old_scope %s)",
 					user, enrollment.Scope)
@@ -47,6 +53,10 @@ def _enroll(course, user, purchasable=None):
 		enrollment.Scope = ES_PURCHASED
 		## notify to reflect changes
 		lifecycleevent.modified(enrollment)
+		
+	# notify store based enrollment
+	request = request or get_current_request()
+	notify(StoreEnrollmentEvent(enrollment, purchasable, request))
 	return True
 
 def _unenroll(course, user, purchasable=None):
@@ -72,14 +82,14 @@ def _get_courses_from_purchase(purchase):
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
-def _process_successful_purchase(purchase, user=None):
+def _process_successful_purchase(purchase, user=None, request=None):
 	user = user or purchase.creator
 	for course, purchasable in _get_courses_from_purchase(purchase):
-		_enroll(course, user, purchasable)
+		_enroll(course, user, purchasable, request=request)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
-	_process_successful_purchase(purchase)
+	_process_successful_purchase(purchase, request=event.request)
 
 @component.adapter(IStorePurchaseInvitation, IInvitationAcceptedEvent)
 def _purchase_invitation_accepted(invitation, event):
@@ -99,7 +109,7 @@ def _purchase_attempt_refunded(purchase, event):
 
 @component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
 def _gift_purchase_attempt_redeemed(purchase, event):
-	_process_successful_purchase(purchase, event.user)
+	_process_successful_purchase(purchase, event.user, event.request)
 
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
 def _redeemed_purchase_attempt_refunded(purchase, event):
