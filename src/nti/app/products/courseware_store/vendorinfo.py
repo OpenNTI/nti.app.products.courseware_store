@@ -13,8 +13,6 @@ from zope import interface
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
-from .utils import allow_vendor_updates
-
 from .interfaces import ICoursePublishableVendorInfo
 
 @component.adapter(ICourseInstance)
@@ -25,5 +23,4 @@ class _DefaultCoursePublishableVendorInfo(object):
         self.course = course
 
     def info(self):
-        result = {'AllowVendorUpdates': allow_vendor_updates(self.course)}
-        return result
+        return None

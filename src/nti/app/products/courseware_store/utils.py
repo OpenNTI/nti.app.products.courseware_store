@@ -81,9 +81,10 @@ def get_nti_course_price(context):
 		return result
 	return None
 
-def allow_vendor_updates(course_instance):
-	course_vendor_info = ICourseInstanceVendorInfo(course_instance, {})
-	result = traverse(course_vendor_info, 'NTI/Purchasable/AllowVendorUpdates', default=False)
+def allow_vendor_updates(context):
+	course = ICourseInstance(context, None)
+	vendor_info = ICourseInstanceVendorInfo(course, {})
+	result = traverse(vendor_info, 'NTI/Purchasable/AllowVendorUpdates', default=False)
 	return bool(result) if result is not None else False
 
 def register_purchasables(catalog=None):

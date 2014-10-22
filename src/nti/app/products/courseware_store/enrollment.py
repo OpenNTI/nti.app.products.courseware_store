@@ -28,6 +28,7 @@ from nti.store.purchasable import get_purchasable
 
 from .interfaces import IStoreEnrollmentOption
 
+from .utils import allow_vendor_updates
 from .utils import get_entry_purchasable_ntiid
 from .utils import get_entry_purchasable_provider
 
@@ -43,6 +44,7 @@ class StoreEnrollmentOption(EnrollmentOption):
 	mime_type = mimeType = 'application/vnd.nextthought.courseware.storeenrollmentoption'
 
 	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
+	AllowVendorUpdates = FP(IStoreEnrollmentOption['AllowVendorUpdates'])
 	
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
@@ -70,6 +72,23 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasable is not None and purchasable.Public:
 			result = StoreEnrollmentOption()
 			result.Purchasable = purchasable
-			result.CatalogEntryNTIID = self.context.ntiid
+			result.AllowVendorUpdates = allow_vendor_updates(self.context)
+			result = StoreEnrollmentOptionProxy(result, self.context.ntiid)
 			return (result,)
 		return ()
+
+from zope.proxy import ProxyBase
+
+class StoreEnrollmentOptionProxy(ProxyBase):
+	
+	CatalogEntryNTIID = property(
+			lambda s: s.__dict__.get('_v_catalog_entry_ntiid'),
+			lambda s, v: s.__dict__.__setitem__('_v_catalog_entry_ntiid', v))
+		
+	def __new__(cls, base, context):
+		return ProxyBase.__new__(cls, base)
+
+	def __init__(self, base, ntiid):
+		ProxyBase.__init__(self, base)
+		self.CatalogEntryNTIID = ntiid
+		

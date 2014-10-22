@@ -36,6 +36,7 @@ from .interfaces import get_course_publishable_vendor_info
 from .utils import get_course_price
 from .utils import is_course_giftable
 from .utils import get_nti_course_price
+from .utils import allow_vendor_updates
 from .utils import get_course_purchasable_ntiid
 from .utils import is_course_enabled_for_purchase
 from .utils import get_entry_purchasable_provider
@@ -67,7 +68,7 @@ def _course_to_purchasable_ntiid(course):
 	entry = ICourseCatalogEntry(course, None)
 	result = _entry_to_purchasable_ntiid(entry) if entry else None
 	return result
-
+		
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
@@ -133,4 +134,20 @@ def _course_to_purchasable(course):
 						   signature=entry.InstructorsSignature,
 						   department=entry.ProviderDepartmentTitle)
 	
+	result = PurchasableProxy(result, allow_vendor_updates(course))
 	return result
+
+from zope.proxy import ProxyBase
+
+class PurchasableProxy(ProxyBase):
+	
+	AllowVendorUpdates = property(
+			lambda s: s.__dict__.get('_v_allow_vendor_updates'),
+			lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
+		
+	def __new__(cls, base, context):
+		return ProxyBase.__new__(cls, base)
+
+	def __init__(self, base, allow):
+		ProxyBase.__init__(self, base)
+		self.AllowVendorUpdates = allow

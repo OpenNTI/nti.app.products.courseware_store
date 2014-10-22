@@ -17,6 +17,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
 from nti.store.interfaces import IPurchasableCourse
 
+from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
 from nti.schema.field import ValidTextLine
@@ -51,6 +52,7 @@ def get_course_publishable_vendor_info(course):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
+	AllowVendorUpdates = Bool(title="Allow vendor updates", required=False, default=False)
 
 class IStoreEnrollmentEvent(interface.Interface):
 	request = Object(IRequest, title="the request", required=False) 
