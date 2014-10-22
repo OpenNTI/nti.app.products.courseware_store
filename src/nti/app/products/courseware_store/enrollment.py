@@ -56,6 +56,7 @@ class StoreEnrollmentOption(EnrollmentOption):
 		result['Price'] = ext_obj.get('Amount', None)
 		result['Currency'] = ext_obj.get('Currency', None)
 		result['IsEnrolled'] = ext_obj.get('Activated', False)
+		result['AllowVendorUpdates'] = self.AllowVendorUpdates
 		return result
 
 @component.adapter(ICourseCatalogEntry)
