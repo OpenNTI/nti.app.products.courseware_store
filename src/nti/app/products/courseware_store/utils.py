@@ -16,14 +16,22 @@ from zope.traversing.api import traverse
 
 from dolmen.builtins.interfaces import IString
 
+from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
 from nti.ntiids.ntiids import get_parts
 
+from nti.store.store import get_purchasable
+from nti.store.store import get_purchase_history_by_item
+
 from nti.store.interfaces import IPurchasableCourse
+from nti.store.interfaces import IInvitationPurchaseAttempt
+
+from nti.utils.maps import CaseInsensitiveDict
 
 from .model import CoursePrice
 
@@ -100,3 +108,33 @@ def register_purchasables(catalog=None):
 			lifecycleevent.created(purchasable)
 			logger.debug("Course purchasable %s registered", purchasable.NTIID)
 	return result
+
+def find_allow_vendor_updates_users(entry, invitation=False):
+	catalog = component.getUtility(ICourseCatalog)
+	try:
+		if not ICourseCatalogEntry.providedBy(entry):
+			entry = catalog.getCatalogEntry(str(entry))
+		
+		provider = get_entry_purchasable_provider(entry)
+		ntiid = get_entry_purchasable_ntiid(entry, provider)
+		purchasable = get_purchasable(ntiid)
+		if purchasable is not None and purchasable.Public:
+			result = []
+			course = ICourseInstance(entry)
+			enrollments = ICourseEnrollments(course)
+			for enrollment in enrollments.iter_enrollments():
+				if enrollment.Scope != ES_PURCHASED:
+					continue
+				user = enrollment.Principal
+				purchases = get_purchase_history_by_item(user, ntiid)
+				for purchase in purchases or ():
+					if invitation and IInvitationPurchaseAttempt.providedBy(purchase):
+						continue
+					context = CaseInsensitiveDict(purchase.Context or {})
+					if context.get('AllowVendorUpdates', False):
+						result.append(user.username)
+						break
+			return result
+	except KeyError:
+		logger.debug("Could not find course entry %s", entry)
+	return ()
