@@ -9,9 +9,11 @@ __docformat__ = "restructuredtext en"
 
 from hamcrest import is_
 from hamcrest import none
+from hamcrest import is_in
 from hamcrest import is_not
+from hamcrest import has_length
 from hamcrest import assert_that
-from hamcrest import has_property
+from hamcrest import has_property 
 
 from zope import component
 from zope.event import notify
@@ -24,6 +26,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 
 from nti.app.products.courseware_store.utils import register_purchasables
+from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
 
 from nti.dataserver.users import User
 
@@ -74,7 +77,8 @@ class TestPurchase(ApplicationLayerTest):
 		item = create_purchase_item(item, 1)
 		order = create_purchase_order(item, quantity=quantity)
 		pricing = create_pricing_results(purchase_price=999.99, non_discounted_price=0.0)
-		result = create_purchase_attempt(order, processor=self.processor, state=state)
+		result = create_purchase_attempt(order, processor=self.processor, state=state,
+										 context={"AllowVendorUpdates":True})
 		result.Pricing = pricing
 		return result
 
@@ -113,6 +117,12 @@ class TestPurchase(ApplicationLayerTest):
 			assert_that(enrollment, is_not(none()))
 			assert_that(enrollment, has_property('Scope', ES_PURCHASED))
 			
+			# test report
+			usernames = find_allow_vendor_updates_users(entry)
+			assert_that(usernames, has_length(1))
+			assert_that(self.default_username, is_in(usernames))
+			
+			# test refund
 			notify(PurchaseAttemptRefunded(purchase))
 			assert_that(purchase.State, is_(PA_STATE_REFUNDED))
 
