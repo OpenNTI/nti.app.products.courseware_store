@@ -35,6 +35,7 @@ from .interfaces import get_course_publishable_vendor_info
 
 from .utils import get_course_price
 from .utils import is_course_giftable
+from .utils import is_course_redeemable
 from .utils import get_nti_course_price
 from .utils import allow_vendor_updates
 from .utils import get_course_purchasable_ntiid
@@ -75,6 +76,7 @@ def _course_to_purchasable(course):
 	public = is_course_enabled_for_purchase(course)
 	entry = ICourseCatalogEntry(course)
 	giftable = is_course_giftable(course)
+	redeemable = is_course_redeemable(course)
 	provider = get_entry_purchasable_provider(entry)
 	
 	price = get_course_price(course, provider)	
@@ -124,6 +126,7 @@ def _course_to_purchasable(course):
 						   amount=amount,
 						   currency=currency,
 						   giftable=giftable,
+						   redeemable=redeemable,
 						   vendor_info=vendor_info,
 						   description=entry.description,
 						   # deprecated/legacy

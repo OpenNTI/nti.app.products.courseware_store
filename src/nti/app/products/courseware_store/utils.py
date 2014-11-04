@@ -37,21 +37,27 @@ from .model import CoursePrice
 
 from .interfaces import ICoursePrice
 
-def get_vendor_info(course):
+def get_vendor_info(context):
+	course = ICourseInstance(context)
 	return ICourseInstanceVendorInfo(course, {})
 
-def is_course_enabled_for_purchase(course):
-	vendor_info = get_vendor_info(course)
+def is_course_enabled_for_purchase(context):
+	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/Enabled', default=False)
 	return result
 
-def is_course_giftable(course):
-	vendor_info = get_vendor_info(course)
+def is_course_giftable(context):
+	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
 	return result
 
-def get_course_purchasable_provider(course):
-	vendor_info = get_vendor_info(course)
+def is_course_redeemable(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
+	return result
+
+def get_course_purchasable_provider(context):
+	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
 	return result
 
