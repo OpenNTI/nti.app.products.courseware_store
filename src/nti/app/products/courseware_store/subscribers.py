@@ -28,6 +28,9 @@ from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
+from nti.dataserver.users import User
+from nti.dataserver.interfaces import IUser
+
 from nti.intid.interfaces import IIntIdRemovedEvent
 
 from nti.store.purchasable import get_purchasable
@@ -43,6 +46,10 @@ from nti.store.interfaces import IPurchaseAttemptSuccessful
 from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 
 from .interfaces import StoreEnrollmentEvent
+
+def get_user(user):
+	result = User.get_user(str(user)) if user and not IUser.providedBy(user) else user
+	return result
 
 def _enroll(course, user, purchasable=None, request=None):
 	drop_any_other_enrollments(course, user)
@@ -89,13 +96,15 @@ def _get_courses_from_purchase(purchase):
 				logger.error("Could not find course entry %s", name)
 
 def _process_successful_purchase(purchase, user=None, request=None):
-	user = user or purchase.creator
-	for course, purchasable in _get_courses_from_purchase(purchase):
-		_enroll(course, user, purchasable, request=request)
+	user = get_user(user if user is not None else purchase.creator)
+	if user is not None:
+		for course, purchasable in _get_courses_from_purchase(purchase):
+			_enroll(course, user, purchasable, request=request)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
-	_process_successful_purchase(purchase, request=event.request)
+	if not IGiftPurchaseAttempt.providedBy(purchase):
+		_process_successful_purchase(purchase, request=event.request)
 
 @component.adapter(IStorePurchaseInvitation, IInvitationAcceptedEvent)
 def _purchase_invitation_accepted(invitation, event):
@@ -105,13 +114,15 @@ def _purchase_invitation_accepted(invitation, event):
 		_process_successful_purchase(original)
 
 def _process_refunded_purchase(purchase, user=None):
-	user = user or purchase.creator
-	for course, purchasable in _get_courses_from_purchase(purchase):
-		_unenroll(course, user, purchasable)
+	user = get_user(user if user is not None else purchase.creator)
+	if user is not None:
+		for course, purchasable in _get_courses_from_purchase(purchase):
+			_unenroll(course, user, purchasable)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):
-	_process_refunded_purchase(purchase)
+	if not IGiftPurchaseAttempt.providedBy(purchase):
+		_process_refunded_purchase(purchase)
 
 @component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
 def _gift_purchase_attempt_redeemed(purchase, event):
