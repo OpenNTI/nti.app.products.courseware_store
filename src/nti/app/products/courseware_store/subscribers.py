@@ -52,6 +52,7 @@ def get_user(user):
 	return result
 
 def _enroll(course, user, purchasable=None, request=None):
+	send_event = True
 	drop_any_other_enrollments(course, user)
 	enrollments = ICourseEnrollments(course)
 	enrollment_manager = ICourseEnrollmentManager(course)
@@ -59,18 +60,21 @@ def _enroll(course, user, purchasable=None, request=None):
 	if enrollment is None: 	# Never before been enrolled
 		enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
 											   context=purchasable)
-	else:
+	elif enrollment.Scope != ES_PURCHASED:
 		logger.info("User %s now paying for course (old_scope %s)",
 					user, enrollment.Scope)
 		## change scope and mark record
 		enrollment.Scope = ES_PURCHASED
 		## notify to reflect changes
 		lifecycleevent.modified(enrollment)
+	else:
+		send_event = False
 		
-	# notify store based enrollment
-	request = request or get_current_request()
-	notify(StoreEnrollmentEvent(enrollment, purchasable, request))
-	return True
+	if send_event:
+		# notify store based enrollment
+		request = request or get_current_request()
+		notify(StoreEnrollmentEvent(enrollment, purchasable, request))
+	return send_event
 
 def _unenroll(course, user, purchasable=None):
 	enrollments = ICourseEnrollments(course)
