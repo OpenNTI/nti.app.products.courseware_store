@@ -16,6 +16,7 @@ from nti.app.products.courseware.utils import get_enrollment_record
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
+from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -79,3 +80,5 @@ class _StoreEnrollmentOptionLinkDecorator(AbstractAuthenticatedRequestAwareDecor
 		record = self._get_enrollment_record(context, self.remoteUser)
 		isAvailable = bool(record is None or record.Scope == ES_PUBLIC)
 		result['IsAvailable'] = isAvailable
+		IsEnrolled = bool(record is not None and record.Scope == ES_PURCHASED)
+		result['IsEnrolled'] = IsEnrolled

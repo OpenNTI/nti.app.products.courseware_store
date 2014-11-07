@@ -46,6 +46,9 @@ class StoreEnrollmentOption(EnrollmentOption):
 	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
 	AllowVendorUpdates = FP(IStoreEnrollmentOption['AllowVendorUpdates'])
 	
+	def is_enrolled(self, context):
+		pass
+		
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
 		result[MIMETYPE] = self.mimeType
@@ -55,7 +58,6 @@ class StoreEnrollmentOption(EnrollmentOption):
 		result['RequiresAdmission'] = False
 		result['Price'] = ext_obj.get('Amount', None)
 		result['Currency'] = ext_obj.get('Currency', None)
-		result['IsEnrolled'] = ext_obj.get('Activated', False)
 		result['AllowVendorUpdates'] = self.AllowVendorUpdates
 		return result
 
