@@ -63,6 +63,5 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 										'Price', is_not(none()),
 										'Currency', is_not(none()),
 										'RequiresAdmission', is_(False),
-										'IsEnrolled', is_not(none()),
 										'AllowVendorUpdates', is_(True),
 							  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption')))
