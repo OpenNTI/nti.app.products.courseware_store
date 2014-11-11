@@ -80,5 +80,5 @@ class _StoreEnrollmentOptionLinkDecorator(AbstractAuthenticatedRequestAwareDecor
 		record = self._get_enrollment_record(context, self.remoteUser)
 		isAvailable = bool(record is None or record.Scope == ES_PUBLIC)
 		result['IsAvailable'] = isAvailable
-		IsEnrolled = bool(record is not None and record.Scope == ES_PURCHASED)
+		IsEnrolled = record is not None and record.Scope == ES_PURCHASED
 		result['IsEnrolled'] = IsEnrolled
