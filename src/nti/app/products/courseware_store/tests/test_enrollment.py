@@ -58,10 +58,11 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 
 			ext_obj = to_external_object(options)
 			assert_that(ext_obj, 
-				has_entry('StoreEnrollment',
-						   has_entries(	'Purchasable', is_not(none()),
-										'Price', is_not(none()),
-										'Currency', is_not(none()),
-										'RequiresAdmission', is_(False),
-										'AllowVendorUpdates', is_(True),
-							  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption')))
+				has_entry('Items',
+					has_entry('StoreEnrollment',
+							   has_entries(	'Purchasable', is_not(none()),
+											'Price', is_not(none()),
+											'Currency', is_not(none()),
+											'RequiresAdmission', is_(False),
+											'AllowVendorUpdates', is_(True),
+								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption'))))
