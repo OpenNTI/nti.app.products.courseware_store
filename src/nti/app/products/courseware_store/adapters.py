@@ -38,7 +38,9 @@ from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
 from .utils import allow_vendor_updates
+from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
+from .utils import get_course_purchasable_title
 from .utils import is_course_enabled_for_purchase
 from .utils import get_entry_purchasable_provider
 
@@ -116,11 +118,14 @@ def _course_to_purchasable(course):
 	else:
 		start_date = unicode(entry.StartDate) if entry.StartDate else None
 
+	name = get_course_purchasable_name(course) or entry.title
+	title = get_course_purchasable_title(course) or entry.title
+	
 	vendor_info = get_course_publishable_vendor_info(course)
 	result = create_course(ntiid=ntiid,
 						   items=items,
-						   name=entry.title, 
-						   title=entry.title,
+						   name=name, 
+						   title=title,
 						   provider=provider, 
 						   public=public,
 						   amount=amount,

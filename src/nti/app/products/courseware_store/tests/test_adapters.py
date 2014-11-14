@@ -61,6 +61,8 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that(purchasable, has_property('Items', has_length(1)))
 			assert_that(purchasable, has_property('Amount', is_(599.0)))
 			assert_that(purchasable, has_property('Currency', is_('USD')))
+			assert_that(purchasable, has_property('Name', is_('Law and Justice')))
+			assert_that(purchasable, has_property('Title', is_('Law and Justice')))
 			items = list(purchasable.Items)
 			assert_that(items, is_(['tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice']))
 

@@ -61,7 +61,18 @@ def get_course_purchasable_provider(context):
 	result = traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
 	return result
 
-def get_entry_purchasable_provider(entry):
+def get_course_purchasable_name(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/Name', default=None)
+	return result
+
+def get_course_purchasable_title(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/Title', default=None)
+	return result
+
+def get_entry_purchasable_provider(context):
+	entry = ICourseCatalogEntry(context)
 	course = ICourseInstance(entry)
 	parts = get_parts(entry.ntiid)
 	provider = get_course_purchasable_provider(course) or parts.provider
@@ -75,8 +86,9 @@ def get_course_price(course, *names):
 			return result
 	return None
 
-def get_course_purchasable_ntiid(entry, name=None):
+def get_course_purchasable_ntiid(context, name=None):
 	result = None
+	entry = ICourseCatalogEntry(context)
 	entry = ICourseCatalogEntry(entry)
 	if name:
 		result = component.queryAdapter(entry, IString, name=name)
