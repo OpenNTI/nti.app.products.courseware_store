@@ -75,23 +75,7 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasable is not None and purchasable.Public:
 			result = StoreEnrollmentOption()
 			result.Purchasable = purchasable
+			result.CatalogEntryNTIID = self.context.ntiid
 			result.AllowVendorUpdates = allow_vendor_updates(self.context)
-			result = StoreEnrollmentOptionProxy(result, self.context.ntiid)
 			return (result,)
 		return ()
-
-from zope.proxy import ProxyBase
-
-class StoreEnrollmentOptionProxy(ProxyBase):
-	
-	CatalogEntryNTIID = property(
-			lambda s: s.__dict__.get('_v_catalog_entry_ntiid'),
-			lambda s, v: s.__dict__.__setitem__('_v_catalog_entry_ntiid', v))
-		
-	def __new__(cls, base, context):
-		return ProxyBase.__new__(cls, base)
-
-	def __init__(self, base, ntiid):
-		ProxyBase.__init__(self, base)
-		self.CatalogEntryNTIID = ntiid
-		
