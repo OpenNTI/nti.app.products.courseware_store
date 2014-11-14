@@ -45,9 +45,6 @@ class StoreEnrollmentOption(EnrollmentOption):
 
 	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
 	AllowVendorUpdates = FP(IStoreEnrollmentOption['AllowVendorUpdates'])
-	
-	def is_enrolled(self, context):
-		pass
 		
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
