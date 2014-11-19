@@ -89,7 +89,6 @@ def get_course_price(course, *names):
 def get_course_purchasable_ntiid(context, name=None):
 	result = None
 	entry = ICourseCatalogEntry(context)
-	entry = ICourseCatalogEntry(entry)
 	if name:
 		result = component.queryAdapter(entry, IString, name=name)
 	if not result:
@@ -124,7 +123,8 @@ def register_purchasables(catalog=None):
 			component.provideUtility(purchasable, IPurchasableCourse, name=name)
 			result.append(purchasable)
 			lifecycleevent.created(purchasable)
-			logger.debug("Course purchasable %s registered", purchasable.NTIID)
+			logger.debug("Purchasable %s was registered for course %s",
+						 purchasable.NTIID, catalog_entry.ntiid)
 	return result
 
 def find_allow_vendor_updates_users(entry, invitation=False):
