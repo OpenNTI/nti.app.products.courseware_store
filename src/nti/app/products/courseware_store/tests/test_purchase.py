@@ -88,7 +88,8 @@ class TestPurchase(ApplicationLayerTest):
 		order = create_purchase_order(item, quantity=None)
 		pricing = create_pricing_results(purchase_price=999.99, non_discounted_price=0.0)
 		result = create_gift_purchase_attempt(order=order, processor=self.processor, 
-										  	  state=state, creator=creator)
+										  	  state=state, creator=creator,
+										  	  context={"AllowVendorUpdates":True})
 		result.Pricing = pricing
 		return result
 	
@@ -151,7 +152,11 @@ class TestPurchase(ApplicationLayerTest):
 			enrollment = enrollments.get_enrollment_for_principal(user)
 			assert_that(enrollment, is_not(none()))
 			assert_that(enrollment, has_property('Scope', ES_PURCHASED))
-			
+
+			usernames = find_allow_vendor_updates_users(entry)
+			assert_that(usernames, has_length(1))
+			assert_that(self.default_username, is_in(usernames))
+						
 			notify(PurchaseAttemptRefunded(gift))
 			assert_that(gift.State, is_(PA_STATE_REFUNDED))
 
