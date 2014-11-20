@@ -8,6 +8,8 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+from . import MessageFactory as _
+
 from zope import component
 from zope.event import notify
 from zope import lifecycleevent
@@ -59,7 +61,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 		## CS check if there is a purchased based enrollment
 		record = get_enrollment_record(course, user)
 		if record is not None and record.Scope == ES_PURCHASED:
-			raise AlreadyEnrolledException()
+			raise AlreadyEnrolledException(_("User already enrolled in this course"))
 
 	send_event = True
 	drop_any_other_enrollments(course, user)
