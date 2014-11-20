@@ -13,6 +13,7 @@ from pyramid.interfaces import IRequest
 
 from nti.app.products.courseware.interfaces import IEnrollmentOption
 
+from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
 from nti.store.interfaces import IPurchasableCourse
@@ -42,8 +43,9 @@ class ICoursePublishableVendorInfo(interface.Interface):
 		return a map with public info
 		"""
 
-def get_course_publishable_vendor_info(course):
+def get_course_publishable_vendor_info(context):
 	result = {}
+	course = ICourseInstance(context)
 	subscribers = component.subscribers((course,), ICoursePublishableVendorInfo)
 	for s in list(subscribers):
 		info = s.info()
