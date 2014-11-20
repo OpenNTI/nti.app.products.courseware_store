@@ -9,12 +9,12 @@
 	<include package="zope.security" file="meta.zcml" />
 	<include package="zope.component" />
 	<include package="zope.security" />
-	
+
 	<!-- Adapters -->
 	<adapter factory=".adapters._entry_to_purchasable" />
 	<adapter factory=".adapters._course_to_purchasable" />
-				 
-	<adapter factory=".adapters._course_to_purchasable_ntiid" 
+
+	<adapter factory=".adapters._course_to_purchasable_ntiid"
 	 		 for="nti.contenttypes.courses.interfaces.ICourseInstance"
 			 provides="dolmen.builtins.interfaces.IString"
 			 name="purchasable_course_ntiid" />
@@ -23,7 +23,7 @@
 			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 			 provides="dolmen.builtins.interfaces.IString"
 			 name="purchasable_course_ntiid" />
-			 						
+
 	<!-- Price Finders -->
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
@@ -31,18 +31,18 @@
 
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
-			 provides=".interfaces.ICoursePrice" 
+			 provides=".interfaces.ICoursePrice"
 			 name="nti" />
-			 
+
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
-			 provides=".interfaces.ICoursePrice" />	
+			 provides=".interfaces.ICoursePrice" />
 
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 			 provides=".interfaces.ICoursePrice"
-			 name="nti" />	
-			 
+			 name="nti" />
+
 	<!-- Subscribers -->
 	<subscriber handler=".subscribers._enrollment_record_dropped" />
 	<subscriber handler=".subscribers._purchase_attempt_refunded" />
@@ -53,11 +53,14 @@
 
 	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>
-				
+
+	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
+				provides=".interfaces.ICoursePublishableVendorInfo"/>
+
 	<subscriber	factory=".enrollment.StoreEnrollmentOptionProvider"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
-				
+
 	<!-- Decorators -->
 	<subscriber factory=".decorators._StoreEnrollmentOptionDecorator"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"

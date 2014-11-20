@@ -13,6 +13,8 @@ from hamcrest import is_not
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_property
+from hamcrest import not_none
+from hamcrest import has_key
 
 import fudge
 
@@ -27,6 +29,9 @@ from nti.store.interfaces import IPurchasableCourse
 from nti.dataserver.tests import mock_dataserver
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
+from nti.app.products.courseware_store.interfaces import ICoursePublishableVendorInfo
+
+from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 from nti.app.testing.application_webtest import ApplicationLayerTest
@@ -34,7 +39,7 @@ from nti.app.testing.application_webtest import ApplicationLayerTest
 from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
 
 class TestAdapters(ApplicationLayerTest):
-	
+
 	layer = InstructedCourseApplicationTestLayer
 
 	default_origin = str('http://janux.ou.edu')
@@ -70,7 +75,7 @@ class TestAdapters(ApplicationLayerTest):
 	def test_nti_course_price_finder(self, mock_vi):
 		fake_course = fudge.Fake()
 		interface.alsoProvides(fake_course, ICourseInstance)
-		
+
 		mock_vi.is_callable().with_args().returns(
 		{
 			"NTI": {
@@ -84,3 +89,22 @@ class TestAdapters(ApplicationLayerTest):
 		assert_that(course_price, is_not(none()))
 		assert_that(course_price, has_property(u'Amount', is_(300)))
 		assert_that(course_price, has_property(u'Currency', is_('COP')))
+
+	@WithSharedApplicationMockDS(testapp=True, users=True)
+	def test_course_catalog_vendor_info(self):
+
+		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
+			catalog_entry = self.catalog_entry()
+			course = ICourseInstance( catalog_entry )
+			vendor_infos = component.subscribers((course,), ICoursePublishableVendorInfo)
+
+			vendor_info = None
+
+			for vi in vendor_infos:
+				if isinstance( vi, _CourseCatalogPublishableVendorInfo ):
+					vendor_info = vi.info()
+
+			assert_that( vendor_info, not_none() )
+			assert_that( vendor_info, has_key( 'StartDate' ))
+			assert_that( vendor_info, has_key( 'EndDate' ))
+			assert_that( vendor_info, has_key( 'Duration' ))
