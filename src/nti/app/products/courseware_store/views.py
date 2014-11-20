@@ -34,6 +34,11 @@ from nti.utils.maps import CaseInsensitiveDict
 
 from .utils import find_allow_vendor_updates_users
 
+def _tx_string(s):
+	if s and isinstance(s, unicode):
+		s = s.encode('utf-8')
+	return s
+
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
 			 context=IDataserverFolder,
@@ -76,7 +81,7 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 			email = getattr(profile, 'email', None)
 			name = getattr(profile, 'realname', None) or username
 						
-			row_data = [username, name, email]
+			row_data = [username, _tx_string(name), email]
 			csv_writer.writerow(row_data)
 
 		response = self.request.response
