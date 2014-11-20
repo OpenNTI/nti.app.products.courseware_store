@@ -17,6 +17,7 @@ from zope.security.management import queryInteraction
 from pyramid import httpexceptions as hexc
 from pyramid.threadlocal import get_current_request
 
+from nti.app.products.courseware.utils import get_enrollment_record
 from nti.app.products.courseware.utils import drop_any_other_enrollments
 
 from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
@@ -25,6 +26,7 @@ from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
+from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
@@ -51,7 +53,14 @@ def get_user(user):
 	result = User.get_user(str(user)) if user and not IUser.providedBy(user) else user
 	return result
 
-def _enroll(course, user, purchasable=None, request=None):
+def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
+
+	if check_enrollment:
+		## CS check if there is a purchased based enrollment
+		record = get_enrollment_record(course, user)
+		if record is not None and record.Scope == ES_PURCHASED:
+			raise AlreadyEnrolledException()
+
 	send_event = True
 	drop_any_other_enrollments(course, user)
 	enrollments = ICourseEnrollments(course)
@@ -99,11 +108,11 @@ def _get_courses_from_purchase(purchase):
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
-def _process_successful_purchase(purchase, user=None, request=None):
+def _process_successful_purchase(purchase, user=None, request=None, check=False):
 	user = get_user(user if user is not None else purchase.creator)
 	if user is not None:
 		for course, purchasable in _get_courses_from_purchase(purchase):
-			_enroll(course, user, purchasable, request=request)
+			_enroll(course, user, purchasable, request=request, check_enrollment=check)
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
@@ -130,7 +139,7 @@ def _purchase_attempt_refunded(purchase, event):
 
 @component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
 def _gift_purchase_attempt_redeemed(purchase, event):
-	_process_successful_purchase(purchase, event.user, event.request)
+	_process_successful_purchase(purchase, event.user, event.request, True)
 
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
 def _redeemed_purchase_attempt_refunded(purchase, event):

@@ -24,6 +24,7 @@ from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
+from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
 from nti.app.products.courseware_store.utils import register_purchasables
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
@@ -153,10 +154,16 @@ class TestPurchase(ApplicationLayerTest):
 			assert_that(enrollment, is_not(none()))
 			assert_that(enrollment, has_property('Scope', ES_PURCHASED))
 
+			with self.assertRaises(AlreadyEnrolledException):
+				gift.State = PA_STATE_SUCCESS
+				notify(GiftPurchaseAttemptRedeemed(gift, user))
+		
 			usernames = find_allow_vendor_updates_users(entry)
 			assert_that(usernames, has_length(1))
 			assert_that(self.default_username, is_in(usernames))
-						
+		
+			# restore
+			gift.State = PA_STATE_REDEEMED				
 			notify(PurchaseAttemptRefunded(gift))
 			assert_that(gift.State, is_(PA_STATE_REFUNDED))
 
