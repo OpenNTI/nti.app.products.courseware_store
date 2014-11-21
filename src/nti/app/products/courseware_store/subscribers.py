@@ -4,6 +4,7 @@
 .. $Id$
 """
 from __future__ import print_function, unicode_literals, absolute_import, division
+from __builtin__ import True
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -37,6 +38,7 @@ from nti.dataserver.interfaces import IUser
 
 from nti.intid.interfaces import IIntIdRemovedEvent
 
+from nti.store.store import get_gift_code
 from nti.store.purchasable import get_purchasable
 
 from nti.store.interfaces import IPurchaseAttempt
@@ -107,15 +109,19 @@ def _get_courses_from_purchase(purchase):
 				logger.error("Could not find course entry %s", name)
 
 def _process_successful_purchase(purchase, user=None, request=None, check=False):
+	result = False
 	user = get_user(user if user is not None else purchase.creator)
 	if user is not None:
 		for course, purchasable in _get_courses_from_purchase(purchase):
 			_enroll(course, user, purchasable, request=request, check_enrollment=check)
+			result = True
+	return result
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
-	if not IGiftPurchaseAttempt.providedBy(purchase):
-		_process_successful_purchase(purchase, request=event.request)
+	if 	not IGiftPurchaseAttempt.providedBy(purchase) and \
+		_process_successful_purchase(purchase, request=event.request):
+		logger.info("Course purchase %s was successful", purchase.id)
 
 @component.adapter(IStorePurchaseInvitation, IInvitationAcceptedEvent)
 def _purchase_invitation_accepted(invitation, event):
@@ -123,21 +129,28 @@ def _purchase_invitation_accepted(invitation, event):
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
 		_process_successful_purchase(original)
+		logger.info("Course invitation %s was accepted",
+					invitation.code)
 
 def _process_refunded_purchase(purchase, user=None):
+	result = False
 	user = get_user(user if user is not None else purchase.creator)
 	if user is not None:
 		for course, purchasable in _get_courses_from_purchase(purchase):
 			_unenroll(course, user, purchasable)
+			result = True
+	return result
 		
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):
-	if not IGiftPurchaseAttempt.providedBy(purchase):
-		_process_refunded_purchase(purchase)
+	if	not IGiftPurchaseAttempt.providedBy(purchase) and \
+		_process_refunded_purchase(purchase):
+		logger.info("Course purchase %s was refunded", purchase.id)
 
 @component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
 def _gift_purchase_attempt_redeemed(purchase, event):
-	_process_successful_purchase(purchase, event.user, event.request, True)
+	if _process_successful_purchase(purchase, event.user, event.request, True):
+		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
 
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
 def _redeemed_purchase_attempt_refunded(purchase, event):
