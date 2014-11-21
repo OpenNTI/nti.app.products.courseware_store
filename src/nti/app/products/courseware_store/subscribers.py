@@ -74,8 +74,8 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 			enrollment.Scope = ES_PURCHASED
 			## notify to reflect changes
 			lifecycleevent.modified(enrollment)
-		else:
-			send_event = False
+	else:
+		send_event = False
 		
 	if send_event:
 		# notify store based enrollment
