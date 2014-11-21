@@ -56,30 +56,26 @@ def get_user(user):
 	return result
 
 def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
-
-	if check_enrollment:
-		## CS check if there is a purchased based enrollment
-		record = get_enrollment_record(course, user)
-		if record is not None and record.Scope == ES_PURCHASED:
-			raise AlreadyEnrolledException(_("User already enrolled in this course"))
+	enrollment = get_enrollment_record(course, user)
+	if enrollment is not None and enrollment.Scope == ES_PURCHASED and check_enrollment:
+		raise AlreadyEnrolledException(_("User already enrolled in this course"))
 
 	send_event = True
-	drop_any_other_enrollments(course, user)
-	enrollments = ICourseEnrollments(course)
-	enrollment_manager = ICourseEnrollmentManager(course)
-	enrollment = enrollments.get_enrollment_for_principal(user)
-	if enrollment is None: 	# Never before been enrolled
-		enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
-											   context=purchasable)
-	elif enrollment.Scope != ES_PURCHASED:
-		logger.info("User %s now paying for course (old_scope %s)",
-					user, enrollment.Scope)
-		## change scope and mark record
-		enrollment.Scope = ES_PURCHASED
-		## notify to reflect changes
-		lifecycleevent.modified(enrollment)
-	else:
-		send_event = False
+	if enrollment is None or enrollment.Scope != ES_PURCHASED:
+		drop_any_other_enrollments(course, user)
+		if enrollment is None: 	# Never before been enrolled
+			enrollment_manager = ICourseEnrollmentManager(course)
+			enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
+												   context=purchasable)
+		elif enrollment.Scope != ES_PURCHASED:
+			logger.info("User %s now paying for course (old_scope %s)",
+						user, enrollment.Scope)
+			## change scope and mark record
+			enrollment.Scope = ES_PURCHASED
+			## notify to reflect changes
+			lifecycleevent.modified(enrollment)
+		else:
+			send_event = False
 		
 	if send_event:
 		# notify store based enrollment
