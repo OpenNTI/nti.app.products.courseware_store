@@ -38,7 +38,7 @@ from .model import CoursePrice
 from .interfaces import ICoursePrice
 
 def get_vendor_info(context):
-	course = ICourseInstance(context)
+	course = ICourseInstance(context, None)
 	return ICourseInstanceVendorInfo(course, {})
 
 def is_course_enabled_for_purchase(context):
@@ -97,8 +97,7 @@ def get_course_purchasable_ntiid(context, name=None):
 get_entry_purchasable_ntiid = get_course_purchasable_ntiid
 
 def get_nti_course_price(context):
-	course = ICourseInstance(context, None)
-	vendor_info = get_vendor_info(course)
+	vendor_info = get_vendor_info(context)
 	amount = traverse(vendor_info, 'NTI/Purchasable/Price', default=None)
 	currency = traverse(vendor_info, 'NTI/Purchasable/Currency', default='USD')
 	if amount:
@@ -107,8 +106,7 @@ def get_nti_course_price(context):
 	return None
 
 def allow_vendor_updates(context):
-	course = ICourseInstance(context, None)
-	vendor_info = ICourseInstanceVendorInfo(course, {})
+	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/AllowVendorUpdates', default=False)
 	return bool(result) if result is not None else False
 
