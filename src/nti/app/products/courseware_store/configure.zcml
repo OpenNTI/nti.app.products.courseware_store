@@ -10,6 +10,13 @@
 	<include package="zope.component" />
 	<include package="zope.security" />
 
+	<include package="nti.store" />
+	<include package="nti.contenttypes.courses" />
+	
+	<class class="nti.contenttypes.courses.interfaces.AlreadyEnrolledException">
+		<implements interface="nti.store.interfaces.IRedemptionException" />
+	</class>
+	
 	<!-- Adapters -->
 	<adapter factory=".adapters._entry_to_purchasable" />
 	<adapter factory=".adapters._course_to_purchasable" />

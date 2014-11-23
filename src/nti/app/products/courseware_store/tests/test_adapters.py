@@ -23,7 +23,9 @@ from zope import interface
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
+from nti.store.interfaces import IRedemptionError
 from nti.store.interfaces import IPurchasableCourse
 
 from nti.dataserver.tests import mock_dataserver
@@ -108,3 +110,9 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that( vendor_info, has_key( 'StartDate' ))
 			assert_that( vendor_info, has_key( 'EndDate' ))
 			assert_that( vendor_info, has_key( 'Duration' ))
+			
+	@WithSharedApplicationMockDS(testapp=True, users=True)
+	def test_already_enrolled_exception(self):
+		e = AlreadyEnrolledException()
+		error = IRedemptionError(e, None)
+		assert_that(error, is_not(none()))

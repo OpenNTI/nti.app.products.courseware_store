@@ -26,7 +26,6 @@ class _DefaultCoursePublishableVendorInfo(object):
 	def info(self):
 		return None
 
-
 @component.adapter(ICourseInstance)
 @interface.implementer(ICoursePublishableVendorInfo)
 class _CourseCatalogPublishableVendorInfo(object):
@@ -34,6 +33,7 @@ class _CourseCatalogPublishableVendorInfo(object):
 	A bit of a hack to expose course catalog information to unauthenticated users
 	on the landing page.
 	"""
+
 	def __init__(self, course):
 		self.course = course
 
@@ -43,8 +43,8 @@ class _CourseCatalogPublishableVendorInfo(object):
 			return None
 
 		result = {'StartDate': catalog_entry.StartDate,
-				 'EndDate': catalog_entry.EndDate,
-				 'Duration': catalog_entry.Duration }
+				  'EndDate': catalog_entry.EndDate,
+				  'Duration': catalog_entry.Duration }
 
 		credit_info = getattr( catalog_entry, 'Credit', None )
 		if credit_info:
@@ -52,5 +52,4 @@ class _CourseCatalogPublishableVendorInfo(object):
 			credit_info = credit_info[0]
 			hours = credit_info.Hours
 			result.update( { 'Hours': hours } )
-
 		return result
