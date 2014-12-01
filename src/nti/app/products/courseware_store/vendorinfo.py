@@ -16,6 +16,8 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from .interfaces import ICoursePublishableVendorInfo
 
+from .utils import allow_vendor_updates
+
 @component.adapter(ICourseInstance)
 @interface.implementer(ICoursePublishableVendorInfo)
 class _DefaultCoursePublishableVendorInfo(object):
@@ -42,9 +44,12 @@ class _CourseCatalogPublishableVendorInfo(object):
 		if not catalog_entry:
 			return None
 
+		does_allow_vendor_updates = allow_vendor_updates( self.course )
+
 		result = {'StartDate': catalog_entry.StartDate,
 				  'EndDate': catalog_entry.EndDate,
-				  'Duration': catalog_entry.Duration }
+				  'Duration': catalog_entry.Duration,
+				  'AllowVendorUpdates' : does_allow_vendor_updates }
 
 		credit_info = getattr( catalog_entry, 'Credit', None )
 		if credit_info:
