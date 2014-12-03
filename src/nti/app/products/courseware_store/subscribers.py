@@ -60,7 +60,7 @@ def get_user(user):
 def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
 	enrollment = get_enrollment_record(course, user)
 	if enrollment is not None and enrollment.Scope == ES_PURCHASED and check_enrollment:
-		raise AlreadyEnrolledException(_("User already enrolled in this course"))
+		raise AlreadyEnrolledException(_("You are already enrolled in this course"))
 
 	send_event = True
 	if enrollment is None or enrollment.Scope != ES_PURCHASED:
@@ -78,7 +78,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 			lifecycleevent.modified(enrollment)
 	else:
 		send_event = False
-		
+
 	if send_event:
 		# notify store based enrollment
 		request = request or get_current_request()
@@ -116,7 +116,7 @@ def _process_successful_purchase(purchase, user=None, request=None, check=False)
 			_enroll(course, user, purchasable, request=request, check_enrollment=check)
 			result = True
 	return result
-		
+
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
 	if 	not IGiftPurchaseAttempt.providedBy(purchase) and \
@@ -140,7 +140,7 @@ def _process_refunded_purchase(purchase, user=None):
 			_unenroll(course, user, purchasable)
 			result = True
 	return result
-		
+
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
 def _purchase_attempt_refunded(purchase, event):
 	if	not IGiftPurchaseAttempt.providedBy(purchase) and \
