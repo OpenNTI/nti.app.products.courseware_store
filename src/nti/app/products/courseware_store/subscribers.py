@@ -60,7 +60,7 @@ def get_user(user):
 def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
 	enrollment = get_enrollment_record(course, user)
 	if enrollment is not None and enrollment.Scope == ES_PURCHASED and check_enrollment:
-		raise AlreadyEnrolledException(_("You are already enrolled in this course"))
+		raise AlreadyEnrolledException(_("You are already enrolled in this course."))
 
 	send_event = True
 	if enrollment is None or enrollment.Scope != ES_PURCHASED:
@@ -159,4 +159,4 @@ def _redeemed_purchase_attempt_refunded(purchase, event):
 @component.adapter(ICourseInstanceEnrollmentRecord, IIntIdRemovedEvent)
 def _enrollment_record_dropped(record, event):
 	if record.Scope == ES_PURCHASED and queryInteraction() is not None:
-		raise hexc.HTTPForbidden('Cannot drop a purchased course')
+		raise hexc.HTTPForbidden('Cannot drop a purchased course.')
