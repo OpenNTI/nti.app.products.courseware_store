@@ -123,14 +123,14 @@ def _purchase_attempt_successful(purchase, event):
 		_process_successful_purchase(purchase, request=event.request):
 		logger.info("Course purchase %s was successful", purchase.id)
 
-@component.adapter(IStorePurchaseInvitation, IInvitationAcceptedEvent)
-def _purchase_invitation_accepted(invitation, event):
+@component.adapter(IInvitationAcceptedEvent)
+def _purchase_invitation_accepted(event):
+	invitation = event.object
 	if 	IStorePurchaseInvitation.providedBy(invitation) and \
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
 		_process_successful_purchase(original)
-		logger.info("Course invitation %s was accepted",
-					invitation.code)
+		logger.info("Course invitation %s was accepted", invitation.code)
 
 def _process_refunded_purchase(purchase, user=None):
 	result = False
