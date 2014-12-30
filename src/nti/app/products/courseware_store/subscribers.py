@@ -129,7 +129,7 @@ def _purchase_invitation_accepted(event):
 	if 	IStorePurchaseInvitation.providedBy(invitation) and \
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
-		_process_successful_purchase(original)
+		_process_successful_purchase(original, user=event.user)
 		logger.info("Course invitation %s was accepted", invitation.code)
 
 def _process_refunded_purchase(purchase, user=None):
