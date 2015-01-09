@@ -37,6 +37,25 @@ from .utils import get_entry_purchasable_provider
 CLASS = StandardExternalFields.CLASS
 MIMETYPE = StandardExternalFields.MIMETYPE
 
+def get_purchasable(context):
+	provider = get_entry_purchasable_provider(context)
+	ntiid = get_entry_purchasable_ntiid(context, provider)
+	purchasable = get_purchasable(ntiid) if ntiid else None
+	return purchasable
+	
+def get_entry_context(context):
+	course = ICourseInstance(context)
+	purchasable = get_purchasable(context)
+	## CS: if we cannot get a purchasable and the context course is a 
+	## sub-instance try with its parent course. This may happen
+	## with mapped courses
+	if 	(purchasable is None or not purchasable.Public) and \
+		ICourseSubInstance.providedBy(course):
+		result = ICourseCatalogEntry(course.__parent__.__parent__)
+	else:
+		result = context
+	return result
+
 @interface.implementer(IStoreEnrollmentOption, IInternalObjectExternalizer)
 @WithRepr
 @NoPickle
@@ -68,24 +87,11 @@ class StoreEnrollmentOptionProvider(object):
 		self.context = context
 		
 	def get_purchasable(self, context):
-		provider = get_entry_purchasable_provider(context)
-		ntiid = get_entry_purchasable_ntiid(context, provider)
-		purchasable = get_purchasable(ntiid) if ntiid else None
-		return purchasable
+		return get_purchasable(context)
 	
 	def get_context(self):
-		course = ICourseInstance(self.context)
-		purchasable = self.get_purchasable(self.context)
-		## CS: if we cannot get a purchasable and the context course is a 
-		## sub-instance try with its parent course. This may happen
-		## with mapped courses
-		if 	(purchasable is None or not purchasable.Public) and \
-			ICourseSubInstance.providedBy(course):
-			result = ICourseCatalogEntry(course.__parent__.__parent__)
-		else:
-			result = self.context
-		return result
-		
+		return get_entry_context(self.context)
+
 	def iter_options(self):
 		context = self.get_context()
 		purchasable = self.get_purchasable(context)
