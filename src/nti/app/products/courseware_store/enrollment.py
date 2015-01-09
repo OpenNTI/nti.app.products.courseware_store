@@ -37,7 +37,7 @@ from .utils import get_entry_purchasable_provider
 CLASS = StandardExternalFields.CLASS
 MIMETYPE = StandardExternalFields.MIMETYPE
 
-def get_purchasable(context):
+def get_entry_purchasable(context):
 	provider = get_entry_purchasable_provider(context)
 	ntiid = get_entry_purchasable_ntiid(context, provider)
 	purchasable = get_purchasable(ntiid) if ntiid else None
@@ -87,7 +87,7 @@ class StoreEnrollmentOptionProvider(object):
 		self.context = context
 		
 	def get_purchasable(self, context):
-		return get_purchasable(context)
+		return get_entry_purchasable(context)
 	
 	def get_context(self):
 		return get_entry_context(self.context)
