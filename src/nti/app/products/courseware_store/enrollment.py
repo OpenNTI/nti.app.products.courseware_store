@@ -98,7 +98,8 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasable is not None and purchasable.Public:
 			result = StoreEnrollmentOption()
 			result.Purchasable = purchasable
-			result.CatalogEntryNTIID = context.ntiid
-			result.AllowVendorUpdates = allow_vendor_updates(context)
+			## CS: We want to use the original data
+			result.CatalogEntryNTIID = self.context.ntiid
+			result.AllowVendorUpdates = allow_vendor_updates(self.context)
 			return (result,)
 		return ()
