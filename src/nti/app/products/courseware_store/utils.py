@@ -78,7 +78,8 @@ def get_entry_purchasable_provider(context):
 	provider = get_course_purchasable_provider(course) or parts.provider
 	return provider
 
-def get_course_price(course, *names):
+def get_course_price(context, *names):
+	course = ICourseInstance(context, None)
 	names = chain(names, ('',)) if names else ('',)
 	for name in names:
 		result = component.queryAdapter(course,  ICoursePrice, name=name)
