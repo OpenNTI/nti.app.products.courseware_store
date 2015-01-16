@@ -154,6 +154,9 @@ from zope.traversing.interfaces import IEtcNamespace
 
 from nti.store.course import PurchasableCourse
 
+## CS: Make sure this getters and setters are only set
+## to properties defined in the IPurchasableCourse interface
+
 def _setter(name):
 	def func(self, value):
 		self.__dict__[name] = value
@@ -161,7 +164,7 @@ def _setter(name):
 
 def _getter(name):
 	def func(self):
-		self._sync
+		self._check # force a check on the properties values
 		return self.__dict__.get(name, None)
 	return func
 
@@ -190,7 +193,7 @@ class PurchasableProxy(PurchasableCourse):
 	Redeemable = _alias('Redeemable')
 	
 	@CachedProperty('lastSynchronized')
-	def _sync(self):
+	def _check(self):
 		if not self.CatalogEntryNTIID:
 			return
 		try:
