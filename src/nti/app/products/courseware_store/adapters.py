@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -26,9 +27,12 @@ from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store.course import create_course
 from nti.store.interfaces import IPurchasableCourse
+
+from nti.utils.property import CachedProperty
 
 from .interfaces import ICoursePrice
 from .interfaces import get_course_publishable_vendor_info
@@ -75,10 +79,10 @@ def _course_to_purchasable_ntiid(course):
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
-	public = is_course_enabled_for_purchase(course)
 	entry = ICourseCatalogEntry(course)
 	giftable = is_course_giftable(course)
 	redeemable = is_course_redeemable(course)
+	public = is_course_enabled_for_purchase(course)
 	provider = get_entry_purchasable_provider(entry)
 	
 	price = get_course_price(course, provider)	
@@ -140,22 +144,70 @@ def _course_to_purchasable(course):
 						   thumbnail=thumbnail,
 						   startdate=start_date,
 						   signature=entry.InstructorsSignature,
-						   department=entry.ProviderDepartmentTitle)
+						   department=entry.ProviderDepartmentTitle,
+						   factory=PurchasableProxy)
 	
-	result = PurchasableProxy(result, allow_vendor_updates(course))
+	result.CatalogEntryNTIID = entry.ntiid
 	return result
 
-from zope.proxy import ProxyBase
+from zope.traversing.interfaces import IEtcNamespace
 
-class PurchasableProxy(ProxyBase):
+from nti.store.course import PurchasableCourse
+
+def _setter(name):
+	def func(self, value):
+		self.__dict__[name] = value
+	return func
+
+def _getter(name):
+	def func(self):
+		self._sync
+		return self.__dict__.get(name, None)
+	return func
+
+def _alias(prop_name):
+	prop_name = str(prop_name) # native string
+	return property( _getter(prop_name), _setter(prop_name))
 	
-	AllowVendorUpdates = property(
-			lambda s: s.__dict__.get('_v_allow_vendor_updates'),
-			lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
-		
-	def __new__(cls, base, context):
-		return ProxyBase.__new__(cls, base)
+class PurchasableProxy(PurchasableCourse):
+	
+	__external_class_name__ = 'PurchasableCourse'
+	
+	CatalogEntryNTIID = None
+	AllowVendorUpdates = False
 
-	def __init__(self, base, allow):
-		ProxyBase.__init__(self, base)
-		self.AllowVendorUpdates = allow
+	@property
+	def lastSynchronized(self):
+		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
+		result = getattr(hostsites, 'lastSynchronized', 0)
+		return result
+		
+	Amount = _alias('Amount')
+	Currency = _alias('Currency')
+	
+	Public = _alias('Public')
+	Giftable = _alias('Giftable')
+	Redeemable = _alias('Redeemable')
+	
+	@CachedProperty('lastSynchronized')
+	def _sync(self):
+		if not self.CatalogEntryNTIID:
+			return
+		try:
+			entry = find_object_with_ntiid(self.CatalogEntryNTIID)
+			if entry is None:
+				self.Public = False
+			else:
+				# reset flags
+				self.Giftable = is_course_giftable(entry)
+				self.Redeemable = is_course_redeemable(entry)
+				self.Public = is_course_enabled_for_purchase(entry)
+				self.AllowVendorUpdates = allow_vendor_updates(entry)
+				# reset price
+				provider = get_entry_purchasable_provider(entry)
+				price = get_course_price(entry, provider)
+				self.Amount = price.Amount
+				self.Currency = price.Currency
+		except (StandardError, Exception):
+			## running outside a transaction?
+			self.Public = False
