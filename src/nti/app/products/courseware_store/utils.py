@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -13,6 +14,7 @@ from itertools import chain
 from zope import component
 from zope import lifecycleevent
 from zope.traversing.api import traverse
+from zope.security.interfaces import IPrincipal
 
 from dolmen.builtins.interfaces import IString
 
@@ -140,9 +142,15 @@ def find_allow_vendor_updates_users(entry, invitation=False):
 			course = ICourseInstance(entry)
 			enrollments = ICourseEnrollments(course)
 			for enrollment in enrollments.iter_enrollments():
+				# check purchase enrollments only
 				if enrollment.Scope != ES_PURCHASED:
 					continue
+				
 				user = enrollment.Principal
+				if IPrincipal(user, None) is None:
+					# ignore dup enrollment
+					continue
+				
 				purchases = get_purchase_history_by_item(user, ntiid)
 				for purchase in purchases or ():
 					if invitation and IInvitationPurchaseAttempt.providedBy(purchase):
