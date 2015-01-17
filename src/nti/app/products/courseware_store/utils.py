@@ -9,12 +9,19 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import six
 from itertools import chain
+
+import zope.intid
 
 from zope import component
 from zope import lifecycleevent
 from zope.traversing.api import traverse
+from zope.catalog.interfaces import ICatalog
 from zope.security.interfaces import IPrincipal
+
+from ZODB.interfaces import IBroken
+from ZODB.POSException import POSError
 
 from dolmen.builtins.interfaces import IString
 
@@ -25,13 +32,17 @@ from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
 
+from nti.dataserver.metadata_index import IX_MIMETYPE, IX_CREATOR
+from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
+
 from nti.ntiids.ntiids import get_parts
+from nti.ntiids.ntiids import find_object_with_ntiid
 
-from nti.store.store import get_purchasable
-from nti.store.store import get_purchase_history_by_item
-
+from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IInvitationPurchaseAttempt
+
+from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
 
 from nti.utils.maps import CaseInsensitiveDict
 
@@ -128,38 +139,70 @@ def register_purchasables(catalog=None):
 						 purchasable.NTIID, catalog_entry.ntiid)
 	return result
 
-def find_allow_vendor_updates_users(entry, invitation=False):
-	catalog = component.getUtility(ICourseCatalog)
-	try:
-		if not ICourseCatalogEntry.providedBy(entry):
-			entry = catalog.getCatalogEntry(str(entry))
+def find_catalog_entry(context):
+	if isinstance(context, six.string_types):
+		result = find_object_with_ntiid(context)
+		if result is None:
+			try:
+				catalog = component.getUtility(ICourseCatalog)
+				result = catalog.getCatalogEntry(context)
+			except (LookupError, KeyError):
+				result = None
+	else:
+		result = context
+	result = ICourseCatalogEntry(result, None)
+	return result
+
+def find_allow_vendor_updates_purchases(entry, invitation=False):
+	entry = find_catalog_entry(entry)
+	if entry is None:
+		return ()
+	
+	mime_types = PURCHASE_ATTEMPT_MIME_TYPES
+	catalog = component.getUtility(ICatalog, METADATA_CATALOG_NAME)
+	intids_purchases = catalog[IX_MIMETYPE].apply({'any_of': mime_types})
+	if not intids_purchases:
+		return ()
 		
-		provider = get_entry_purchasable_provider(entry)
-		ntiid = get_entry_purchasable_ntiid(entry, provider)
-		purchasable = get_purchasable(ntiid)
-		if purchasable is not None and purchasable.Public:
-			result = []
-			course = ICourseInstance(entry)
-			enrollments = ICourseEnrollments(course)
-			for enrollment in enrollments.iter_enrollments():
-				# check purchase enrollments only
-				if enrollment.Scope != ES_PURCHASED:
-					continue
-				
-				user = enrollment.Principal
-				if IPrincipal(user, None) is None:
-					# ignore dup enrollment
-					continue
-				
-				purchases = get_purchase_history_by_item(user, ntiid)
-				for purchase in purchases or ():
-					if invitation and IInvitationPurchaseAttempt.providedBy(purchase):
-						continue
-					context = CaseInsensitiveDict(purchase.Context or {})
-					if context.get('AllowVendorUpdates', False):
-						result.append(user.username)
-						break
-			return result
-	except KeyError:
-		logger.debug("Could not find course entry %s", entry)
-	return ()
+	usernames = []
+	enrollments = ICourseEnrollments(ICourseInstance(entry))
+	for enrollment in enrollments.iter_enrollments():
+		principal = IPrincipal(enrollment.Principal, None)
+		if principal is not None and enrollment.Scope == ES_PURCHASED:
+			usernames.append(principal.id.lower())	
+			
+	creator_intids = catalog[IX_CREATOR].apply({'any_of': usernames})
+	intids_purchases = catalog.family.IF.intersection(intids_purchases,
+													  creator_intids )
+		
+	provider = get_entry_purchasable_provider(entry)
+	ntiid = get_entry_purchasable_ntiid(entry, provider)
+			
+	result = []
+	intids = component.getUtility(zope.intid.IIntIds)	
+	for uid in intids_purchases:
+		try:
+			purchase = intids.queryObject(uid)
+			# filter any invalid object
+			if 	purchase is None or IBroken.providedBy(purchase) or \
+				not IPurchaseAttempt.providedBy(purchase):
+				continue
+			# invitations may not be required
+			if not invitation and IInvitationPurchaseAttempt.providedBy(purchase):
+				continue
+			# check the purchasable is in the purchase
+			if ntiid not in purchase.Items:
+				continue
+			# check vendor updates
+			context = CaseInsensitiveDict(purchase.Context or {})
+			if not context.get('AllowVendorUpdates', False):
+				continue
+			result.append(purchase)
+		except (POSError, TypeError):
+			continue	
+	return result
+
+def find_allow_vendor_updates_users(entry, invitation=False):
+	purchases = find_allow_vendor_updates_purchases(entry, invitation)
+	result = {getattr(x.creator, 'username', x.creator) for x in purchases}
+	return result

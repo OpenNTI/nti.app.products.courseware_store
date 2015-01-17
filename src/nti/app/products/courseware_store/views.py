@@ -24,19 +24,15 @@ from nti.app.base.abstract_views import AbstractAuthenticatedView
 from nti.contenttypes.courses.interfaces import ICourseCatalog,\
 	ICourseCatalogEntry
 
-from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
 
 from nti.dataserver import authorization as nauth
-
-from nti.dataserver.users import User
-from nti.dataserver.users.interfaces import IUserProfile
 
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.utils.maps import CaseInsensitiveDict
 
-from .utils import find_allow_vendor_updates_users
+from .utils import find_allow_vendor_updates_purchases
 
 def _tx_string(s):
 	if s and isinstance(s, unicode):
@@ -77,16 +73,14 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		header = ['username', 'name', 'email'] 
 		csv_writer.writerow(header)
 		
-		usernames = find_allow_vendor_updates_users(entry)
-		for username in usernames:
-			user = User.get_user(username)
-			if not user or not IUser.providedBy(user):
-				continue
-
-			profile = IUserProfile( user, None )
+		purchases = find_allow_vendor_updates_purchases(entry)
+		for purchase in purchases:
+			creator = purchase.creator
+			username = getattr(creator, 'username', creator)
+			profile = purchase.Profile
 			email = getattr(profile, 'email', None)
 			name = getattr(profile, 'realname', None) or username
-						
+			# write data
 			row_data = [username, name, email]
 			csv_writer.writerow([_tx_string(x) for x in row_data])
 
