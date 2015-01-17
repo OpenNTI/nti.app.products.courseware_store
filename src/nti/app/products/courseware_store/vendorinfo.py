@@ -3,48 +3,41 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from zope import component
 from zope import interface
 
-from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from .interfaces import ICoursePublishableVendorInfo
 
 from .utils import allow_vendor_updates
 
-@component.adapter(ICourseInstance)
 @interface.implementer(ICoursePublishableVendorInfo)
 class _DefaultCoursePublishableVendorInfo(object):
 
-	def __init__(self, course):
-		self.course = course
+	def __init__(self, context):
+		self.context = context
 
 	def info(self):
 		return None
 
-@component.adapter(ICourseInstance)
 @interface.implementer(ICoursePublishableVendorInfo)
 class _CourseCatalogPublishableVendorInfo(object):
-	"""
-	A bit of a hack to expose course catalog information to unauthenticated users
-	on the landing page.
-	"""
 
-	def __init__(self, course):
-		self.course = course
+	def __init__(self, context):
+		self.context = context
 
 	def info(self):
-		catalog_entry = ICourseCatalogEntry( self.course, None )
+		catalog_entry = ICourseCatalogEntry( self.context, None )
 		if not catalog_entry:
 			return None
 
-		does_allow_vendor_updates = allow_vendor_updates( self.course )
+		does_allow_vendor_updates = allow_vendor_updates(self.context)
 
 		result = {'StartDate': catalog_entry.StartDate,
 				  'EndDate': catalog_entry.EndDate,

@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -54,12 +55,15 @@ def get_course_publishable_vendor_info(context):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
-	AllowVendorUpdates = Bool(title="Allow vendor updates", required=False, default=False)
+	AllowVendorUpdates = Bool(title="Allow vendor updates", required=False,
+							  default=False)
 
 class IStoreEnrollmentEvent(interface.Interface):
 	request = Object(IRequest, title="the request", required=False) 
-	purchasable = Object(IPurchasableCourse, title="purchasable course", required=False)
-	record = Object(ICourseInstanceEnrollmentRecord, title="enrollemnt record", required=True)
+	purchasable = Object(IPurchasableCourse, title="purchasable course", 
+						 required=False)
+	record = Object(ICourseInstanceEnrollmentRecord, title="enrollemnt record",
+					required=True)
 	
 @interface.implementer(IStoreEnrollmentEvent)
 class StoreEnrollmentEvent(object):

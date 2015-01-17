@@ -80,7 +80,7 @@ class TestViews(ApplicationLayerTest):
 							   params={'ntiid':self.course_ntiid})
 		assert_that(res.body,
 					is_(
-						b'Username,Name,Email\r\n'
+						b'username,name,email\r\n'
 						b'sjohnson@nextthought.com,sjohnson@nextthought.com,\r\n') )
 
 		assert_that(res.content_disposition,

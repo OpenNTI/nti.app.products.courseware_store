@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -21,9 +22,10 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.externalization.persistence import NoPickle
 from nti.externalization.representation import WithRepr
+from nti.externalization.externalization import to_external_object
+
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-from nti.externalization.externalization import to_external_object
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
 from nti.store.purchasable import get_purchasable

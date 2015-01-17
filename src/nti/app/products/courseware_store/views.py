@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -20,7 +21,8 @@ from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalog,\
+	ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IUser
 from nti.dataserver.interfaces import IDataserverFolder
@@ -29,6 +31,8 @@ from nti.dataserver import authorization as nauth
 
 from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
+
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.utils.maps import CaseInsensitiveDict
 
@@ -51,24 +55,26 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		
 		ntiid = params.get('ntiid') or \
 				params.get('entry') or \
-				params.get('course') or \
-				params.get('ProviderUniqueID')
+				params.get('course')
 		if not ntiid:
 			raise hexc.HTTPUnprocessableEntity(detail=_('No course entry identifier'))
 
-		try:
-			catalog = component.getUtility(ICourseCatalog)
-			entry = catalog.getCatalogEntry(ntiid)
-		except LookupError:
-			raise hexc.HTTPNotFound(detail=_('Catalog not found'))
-		except KeyError:
-			raise hexc.HTTPNotFound(detail=_('Course not found'))
+		context = find_object_with_ntiid(ntiid)
+		entry = ICourseCatalogEntry(context, None)
+		if entry is None:
+			try:
+				catalog = component.getUtility(ICourseCatalog)
+				entry = catalog.getCatalogEntry(ntiid)
+			except LookupError:
+				raise hexc.HTTPUnprocessableEntity(detail=_('Catalog not found'))
+			except KeyError:
+				raise hexc.HTTPUnprocessableEntity(detail=_('Course not found'))
 
 		bio = BytesIO()
 		csv_writer = csv.writer(bio)
 		
 		# header
-		header = ['Username', 'Name', 'Email'] 
+		header = ['username', 'name', 'email'] 
 		csv_writer.writerow(header)
 		
 		usernames = find_allow_vendor_updates_users(entry)
@@ -81,8 +87,8 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 			email = getattr(profile, 'email', None)
 			name = getattr(profile, 'realname', None) or username
 						
-			row_data = [username, _tx_string(name), email]
-			csv_writer.writerow(row_data)
+			row_data = [username, name, email]
+			csv_writer.writerow([_tx_string(x) for x in row_data])
 
 		response = self.request.response
 		response.body = bio.getvalue()

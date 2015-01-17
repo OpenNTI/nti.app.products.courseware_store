@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -43,4 +44,3 @@ class CoursePrice(SchemaConfigured):
             return (self.Amount, self.Currency) > (self.Amount, self.Currency)
         except AttributeError:  # pragma: no cover
             return NotImplemented
-        
