@@ -85,6 +85,7 @@ def _course_to_purchasable(course):
 	public = is_course_enabled_for_purchase(course)
 	provider = get_entry_purchasable_provider(entry)
 	
+	# find course price
 	price = get_course_price(course, provider)	
 	if price is None:
 		return None
@@ -153,6 +154,7 @@ def _course_to_purchasable(course):
 from zope.traversing.interfaces import IEtcNamespace
 
 from nti.store.course import PurchasableCourse
+from nti.store.interfaces import IPurchasableVendorInfo
 
 ## CS: Make sure this getters and setters are only set
 ## to properties defined in the IPurchasableCourse interface
@@ -179,38 +181,41 @@ class PurchasableProxy(PurchasableCourse):
 	CatalogEntryNTIID = None
 	AllowVendorUpdates = False
 
-	@property
-	def lastSynchronized(self):
-		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
-		result = getattr(hostsites, 'lastSynchronized', 0)
-		return result
-		
 	Amount = _alias('Amount')
 	Currency = _alias('Currency')
 	
 	Public = _alias('Public')
 	Giftable = _alias('Giftable')
 	Redeemable = _alias('Redeemable')
-	
+
+	@property
+	def lastSynchronized(self):
+		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
+		result = getattr(hostsites, 'lastSynchronized', 0)
+		return result
+
 	@CachedProperty('lastSynchronized')
 	def _check(self):
 		if not self.CatalogEntryNTIID:
 			return
 		try:
 			entry = find_object_with_ntiid(self.CatalogEntryNTIID)
-			if entry is None:
+			if entry is None: # course removed
 				self.Public = False
 			else:
-				# reset flags
-				self.Giftable = is_course_giftable(entry)
-				self.Redeemable = is_course_redeemable(entry)
-				self.Public = is_course_enabled_for_purchase(entry)
-				self.AllowVendorUpdates = allow_vendor_updates(entry)
-				# reset price
 				provider = get_entry_purchasable_provider(entry)
 				price = get_course_price(entry, provider)
-				self.Amount = price.Amount
-				self.Currency = price.Currency
+				if price is None: # price removed
+					self.Public = False
+				else: 
+					self.Amount = price.Amount
+					self.Currency = price.Currency
+					self.Giftable = is_course_giftable(entry)
+					self.Redeemable = is_course_redeemable(entry)
+					self.Public = is_course_enabled_for_purchase(entry)
+					self.AllowVendorUpdates = allow_vendor_updates(entry) 
+					vendor_info = get_course_publishable_vendor_info(entry)
+					self.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
 		except (StandardError, Exception):
 			## running outside a transaction?
 			self.Public = False
