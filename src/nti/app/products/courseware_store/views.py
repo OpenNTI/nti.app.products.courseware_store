@@ -21,16 +21,16 @@ from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog,\
-	ICourseCatalogEntry
+from nti.common.maps import CaseInsensitiveDict
+
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.dataserver.interfaces import IDataserverFolder
 
 from nti.dataserver import authorization as nauth
 
 from nti.ntiids.ntiids import find_object_with_ntiid
-
-from nti.utils.maps import CaseInsensitiveDict
 
 from .utils import find_allow_vendor_updates_purchases
 

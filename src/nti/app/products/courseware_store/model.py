@@ -13,13 +13,13 @@ from functools import total_ordering
 
 from zope import interface
 
+from nti.common.property import alias
+
 from nti.externalization.representation import WithRepr
 
 from nti.schema.schema import EqHash
 from nti.schema.field import SchemaConfigured
 from nti.schema.fieldproperty import createDirectFieldProperties
-
-from nti.utils.property import alias
 
 from .interfaces import ICoursePrice
 

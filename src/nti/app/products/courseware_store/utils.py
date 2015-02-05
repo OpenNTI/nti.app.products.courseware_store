@@ -25,6 +25,8 @@ from ZODB.POSException import POSError
 
 from dolmen.builtins.interfaces import IString
 
+from nti.common.maps import CaseInsensitiveDict
+
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -43,8 +45,6 @@ from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IInvitationPurchaseAttempt
 
 from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
-
-from nti.utils.maps import CaseInsensitiveDict
 
 from .model import CoursePrice
 

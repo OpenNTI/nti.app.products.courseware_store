@@ -18,6 +18,8 @@ from zope import interface
 
 from dolmen.builtins.interfaces import IString
 
+from nti.common.property import CachedProperty
+
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -31,8 +33,6 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store.course import create_course
 from nti.store.interfaces import IPurchasableCourse
-
-from nti.utils.property import CachedProperty
 
 from .interfaces import ICoursePrice
 from .interfaces import get_course_publishable_vendor_info
