@@ -42,7 +42,7 @@ def _tx_string(s):
 @view_config(route_name='objects.generic.traversal',
 			 renderer='rest',
 			 context=IDataserverFolder,
-			 permission=nauth.ACT_MODERATE,
+			 permission=nauth.ACT_NTI_ADMIN,
 			 name='VendorUpdatesPurchasedCourse')
 class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 	
