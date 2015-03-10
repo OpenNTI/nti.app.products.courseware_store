@@ -54,6 +54,7 @@ def get_course_publishable_vendor_info(context):
 	return result
 
 class IStoreEnrollmentOption(IEnrollmentOption):
+	IsEnabled = Bool(title="Is enabled flag", required=False, default=True)
 	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
 	AllowVendorUpdates = Bool(title="Allow vendor updates", required=False,
 							  default=False)

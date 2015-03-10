@@ -61,6 +61,7 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 				has_entry('Items',
 					has_entry('StoreEnrollment',
 							   has_entries(	'Purchasable', is_not(none()),
+											'IsEnabled', is_(True),
 											'Price', is_not(none()),
 											'Currency', is_not(none()),
 											'RequiresAdmission', is_(False),

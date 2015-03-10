@@ -66,6 +66,7 @@ class StoreEnrollmentOption(EnrollmentOption):
 	__external_class_name__ = "StoreEnrollment"
 	mime_type = mimeType = 'application/vnd.nextthought.courseware.storeenrollmentoption'
 
+	IsEnabled = FP(IStoreEnrollmentOption['IsEnabled'])
 	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
 	AllowVendorUpdates = FP(IStoreEnrollmentOption['AllowVendorUpdates'])
 		
@@ -79,6 +80,7 @@ class StoreEnrollmentOption(EnrollmentOption):
 		result['Price'] = ext_obj.get('Amount', None)
 		result['Currency'] = ext_obj.get('Currency', None)
 		result['AllowVendorUpdates'] = self.AllowVendorUpdates
+		result['IsAvailable'] = result['IsEnabled'] = self.IsEnabled
 		return result
 
 @component.adapter(ICourseCatalogEntry)
@@ -97,9 +99,10 @@ class StoreEnrollmentOptionProvider(object):
 	def iter_options(self):
 		context = self.get_context()
 		purchasable = self.get_purchasable(context)
-		if purchasable is not None and purchasable.Public:
+		if purchasable is not None:
 			result = StoreEnrollmentOption()
 			result.Purchasable = purchasable
+			result.IsEnabled = purchasable.Public
 			## CS: We want to use the original data
 			result.CatalogEntryNTIID = self.context.ntiid
 			result.AllowVendorUpdates = allow_vendor_updates(self.context)
