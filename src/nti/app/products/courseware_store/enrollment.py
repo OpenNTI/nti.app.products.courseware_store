@@ -77,10 +77,10 @@ class StoreEnrollmentOption(EnrollmentOption):
 		ext_obj = to_external_object(self.Purchasable, name='summary')
 		result['Purchasable'] = ext_obj
 		result['RequiresAdmission'] = False
+		result['IsEnabled'] = self.IsEnabled
 		result['Price'] = ext_obj.get('Amount', None)
 		result['Currency'] = ext_obj.get('Currency', None)
 		result['AllowVendorUpdates'] = self.AllowVendorUpdates
-		result['IsAvailable'] = result['IsEnabled'] = self.IsEnabled
 		return result
 
 @component.adapter(ICourseCatalogEntry)
