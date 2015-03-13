@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import print_function, unicode_literals, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -41,3 +42,4 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 		result['Enabled'] = result['IsAvailable'] = isAvailable
 		IsEnrolled = bool(record is not None and record.Scope == ES_PURCHASED)
 		result['IsEnrolled'] = IsEnrolled
+		result.pop('IsEnabled', None) # redundant
