@@ -78,6 +78,11 @@
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
 
+	<!--
+	Register outside the site to listen to IApplicationTransactionOpenedEvent
+	-->
+	<subscriber handler=".subscribers.register_course_purchasables" />
+	
 	<!-- Decorators -->
 	<subscriber factory=".decorators._StoreEnrollmentOptionDecorator"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"

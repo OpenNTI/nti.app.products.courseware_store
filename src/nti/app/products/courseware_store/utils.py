@@ -126,7 +126,7 @@ def allow_vendor_updates(context):
 
 def register_purchasables(catalog=None):
 	result = []
-	catalog = catalog or component.getUtility(ICourseCatalog)
+	catalog = catalog if catalog is not None else component.getUtility(ICourseCatalog)
 	for catalog_entry in catalog.iterCatalogEntries():
 		purchasable = IPurchasableCourse(catalog_entry, None)
 		name = getattr(purchasable, 'NTIID', None)
