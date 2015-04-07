@@ -11,9 +11,12 @@ logger = __import__('logging').getLogger(__name__)
 
 from . import MessageFactory as _
 
+import six
+
 from zope import component
-from zope.event import notify
 from zope import lifecycleevent
+
+from zope.event import notify
 
 from zope.security.management import queryInteraction
 
@@ -94,9 +97,9 @@ def _unenroll(course, user, purchasable=None):
 		return True
 	return False
 
-def _get_courses_from_purchase(purchase):
+def _get_courses_from_purchasables(*purchasables):			
 	catalog = component.getUtility(ICourseCatalog)
-	for item in purchase.Items:
+	for item in purchasables:
 		purchasable = get_purchasable(item)
 		if not IPurchasableCourse.providedBy(purchasable):
 			continue
@@ -108,11 +111,13 @@ def _get_courses_from_purchase(purchase):
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
-def _process_successful_purchase(purchase, user=None, request=None, check=False):
+def _process_successful_purchase(purchasables, user=None, request=None, check=False, ):
 	result = False
-	user = get_user(user if user is not None else purchase.creator)
+	user = get_user(user)
+	purchasables = 	purchasables.split() \
+					if isinstance(purchasables, six.string_types) else purchasables
 	if user is not None:
-		for course, purchasable in _get_courses_from_purchase(purchase):
+		for course, purchasable in _get_courses_from_purchasables(*purchasables):
 			_enroll(course, user, purchasable, request=request, check_enrollment=check)
 			result = True
 	return result
@@ -120,7 +125,9 @@ def _process_successful_purchase(purchase, user=None, request=None, check=False)
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
 	if 	not IGiftPurchaseAttempt.providedBy(purchase) and \
-		_process_successful_purchase(purchase, request=event.request):
+		_process_successful_purchase(purchase.Items, 
+									 user=purchase.creator, 
+									 request=event.request):
 		logger.info("Course purchase %s was successful", purchase.id)
 
 @component.adapter(IInvitationAcceptedEvent)
@@ -129,14 +136,14 @@ def _purchase_invitation_accepted(event):
 	if 	IStorePurchaseInvitation.providedBy(invitation) and \
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
-		_process_successful_purchase(original, user=event.user)
+		_process_successful_purchase(original.Items, user=event.user)
 		logger.info("Course invitation %s was accepted", invitation.code)
 
 def _process_refunded_purchase(purchase, user=None):
 	result = False
 	user = get_user(user if user is not None else purchase.creator)
 	if user is not None:
-		for course, purchasable in _get_courses_from_purchase(purchase):
+		for course, purchasable in _get_courses_from_purchasables(*purchase.Items):
 			_unenroll(course, user, purchasable)
 			result = True
 	return result
@@ -147,14 +154,17 @@ def _purchase_attempt_refunded(purchase, event):
 		_process_refunded_purchase(purchase):
 		logger.info("Course purchase %s was refunded", purchase.id)
 
-@component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
-def _gift_purchase_attempt_redeemed(purchase, event):
-	if _process_successful_purchase(purchase, event.user, event.request, True):
-		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
-
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
 def _redeemed_purchase_attempt_refunded(purchase, event):
 	_process_refunded_purchase(purchase)
+	
+@component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
+def _gift_purchase_attempt_redeemed(purchase, event):
+	user = event.user
+	request = event.request
+	purchasables = (event.purchasable,) if event.purchasable else purchase.Items
+	if _process_successful_purchase(purchasables, user, request=request, check=True):
+		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
 
 @component.adapter(ICourseInstanceEnrollmentRecord, IIntIdRemovedEvent)
 def _enrollment_record_dropped(record, event):
