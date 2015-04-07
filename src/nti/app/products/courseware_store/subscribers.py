@@ -97,9 +97,9 @@ def _unenroll(course, user, purchasable=None):
 		return True
 	return False
 
-def _get_courses_from_purchasables(*purchasables):			
+def _get_courses_from_purchasables(purchasables=()):			
 	catalog = component.getUtility(ICourseCatalog)
-	for item in purchasables:
+	for item in purchasables or ():
 		purchasable = get_purchasable(item)
 		if not IPurchasableCourse.providedBy(purchasable):
 			continue
@@ -111,13 +111,16 @@ def _get_courses_from_purchasables(*purchasables):
 			except KeyError:
 				logger.error("Could not find course entry %s", name)
 
-def _process_successful_purchase(purchasables, user=None, request=None, check=False, ):
+def _to_sequence(items=(), unique=True):
+	result = items.split() if isinstance(items, six.string_types) else items
+	return set(result or ()) if unique else result
+					
+def _process_successful_purchase(purchasables, user=None, request=None, check=False):
 	result = False
 	user = get_user(user)
-	purchasables = 	purchasables.split() \
-					if isinstance(purchasables, six.string_types) else purchasables
 	if user is not None:
-		for course, purchasable in _get_courses_from_purchasables(*purchasables):
+		purchasables = _to_sequence(purchasables)
+		for course, purchasable in _get_courses_from_purchasables(purchasables):
 			_enroll(course, user, purchasable, request=request, check_enrollment=check)
 			result = True
 	return result
@@ -143,7 +146,7 @@ def _process_refunded_purchase(purchase, user=None):
 	result = False
 	user = get_user(user if user is not None else purchase.creator)
 	if user is not None:
-		for course, purchasable in _get_courses_from_purchasables(*purchase.Items):
+		for course, purchasable in _get_courses_from_purchasables(purchase.Items):
 			_unenroll(course, user, purchasable)
 			result = True
 	return result
