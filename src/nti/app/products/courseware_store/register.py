@@ -19,7 +19,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
-from .purchasable import state as get_state
+from .purchasable import get_state
 from .purchasable import create_course_choice_bundle
 
 from .utils import get_nti_choice_bundles
@@ -73,5 +73,4 @@ def register_purchasables(catalog=None, registry=component):
 			
 	choice_bundles = register_choice_bundles(choice_bundle_map, registry)
 	result.extend(choice_bundles)
-
 	return result

@@ -143,6 +143,13 @@ def find_catalog_entry(context):
 	result = ICourseCatalogEntry(result, None)
 	return result
 
+def safe_find_catalog_entry(context):
+	try:
+		result = find_catalog_entry(context)
+	except Exception:
+		result = None
+	return result
+
 def find_allow_vendor_updates_purchases(entry, invitation=False):
 	entry = find_catalog_entry(entry)
 	if entry is None:
