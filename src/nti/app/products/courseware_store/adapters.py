@@ -18,8 +18,6 @@ from zope import interface
 
 from dolmen.builtins.interfaces import IString
 
-from nti.common.property import CachedProperty
-
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -29,19 +27,19 @@ from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
-from nti.ntiids.ntiids import find_object_with_ntiid
 
-from nti.store.course import create_course
+from nti.store import PURCHASABLE_COURSE
 from nti.store.interfaces import IPurchasableCourse
 
 from .interfaces import ICoursePrice
 from .interfaces import get_course_publishable_vendor_info
 
+from .purchasable import create_proxy_course
+
 from .utils import get_course_price
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
-from .utils import allow_vendor_updates
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
 from .utils import get_course_purchasable_title
@@ -66,7 +64,7 @@ def _entry_to_purchasable_ntiid(entry):
 	parts = get_parts(entry.ntiid)
 	specific = make_specific_safe(entry.ProviderUniqueID)
 	ntiid = make_ntiid(date=parts.date, provider=parts.provider,
-					   nttype="purchasable_course", specific=specific)
+					   nttype=PURCHASABLE_COURSE, specific=specific)
 	return ntiid
 
 @component.adapter(ICourseInstance)
@@ -127,95 +125,25 @@ def _course_to_purchasable(course):
 	title = get_course_purchasable_title(course) or entry.title
 	
 	vendor_info = get_course_publishable_vendor_info(course)
-	result = create_course(ntiid=ntiid,
-						   items=items,
-						   name=name, 
-						   title=title,
-						   provider=provider, 
-						   public=public,
-						   amount=amount,
-						   currency=currency,
-						   giftable=giftable,
-						   redeemable=redeemable,
-						   vendor_info=vendor_info,
-						   description=entry.description,
-						   # deprecated/legacy
-						   icon=icon,
-						   preview=preview,
-						   thumbnail=thumbnail,
-						   startdate=start_date,
-						   signature=entry.InstructorsSignature,
-						   department=entry.ProviderDepartmentTitle,
-						   factory=PurchasableProxy)
+	result = create_proxy_course(ntiid=ntiid,
+								 items=items,
+								 name=name, 
+								 title=title,
+								 provider=provider, 
+								 public=public,
+								 amount=amount,
+								 currency=currency,
+								 giftable=giftable,
+								 redeemable=redeemable,
+								 vendor_info=vendor_info,
+								 description=entry.description,
+								 # deprecated/legacy
+								 icon=icon,
+								 preview=preview,
+								 thumbnail=thumbnail,
+								 startdate=start_date,
+								 signature=entry.InstructorsSignature,
+								 department=entry.ProviderDepartmentTitle)
 	
 	result.CatalogEntryNTIID = entry.ntiid
 	return result
-
-from zope.traversing.interfaces import IEtcNamespace
-
-from nti.store.course import PurchasableCourse
-from nti.store.interfaces import IPurchasableVendorInfo
-
-## CS: Make sure this getters and setters are only set
-## to properties defined in the IPurchasableCourse interface
-
-def _setter(name):
-	def func(self, value):
-		self.__dict__[name] = value
-	return func
-
-def _getter(name):
-	def func(self):
-		self._check_state # force a check on the properties values
-		return self.__dict__.get(name, None)
-	return func
-
-def _alias(prop_name):
-	prop_name = str(prop_name) # native string
-	return property( _getter(prop_name), _setter(prop_name))
-	
-class PurchasableProxy(PurchasableCourse):
-	
-	__external_class_name__ = 'PurchasableCourse'
-	
-	CatalogEntryNTIID = None
-	AllowVendorUpdates = False
-
-	Amount = _alias('Amount')
-	Currency = _alias('Currency')
-	
-	Public = _alias('Public')
-	Giftable = _alias('Giftable')
-	Redeemable = _alias('Redeemable')
-
-	@property
-	def lastSynchronized(self):
-		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
-		result = getattr(hostsites, 'lastSynchronized', 0)
-		return result
-
-	@CachedProperty('lastSynchronized')
-	def _check_state(self):
-		if not self.CatalogEntryNTIID:
-			return
-		try:
-			entry = find_object_with_ntiid(self.CatalogEntryNTIID)
-			if entry is None: # course removed
-				self.Public = False
-			else:
-				provider = get_entry_purchasable_provider(entry)
-				price = get_course_price(entry, provider)
-				if price is None: # price removed
-					self.Public = False
-				else: # Update properties after sync
-					self.Amount = price.Amount
-					self.Currency = price.Currency
-					self.Giftable = is_course_giftable(entry)
-					self.Redeemable = is_course_redeemable(entry)
-					self.Public = is_course_enabled_for_purchase(entry)
-					self.AllowVendorUpdates = allow_vendor_updates(entry) 
-					vendor_info = get_course_publishable_vendor_info(entry)
-					self.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
-		except (StandardError, Exception):
-			## running outside a transaction?
-			self.Public = False

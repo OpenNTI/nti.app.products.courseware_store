@@ -182,7 +182,7 @@ from nti.processlifetime import IApplicationTransactionOpenedEvent
 
 from nti.site.interfaces import IHostPolicyFolder
 
-from .utils import register_purchasables
+from .register import register_purchasables
 
 @component.adapter(IApplicationTransactionOpenedEvent)
 def register_course_purchasables(*args, **kwargs):

@@ -15,7 +15,6 @@ from itertools import chain
 import zope.intid
 
 from zope import component
-from zope import lifecycleevent
 from zope.traversing.api import traverse
 from zope.catalog.interfaces import ICatalog
 from zope.security.interfaces import IPrincipal
@@ -41,7 +40,6 @@ from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store.interfaces import IPurchaseAttempt
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IInvitationPurchaseAttempt
 
 from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
@@ -124,19 +122,11 @@ def allow_vendor_updates(context):
 	result = traverse(vendor_info, 'NTI/Purchasable/AllowVendorUpdates', default=False)
 	return bool(result) if result is not None else False
 
-def register_purchasables(catalog=None):
-	result = []
-	catalog = catalog if catalog is not None else component.getUtility(ICourseCatalog)
-	for catalog_entry in catalog.iterCatalogEntries():
-		purchasable = IPurchasableCourse(catalog_entry, None)
-		name = getattr(purchasable, 'NTIID', None)
-		if 	purchasable is not None and name and \
-			component.queryUtility(IPurchasableCourse, name=name) is None:
-			component.provideUtility(purchasable, IPurchasableCourse, name=name)
-			result.append(purchasable)
-			lifecycleevent.created(purchasable)
-			logger.debug("Purchasable %s was registered for course %s",
-						 purchasable.NTIID, catalog_entry.ntiid)
+def get_nti_choice_bundles(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/ChoiceBundles', default=())
+	result = result.split() if isinstance(result, six.string_types) else result
+	result = set(result) if result else ()
 	return result
 
 def find_catalog_entry(context):
