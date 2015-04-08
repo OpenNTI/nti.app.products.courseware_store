@@ -26,7 +26,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
-from nti.app.products.courseware_store.utils import register_purchasables
+from nti.app.products.courseware_store.register import register_purchasables
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
 
 from nti.dataserver.users import User

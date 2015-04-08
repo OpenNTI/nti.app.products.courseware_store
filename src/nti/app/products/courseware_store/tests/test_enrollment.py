@@ -18,7 +18,7 @@ does_not = is_not
 
 from zope import component
 
-from nti.app.products.courseware_store.utils import register_purchasables
+from nti.app.products.courseware_store.register import register_purchasables
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 

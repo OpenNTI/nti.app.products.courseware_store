@@ -15,7 +15,7 @@ from zope.event import notify
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 
-from nti.app.products.courseware_store.utils import register_purchasables
+from nti.app.products.courseware_store.register import register_purchasables
 
 from nti.dataserver.users import User
 

@@ -10,16 +10,20 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
+from hamcrest import has_key
+from hamcrest import not_none
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_property
-from hamcrest import not_none
-from hamcrest import has_key
 
 import fudge
 
 from zope import component
 from zope import interface
+
+from nti.app.products.courseware_store.interfaces import ICoursePrice
+from nti.app.products.courseware_store.interfaces import ICoursePublishableVendorInfo
+from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -29,11 +33,6 @@ from nti.store.interfaces import IRedemptionError
 from nti.store.interfaces import IPurchasableCourse
 
 from nti.dataserver.tests import mock_dataserver
-
-from nti.app.products.courseware_store.interfaces import ICoursePrice
-from nti.app.products.courseware_store.interfaces import ICoursePublishableVendorInfo
-
-from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 from nti.app.testing.application_webtest import ApplicationLayerTest

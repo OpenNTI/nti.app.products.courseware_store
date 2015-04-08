@@ -35,4 +35,3 @@ class CourseStoreApplicationTestLayer(InstructedCourseApplicationTestLayer):
 
 class OUCoursewareApplicationLayerTest(ApplicationLayerTest):
     layer = CourseStoreApplicationTestLayer
-

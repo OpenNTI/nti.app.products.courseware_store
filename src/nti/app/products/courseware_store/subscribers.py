@@ -165,8 +165,7 @@ def _redeemed_purchase_attempt_refunded(purchase, event):
 def _gift_purchase_attempt_redeemed(purchase, event):
 	user = event.user
 	request = event.request
-	purchasables = (event.purchasable,) if event.purchasable else purchase.Items
-	if _process_successful_purchase(purchasables, user, request=request, check=True):
+	if _process_successful_purchase(purchase.Items, user, request=request, check=True):
 		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
 
 @component.adapter(ICourseInstanceEnrollmentRecord, IIntIdRemovedEvent)
