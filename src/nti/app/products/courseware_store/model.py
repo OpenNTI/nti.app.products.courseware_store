@@ -14,8 +14,7 @@ from functools import total_ordering
 from zope import interface
 
 from nti.common.property import alias
-
-from nti.externalization.representation import WithRepr
+from nti.common.representation import WithRepr
 
 from nti.schema.schema import EqHash
 from nti.schema.field import SchemaConfigured
@@ -23,10 +22,10 @@ from nti.schema.fieldproperty import createDirectFieldProperties
 
 from .interfaces import ICoursePrice
 
-@total_ordering
-@interface.implementer(ICoursePrice)
-@EqHash('Amount', 'Currency')
 @WithRepr
+@total_ordering
+@EqHash('Amount', 'Currency')
+@interface.implementer(ICoursePrice)
 class CoursePrice(SchemaConfigured):
     createDirectFieldProperties(ICoursePrice)
 
