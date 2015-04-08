@@ -166,7 +166,7 @@ def _setter(name):
 
 def _getter(name):
 	def func(self):
-		self._check # force a check on the properties values
+		self._check_state # force a check on the properties values
 		return self.__dict__.get(name, None)
 	return func
 
@@ -195,7 +195,7 @@ class PurchasableProxy(PurchasableCourse):
 		return result
 
 	@CachedProperty('lastSynchronized')
-	def _check(self):
+	def _check_state(self):
 		if not self.CatalogEntryNTIID:
 			return
 		try:
@@ -207,7 +207,7 @@ class PurchasableProxy(PurchasableCourse):
 				price = get_course_price(entry, provider)
 				if price is None: # price removed
 					self.Public = False
-				else: 
+				else: # Update properties after sync
 					self.Amount = price.Amount
 					self.Currency = price.Currency
 					self.Giftable = is_course_giftable(entry)
