@@ -161,6 +161,7 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 			# make sure underlying purchasable course exists
 			purchasable = component.getUtility(IPurchasableCourse, name=name)
 			if purchasable is None:
+				logger.warn("Purchasable %s was not found", name)
 				continue
 			
 			# make sure choice bundles have not changed
@@ -168,10 +169,17 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 			entry = safe_find_catalog_entry(ntiid)
 			choice_bundles = get_nti_choice_bundles(entry)
 			if choice_bundles and not self.Bundle in choice_bundles:
+				logger.warn(
+					"Purchasable %s has been dropped from bundle %s for course %s",
+					purchasable.NTIID, self.NTIID, ntiid)
 				continue
 
 			# make sure state has not changed
-			if get_state(purchasable) != ref_state:
+			p_state = get_state(purchasable)
+			if p_state != ref_state:
+				logger.warn(
+					"Purchasable %s has been dropped from bundle %s because "
+					"its state %s changed",	purchasable.NTIID, self.NTIID, p_state)
 				continue
 			validated.append(purchasable)
 		
@@ -180,9 +188,10 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 				items, ntiids = _items_and_ntiids(validated)
 				self.Items = items
 				self.Purchasables = ntiids
+				logger.warn("Purchasable bundle %s now refers to %s", self.NTIID, items)
 		else:
 			self.Public = False
-			self.Purchasables = () # no longer valid
+			logger.warn("Purchasable bundle %s is no longer valid", self.NTIID)
 		return _marker
 
 	def check_state(self):

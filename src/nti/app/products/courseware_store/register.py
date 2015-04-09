@@ -27,20 +27,29 @@ from .utils import get_nti_choice_bundles
 def process_choice_bundle(name, bundle):
 	state = None
 	validated = []
+	
 	for purchasable in bundle or ():
 		p_state = get_state(purchasable)
 		if state is None:
 			state = p_state
 		elif state == p_state:
 			validated.append(purchasable)
-	if len(validated) > 1: # there is something to create
+		else:
+			logger.warn("Purchasable %s(%s) will not be included in bundle %s", 
+						purchasable.NTIID, p_state, name)
+	
+	# there is something to create
+	if len(validated) > 1:
 		result = create_course_choice_bundle(name, validated)
-		return result
-	return None
+	else:
+		result = None
+		logger.warn("Bundle %s will not be created. Not enough purchasables", name)
+	return result
 
 def register_choice_bundles(bundle_map, registry=component):
 	result = []
 	for name, bundle in bundle_map.items():
+		logger.debug("Creating purchasable bundle %s", name)
 		purchasable = process_choice_bundle(name, bundle)
 		name = getattr(purchasable, 'NTTID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
@@ -49,7 +58,7 @@ def register_choice_bundles(bundle_map, registry=component):
 									name=name)		
 			lifecycleevent.created(purchasable)
 			result.append(purchasable)
-			logger.debug("Purchasable choice bundle %s was registered", name)
+			logger.debug("Purchasable choice bundle %s has been registered", name)
 	return result
 
 def register_purchasables(catalog=None, registry=component):
@@ -60,6 +69,7 @@ def register_purchasables(catalog=None, registry=component):
 		purchasable = IPurchasableCourse(entry, None)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and registry.queryUtility(IPurchasableCourse, name=name) is None:
+			
 			## register purchasable course
 			registry.provideUtility(purchasable, IPurchasableCourse, name=name)
 			result.append(purchasable)
