@@ -131,15 +131,14 @@ def create_proxy_course(**kwargs):
 	result.check_state() # fix cached property
 	return result
 	
-def _items_and_ntiids(purchasables):
-	items = set()
+def _entries_and_ntiids(purchasables):
 	ntiids = set()
+	entries = set()
 	for p in purchasables:
 		ntiids.add(p.NTIID)
-		items.update(p.Items)
-	ntiids = tuple(ntiids)
-	items = to_frozenset(items)
-	return items, ntiids
+		entries.update(p.Items)
+	ntiids = to_frozenset(ntiids)
+	return entries, ntiids
 
 @interface.implementer(IPurchasableCourseChoiceBundle)
 class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProxyMixin):
@@ -148,16 +147,16 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecoursechoicebundle'
 	
 	Bundle = None
-	Purchasables = ()
+	Entries = None
 	
 	@CachedProperty('lastSynchronized')
 	def __state(self):		
-		if not self.Purchasables:
+		if not self.Entries:
 			return _marker
 		
 		validated = []
 		ref_state = get_state(self)
-		for name in self.Purchasables:
+		for name in self.Items:
 			# make sure underlying purchasable course exists
 			purchasable = component.getUtility(IPurchasableCourse, name=name)
 			if purchasable is None:
@@ -185,10 +184,10 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 		
 		if len(validated) > 1:
 			if len(validated) != len(self.Purchasables):
-				items, ntiids = _items_and_ntiids(validated)
-				self.Items = items
-				self.Purchasables = ntiids
-				logger.warn("Purchasable bundle %s now refers to %s", self.NTIID, items)
+				entries, ntiids = _entries_and_ntiids(validated)
+				self.Items = ntiids
+				self.Entries = entries
+				logger.warn("Purchasable bundle %s now refers to %s", self.NTIID, ntiids)
 		else:
 			self.Public = False
 			logger.warn("Purchasable bundle %s is no longer valid", self.NTIID)
@@ -208,9 +207,9 @@ def create_course_choice_bundle(name, purchasables):
 					   specific=specific)
 
 	# gather items and ntiids
-	items, ntiids = _items_and_ntiids(purchasables)	
+	entries, ntiids = _entries_and_ntiids(purchasables)	
 	result = create_course(	ntiid=ntiid,
-							items=items,
+							items=ntiids,
 							name=name, 
 							title=title,
 							description=u'',
@@ -228,5 +227,5 @@ def create_course_choice_bundle(name, purchasables):
 
 	# save properties
 	result.Bundle = name
-	result.Purchasables = ntiids
+	result.Entries = entries
 	return result

@@ -58,9 +58,9 @@ class TestPurchasable(ApplicationLayerTest):
 			assert_that(bundle, has_property('Redeemable', is_(True)))
 			assert_that(bundle, has_property('Amount', is_(599.0)))
 			assert_that(bundle, has_property('Items',
-											 contains('tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice')))
-			assert_that(bundle, has_property('Purchasables',
 											 contains('tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403')))
+			assert_that(bundle, has_property('Entries',
+											 contains('tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice')))
 
 			assert_that(bundle,
 					 	externalizes( has_entries('Class', u'PurchasableCourseChoiceBundle',
