@@ -20,6 +20,8 @@
 	<!-- Adapters -->
 	<adapter factory=".adapters._entry_to_purchasable" />
 	<adapter factory=".adapters._course_to_purchasable" />
+	<adapter factory=".adapters._purchasable_to_catalog_entry" />
+	<adapter factory=".adapters._purchasable_to_course_instance" />
 
 	<adapter factory=".adapters._course_to_purchasable_ntiid"
 	 		 for="nti.contenttypes.courses.interfaces.ICourseInstance"

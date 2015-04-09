@@ -37,6 +37,7 @@ from .interfaces import get_course_publishable_vendor_info
 from .purchasable import create_proxy_course
 
 from .utils import get_course_price
+from .utils import find_catalog_entry
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
@@ -146,4 +147,18 @@ def _course_to_purchasable(course):
 								 department=entry.ProviderDepartmentTitle)
 	
 	result.CatalogEntryNTIID = entry.ntiid
+	return result
+
+@component.adapter(IPurchasableCourse)
+@interface.implementer(ICourseCatalogEntry)
+def _purchasable_to_catalog_entry(purchasable):
+	ntiid = getattr(purchasable, 'CatalogEntryNTIID', None) or u''
+	result = find_catalog_entry(ntiid) if ntiid else None
+	return result
+
+@component.adapter(IPurchasableCourse)
+@interface.implementer(ICourseInstance)
+def _purchasable_to_course_instance(purchasable):
+	entry = ICourseCatalogEntry(purchasable, None)
+	result = ICourseInstance(entry, None)
 	return result
