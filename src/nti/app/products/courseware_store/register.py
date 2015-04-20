@@ -52,7 +52,7 @@ def register_choice_bundles(bundle_map, registry=component):
 	for name, bundle in bundle_map.items():
 		logger.debug("Creating purchasable bundle %s", name)
 		purchasable = process_choice_bundle(name, bundle)
-		name = getattr(purchasable, 'NTTID', None)
+		name = getattr(purchasable, 'NTIID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
 			registry.provideUtility(purchasable, 
 									IPurchasableCourseChoiceBundle, 

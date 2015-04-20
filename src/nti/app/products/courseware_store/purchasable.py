@@ -92,8 +92,9 @@ class BaseProxyMixin(object):
 
 class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 	
-	__external_class_name__ = 'PurchasableCourse'
-	
+	__external_class_name__ = 'PurchasableCourse'	
+	mimeType = mime_type  = 'application/vnd.nextthought.store.purchasablecourse'
+
 	CatalogEntryNTIID = None
 		
 	@CachedProperty('lastSynchronized')
