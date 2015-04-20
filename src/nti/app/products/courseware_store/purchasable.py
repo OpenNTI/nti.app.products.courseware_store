@@ -46,7 +46,7 @@ from .utils import get_entry_purchasable_provider
 	
 def get_state(purchasable):
 	amount = int(purchasable.Amount * 100.0) #cents
-	result = (amount, purchasable.Currency,
+	result = (amount, purchasable.Currency.upper(),
 			  purchasable.Public, purchasable.Giftable, purchasable.Redeemable)
 	return result
 
