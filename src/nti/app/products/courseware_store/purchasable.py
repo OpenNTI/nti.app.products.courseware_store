@@ -45,7 +45,8 @@ from .utils import is_course_enabled_for_purchase
 from .utils import get_entry_purchasable_provider
 	
 def get_state(purchasable):
-	result = (purchasable.Amount, purchasable.Currency,
+	amount = int(purchasable.Amount * 100.0) #cents
+	result = (amount, purchasable.Currency,
 			  purchasable.Public, purchasable.Giftable, purchasable.Redeemable)
 	return result
 

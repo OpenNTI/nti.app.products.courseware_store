@@ -32,6 +32,7 @@ def process_choice_bundle(name, bundle):
 		p_state = get_state(purchasable)
 		if state is None:
 			state = p_state
+			validated.append(purchasable)
 		elif state == p_state:
 			validated.append(purchasable)
 		else:
