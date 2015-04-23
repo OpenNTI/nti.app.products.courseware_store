@@ -77,7 +77,7 @@ class StoreEnrollmentOptionProvider(object):
 		self.context = context
 		
 	def get_purchasables(self, context):
-		result = [get_entry_purchasable(context)]
+		result = [get_entry_purchasable(context)] ## direct purchasable
 		result.extend(get_purchasable_course_bundles(context))
 		return result
 
@@ -90,8 +90,8 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasables:
 			result = StoreEnrollmentOption()
 			result.Purchasables = purchasables
-			## CS: Set enabled flag based on the direct/first purchasable
-			result.IsEnabled = purchasables[0].Public
+			IsEnabled = reduce(lambda x,y: x or y.Public, purchasables, True)
+			result.IsEnabled = IsEnabled
 			## CS: We want to use the original data
 			result.CatalogEntryNTIID = self.context.ntiid
 			result.AllowVendorUpdates = allow_vendor_updates(self.context)
