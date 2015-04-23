@@ -77,8 +77,11 @@ class StoreEnrollmentOptionProvider(object):
 		self.context = context
 		
 	def get_purchasables(self, context):
-		result = [get_entry_purchasable(context)] ## direct purchasable
-		result.extend(get_purchasable_course_bundles(context))
+		result = []
+		direct = get_entry_purchasable(context)
+		if direct is not None: ## direct purchasable
+			result.append(direct)
+			result.extend(get_purchasable_course_bundles(context))
 		return result
 
 	def get_context(self):
