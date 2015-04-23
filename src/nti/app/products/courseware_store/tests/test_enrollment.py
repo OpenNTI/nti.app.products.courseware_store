@@ -68,4 +68,7 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 											'AllowVendorUpdates', is_(True),
 											'Purchasable', is_not(none()),
 								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption',
-								  			'Purchasables', has_entry('Items', has_length(2)) ) ) ))
+								  			'Purchasables', has_entries('Items', has_length(2),
+																		'DefaultGifting', is_not(none()),
+																		'DefaultPurchase', is_not(none())) ) ) ))
+

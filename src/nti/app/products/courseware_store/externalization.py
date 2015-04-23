@@ -40,10 +40,21 @@ class _StoreEnrollmentOptionExternalizer(object):
 		result['AllowVendorUpdates'] = self.obj.AllowVendorUpdates
 		## purchasables
 		items = []
+		defaultGifting = None
+		defaultPurchase = None
+		length = len(self.obj.Purchasables)
 		result['Purchasables'] = { ITEMS:items }
-		for purchasable in self.obj.Purchasables:
+		for idx in range(length):
+			purchasable = self.obj.Purchasables[idx]
+			if not defaultPurchase:
+				defaultPurchase = purchasable.NTIID
 			ext_obj = to_external_object(purchasable, name='summary')
 			items.append(ext_obj)
+			purchasable = self.obj.Purchasables[length-idx-1]
+			if not defaultGifting:
+				defaultGifting = purchasable.NTIID
+		result['Purchasables']['DefaultGifting'] = defaultGifting
+		result['Purchasables']['DefaultPurchase'] = defaultPurchase
 		## legacy
 		result['Purchasable'] = items[0]
 		result['Price'] = items[0].get('Amount', None)
