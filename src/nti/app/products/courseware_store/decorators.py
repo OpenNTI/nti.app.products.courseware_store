@@ -38,8 +38,7 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 
 	def _do_decorate_external(self, context, result):
 		record = self._get_enrollment_record(context, self.remoteUser)
-		IsEnrolled = bool(record is not None and record.Scope == ES_PURCHASED)
+		result['IsEnrolled'] = bool(record is not None and record.Scope == ES_PURCHASED)
 		isAvailable = (record is None or record.Scope == ES_PUBLIC) and context.IsEnabled
 		result['Enabled'] = result['IsAvailable'] = isAvailable
-		result['IsEnrolled'] = IsEnrolled
 		result.pop('IsEnabled', None) # redundant

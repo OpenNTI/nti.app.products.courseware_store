@@ -39,8 +39,11 @@ from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import find_object_with_ntiid
 
+from nti.store.store import get_purchasables
+
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
+from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
 
@@ -202,4 +205,12 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 def find_allow_vendor_updates_users(entry, invitation=False):
 	purchases = find_allow_vendor_updates_purchases(entry, invitation)
 	result = {getattr(x.creator, 'username', x.creator) for x in purchases}
+	return result
+
+def get_purchasable_course_bundles(entry):
+	result = []
+	ntiid = getattr(entry, 'ntiid', entry)
+	for purchasable in get_purchasables(provided=IPurchasableCourseChoiceBundle):
+		if purchasable.Public and ntiid in purchasable.Items:
+			result.append(purchasable)
 	return result

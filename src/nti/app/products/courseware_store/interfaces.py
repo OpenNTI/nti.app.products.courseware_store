@@ -22,6 +22,7 @@ from nti.store.interfaces import IPurchasableCourse
 from nti.schema.field import Bool
 from nti.schema.field import Number
 from nti.schema.field import Object
+from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidTextLine
 
 class ICoursePrice(interface.Interface):
@@ -55,8 +56,12 @@ def get_course_publishable_vendor_info(context):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	IsEnabled = Bool(title="Is enabled flag", required=False, default=True)
-	Purchasable = Object(IPurchasableCourse, title="Purchasable course", required=True)
-	AllowVendorUpdates = Bool(title="Allow vendor updates", required=False,
+	Purchasables = ListOrTuple(Object(IPurchasableCourse),
+							   title="Purchasable course", 
+							   required=True,
+							   min_length=1)
+	AllowVendorUpdates = Bool(title="Allow vendor updates", 
+							  required=False,
 							  default=False)
 
 class IStoreEnrollmentEvent(interface.Interface):

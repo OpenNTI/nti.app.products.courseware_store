@@ -99,14 +99,19 @@
 		root_interfaces=".interfaces.IStoreEnrollmentOption"
 		modules=".enrollment" />
 
+	<adapter factory=".externalization._StoreEnrollmentOptionExternalizer"
+			 for=".interfaces.IStoreEnrollmentOption"
+			 provides="nti.externalization.interfaces.IInternalObjectExternalizer" />
+			 
+	<!-- Keys -->
 	<configure zcml:condition="have testmode">
 		<include package="nti.store.payments.stripe" file="meta.zcml" />
 		<stripe:registerStripeKey
-			alias="Janux"
-			live_mode="False"
-			stripe_user_id="Janux"
-			public_key="pk_test_LIpQyLD7p5FmspOs6pPW9gWG"
-			private_key="sk_test_3K9VJFyfj0oGIMi7Aeg3HNBp" />
+				alias="Janux"
+				live_mode="False"
+				stripe_user_id="Janux"
+				public_key="pk_test_LIpQyLD7p5FmspOs6pPW9gWG"
+				private_key="sk_test_3K9VJFyfj0oGIMi7Aeg3HNBp" />
 	</configure>
 
 </configure>

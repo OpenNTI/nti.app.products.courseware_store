@@ -11,6 +11,7 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import component
 from zope import interface
+
 from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 
 from nti.app.products.courseware.enrollment import EnrollmentOption
@@ -22,11 +23,8 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.externalization.persistence import NoPickle
 from nti.externalization.representation import WithRepr
-from nti.externalization.externalization import to_external_object
 
-from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
-from nti.externalization.interfaces import IInternalObjectExternalizer
 
 from nti.store.purchasable import get_purchasable
 
@@ -35,6 +33,7 @@ from .interfaces import IStoreEnrollmentOption
 from .utils import allow_vendor_updates
 from .utils import get_entry_purchasable_ntiid
 from .utils import get_entry_purchasable_provider
+from .utils import get_purchasable_course_bundles
 
 CLASS = StandardExternalFields.CLASS
 MIMETYPE = StandardExternalFields.MIMETYPE
@@ -58,30 +57,17 @@ def get_entry_context(context):
 		result = context
 	return result
 
-@interface.implementer(IStoreEnrollmentOption, IInternalObjectExternalizer)
 @WithRepr
 @NoPickle
+@interface.implementer(IStoreEnrollmentOption)
 class StoreEnrollmentOption(EnrollmentOption):
 
 	__external_class_name__ = "StoreEnrollment"
 	mime_type = mimeType = 'application/vnd.nextthought.courseware.storeenrollmentoption'
 
 	IsEnabled = FP(IStoreEnrollmentOption['IsEnabled'])
-	Purchasable = FP(IStoreEnrollmentOption['Purchasable'])
+	Purchasables = FP(IStoreEnrollmentOption['Purchasables'])
 	AllowVendorUpdates = FP(IStoreEnrollmentOption['AllowVendorUpdates'])
-		
-	def toExternalObject(self, *args, **kwargs):
-		result = LocatedExternalDict()
-		result[MIMETYPE] = self.mimeType
-		result[CLASS] = self.__external_class_name__
-		ext_obj = to_external_object(self.Purchasable, name='summary')
-		result['Purchasable'] = ext_obj
-		result['RequiresAdmission'] = False
-		result['IsEnabled'] = self.IsEnabled
-		result['Price'] = ext_obj.get('Amount', None)
-		result['Currency'] = ext_obj.get('Currency', None)
-		result['AllowVendorUpdates'] = self.AllowVendorUpdates
-		return result
 
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IEnrollmentOptionProvider)
@@ -90,19 +76,22 @@ class StoreEnrollmentOptionProvider(object):
 	def __init__(self, context):
 		self.context = context
 		
-	def get_purchasable(self, context):
-		return get_entry_purchasable(context)
-	
+	def get_purchasables(self, context):
+		result = [get_entry_purchasable(context)]
+		result.extend(get_purchasable_course_bundles(context))
+		return result
+
 	def get_context(self):
 		return get_entry_context(self.context)
 
 	def iter_options(self):
 		context = self.get_context()
-		purchasable = self.get_purchasable(context)
-		if purchasable is not None:
+		purchasables = self.get_purchasables(context)
+		if purchasables:
 			result = StoreEnrollmentOption()
-			result.Purchasable = purchasable
-			result.IsEnabled = purchasable.Public
+			result.Purchasables = purchasables
+			## CS: Set enabled flag based on the direct/first purchasable
+			result.IsEnabled = purchasables[0].Public
 			## CS: We want to use the original data
 			result.CatalogEntryNTIID = self.context.ntiid
 			result.AllowVendorUpdates = allow_vendor_updates(self.context)

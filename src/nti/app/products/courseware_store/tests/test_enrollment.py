@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, unicode_literals, absolute_import, division
+from hamcrest.library.object.haslength import has_length
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -54,16 +55,17 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 			options = get_enrollment_options(entry)
 			assert_that(options, is_not(none()))
 			assert_that(options, has_entry('StoreEnrollment', 
-										   has_property('Purchasable', is_not(none()))))
+										   has_property('Purchasables', is_not(none()))))
 
 			ext_obj = to_external_object(options)
 			assert_that(ext_obj, 
 				has_entry('Items',
 					has_entry('StoreEnrollment',
-							   has_entries(	'Purchasable', is_not(none()),
-											'IsEnabled', is_(True),
+							   has_entries(	'IsEnabled', is_(True),
 											'Price', is_not(none()),
 											'Currency', is_not(none()),
 											'RequiresAdmission', is_(False),
 											'AllowVendorUpdates', is_(True),
-								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption'))))
+											'Purchasable', is_not(none()),
+								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption',
+								  			'Purchasables', has_entry('Items', has_length(2)) ) ) ))
