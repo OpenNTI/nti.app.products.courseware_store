@@ -9,6 +9,11 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
+import six
+import datetime
+from numbers import Number
+from collections import defaultdict
+
 from zope import component
 from zope import interface
 
@@ -143,6 +148,26 @@ def _items_and_ntiids(purchasables):
 	items = to_frozenset(items)
 	return items, ntiids
 
+def _allowed_tyes():
+	return (six.string_types, Number, datetime.date, datetime.datetime,
+			datetime.timedelta, bool)
+
+def _get_common_vendor_info(purchasables):
+	result = {}
+	types = _allowed_tyes()
+	data = defaultdict(set)
+	for p in purchasables:
+		for k, v in p.VendorInfo.items():
+			if isinstance(v, types):
+				data[k].add(v)
+				
+	for k, s in data.items():
+		if len(s) == 1:
+			result[k] = s.__iter__().next()
+
+	result = IPurchasableVendorInfo(result, None)
+	return result
+
 @interface.implementer(IPurchasableCourseChoiceBundle)
 class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProxyMixin):
 	
@@ -190,6 +215,7 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 				items, ntiids = _items_and_ntiids(validated)
 				self.Items = items
 				self.Purchasables = ntiids
+				self.VendorInfo = _get_common_vendor_info(validated)
 				logger.warn("Purchasable bundle %s now refers to %s", self.NTIID, items)
 		else:
 			self.Public = False
@@ -222,7 +248,7 @@ def create_course_choice_bundle(name, purchasables):
 							provider=reference_purchasable.Provider,
 							giftable=reference_purchasable.Giftable,
 							redeemable=reference_purchasable.Redeemable,
-							vendor_info=None,
+							vendor_info=_get_common_vendor_info(purchasables),
 							factory=PurchasableCourseChoiceBundleProxy)
 	
 	# fix cached property
