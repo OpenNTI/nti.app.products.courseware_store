@@ -17,14 +17,11 @@ from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 from nti.app.products.courseware.enrollment import EnrollmentOption
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 
+from nti.common.representation import WithRepr
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-
-from nti.externalization.persistence import NoPickle
-from nti.externalization.representation import WithRepr
-
-from nti.externalization.interfaces import StandardExternalFields
 
 from nti.store.purchasable import get_purchasable
 
@@ -34,9 +31,6 @@ from .utils import allow_vendor_updates
 from .utils import get_entry_purchasable_ntiid
 from .utils import get_entry_purchasable_provider
 from .utils import get_purchasable_course_bundles
-
-CLASS = StandardExternalFields.CLASS
-MIMETYPE = StandardExternalFields.MIMETYPE
 
 def get_entry_purchasable(context):
 	provider = get_entry_purchasable_provider(context)
@@ -58,7 +52,6 @@ def get_entry_context(context):
 	return result
 
 @WithRepr
-@NoPickle
 @interface.implementer(IStoreEnrollmentOption)
 class StoreEnrollmentOption(EnrollmentOption):
 
