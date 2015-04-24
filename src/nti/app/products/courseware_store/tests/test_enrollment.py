@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, unicode_literals, absolute_import, division
-from hamcrest.library.object.haslength import has_length
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -12,6 +11,7 @@ from hamcrest import is_
 from hamcrest import none
 from hamcrest import is_not
 from hamcrest import has_entry
+from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_entries
 from hamcrest import has_property
@@ -20,6 +20,7 @@ does_not = is_not
 from zope import component
 
 from nti.app.products.courseware_store.register import register_purchasables
+from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 
@@ -52,6 +53,9 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 			register_purchasables()
 			
 			entry = self.catalog_entry()
+			bundles = get_purchasable_course_bundles(entry)
+			assert_that(bundles, has_length(0))
+			
 			options = get_enrollment_options(entry)
 			assert_that(options, is_not(none()))
 			assert_that(options, has_entry('StoreEnrollment', 
@@ -68,7 +72,6 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 											'AllowVendorUpdates', is_(True),
 											'Purchasable', is_not(none()),
 								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption',
-								  			'Purchasables', has_entries('Items', has_length(2),
+								  			'Purchasables', has_entries('Items', has_length(1),
 																		'DefaultGifting', is_not(none()),
 																		'DefaultPurchase', is_not(none())) ) ) ))
-
