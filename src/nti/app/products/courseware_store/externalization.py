@@ -53,8 +53,8 @@ class _StoreEnrollmentOptionExternalizer(object):
 			purchasable = self.obj.Purchasables[length-idx-1]
 			if not defaultGifting:
 				defaultGifting = purchasable.NTIID
-		result['Purchasables']['DefaultGifting'] = defaultGifting
-		result['Purchasables']['DefaultPurchase'] = defaultPurchase
+		result['Purchasables']['DefaultGiftingNTIID'] = defaultGifting
+		result['Purchasables']['DefaultPurchaseNTIID'] = defaultPurchase
 		## legacy
 		result['Purchasable'] = items[0]
 		result['Price'] = items[0].get('Amount', None)

@@ -73,5 +73,5 @@ class TestEnrollmentOptions(ApplicationLayerTest):
 											'Purchasable', is_not(none()),
 								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption',
 								  			'Purchasables', has_entries('Items', has_length(1),
-																		'DefaultGifting', is_not(none()),
-																		'DefaultPurchase', is_not(none())) ) ) ))
+																		'DefaultGiftingNTIID', is_not(none()),
+																		'DefaultPurchaseNTIID', is_not(none())) ) ) ))
