@@ -22,8 +22,6 @@ from zope.security.interfaces import IPrincipal
 from ZODB.interfaces import IBroken
 from ZODB.POSException import POSError
 
-from dolmen.builtins.interfaces import IString
-
 from nti.common.maps import CaseInsensitiveDict
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
@@ -37,8 +35,10 @@ from nti.dataserver.metadata_index import IX_MIMETYPE, IX_CREATOR
 from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
 
 from nti.ntiids.ntiids import get_parts
+from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import find_object_with_ntiid
 
+from nti.store import PURCHASABLE_COURSE
 from nti.store.store import get_purchasables
 
 from nti.store.interfaces import IPurchaseAttempt
@@ -102,13 +102,11 @@ def get_course_price(context, *names):
 	return None
 
 def get_course_purchasable_ntiid(context, name=None):
-	result = None
 	entry = ICourseCatalogEntry(context)
-	if name:
-		result = component.queryAdapter(entry, IString, name=name)
-	if not result:
-		result = component.getAdapter(entry, IString, name="purchasable_course_ntiid")
-	return result
+	parts = get_parts(entry.ntiid)
+	ntiid = make_ntiid(date=parts.date, provider=parts.provider,
+					   nttype=PURCHASABLE_COURSE, specific=parts.specific)
+	return ntiid
 get_entry_purchasable_ntiid = get_course_purchasable_ntiid
 
 def get_nti_course_price(context):

@@ -16,18 +16,12 @@ from datetime import datetime
 from zope import component
 from zope import interface
 
-from dolmen.builtins.interfaces import IString
-
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
-from nti.ntiids.ntiids import get_parts
-from nti.ntiids.ntiids import make_ntiid
-
-from nti.store import PURCHASABLE_COURSE
 from nti.store.interfaces import IPurchasableCourse
 
 from .interfaces import ICoursePrice
@@ -57,22 +51,7 @@ def _entry_to_purchasable(entry):
 	course_instance = ICourseInstance(entry, None)
 	result = IPurchasableCourse(course_instance, None)
 	return result
-	
-@component.adapter(ICourseCatalogEntry)
-@interface.implementer(IString)
-def _entry_to_purchasable_ntiid(entry):
-	parts = get_parts(entry.ntiid)
-	ntiid = make_ntiid(date=parts.date, provider=parts.provider,
-					   nttype=PURCHASABLE_COURSE, specific=parts.specific)
-	return ntiid
 
-@component.adapter(ICourseInstance)
-@interface.implementer(IString)
-def _course_to_purchasable_ntiid(course):
-	entry = ICourseCatalogEntry(course, None)
-	result = _entry_to_purchasable_ntiid(entry) if entry else None
-	return result
-		
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
