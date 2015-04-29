@@ -22,7 +22,9 @@
 	<adapter factory=".adapters._course_to_purchasable" />
 	<adapter factory=".adapters._purchasable_to_catalog_entry" />
 	<adapter factory=".adapters._purchasable_to_course_instance" />
-
+	
+	<adapter factory=".adapters._purchase_transformer" />
+		
 	<!-- Price Finders -->
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"

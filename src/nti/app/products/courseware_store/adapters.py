@@ -16,12 +16,15 @@ from datetime import datetime
 from zope import component
 from zope import interface
 
+from nti.appserver.interfaces import INewObjectTransformer
+
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
+from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourse
 
 from .interfaces import ICoursePrice
@@ -34,6 +37,7 @@ from .utils import find_catalog_entry
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
+from .utils import get_purchase_purchasables
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
 from .utils import get_course_purchasable_title
@@ -139,3 +143,15 @@ def _purchasable_to_course_instance(purchasable):
 	entry = ICourseCatalogEntry(purchasable, None)
 	result = ICourseInstance(entry, None)
 	return result
+
+@component.adapter(IPurchaseAttempt)
+@interface.implementer(INewObjectTransformer)
+def _new_object_transformer( obj ):
+	return _purchase_transformer
+
+def _purchase_transformer(purchase):
+	purchasables = get_purchase_purchasables(purchase)
+	if len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]):
+		ICourseInstance(purchasables[0], None)
+		
+	return purchase
