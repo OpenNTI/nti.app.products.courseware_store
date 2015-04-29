@@ -23,7 +23,7 @@
 	<adapter factory=".adapters._purchasable_to_catalog_entry" />
 	<adapter factory=".adapters._purchasable_to_course_instance" />
 	
-	<adapter factory=".adapters._purchase_transformer" />
+	<adapter factory=".adapters._purchase_newobject_transformer" />
 		
 	<!-- Price Finders -->
 	<adapter factory=".adapters._nti_course_price_finder"

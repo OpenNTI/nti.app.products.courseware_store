@@ -144,14 +144,14 @@ def _purchasable_to_course_instance(purchasable):
 	result = ICourseInstance(entry, None)
 	return result
 
-@component.adapter(IPurchaseAttempt)
-@interface.implementer(INewObjectTransformer)
-def _new_object_transformer( obj ):
-	return _purchase_transformer
 
-def _purchase_transformer(purchase):
+def _purchase_attempt_transformer(purchase):
 	purchasables = get_purchase_purchasables(purchase)
 	if len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]):
 		ICourseInstance(purchasables[0], None)
-		
 	return purchase
+
+@component.adapter(IPurchaseAttempt)
+@interface.implementer(INewObjectTransformer)
+def _purchase_newobject_transformer( obj ):
+	return _purchase_attempt_transformer
