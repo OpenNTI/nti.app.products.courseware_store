@@ -37,7 +37,7 @@ class TestPurchasable(ApplicationLayerTest):
 	
 	layer = InstructedCourseApplicationTestLayer
 		
-	purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403'
+	purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
 	
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_create_course_choice_bundle(self):	
@@ -60,7 +60,7 @@ class TestPurchasable(ApplicationLayerTest):
 			assert_that(bundle, has_property('Items',
 											 contains('tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice')))
 			assert_that(bundle, has_property('Purchasables',
-											 contains('tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403')))
+											 contains('tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice')))
 
 			assert_that(bundle,
 					 	externalizes( has_entries('Class', u'PurchasableCourseChoiceBundle',

@@ -44,9 +44,9 @@ class TestViews(ApplicationLayerTest):
 	
 	default_origin = str('http://janux.ou.edu')
 	
-	purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403'
 	course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
-	
+	purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
+		
 	def catalog_entry(self):
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():

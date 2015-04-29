@@ -63,7 +63,7 @@ class TestAdapters(ApplicationLayerTest):
 			entry = self.catalog_entry()
 			purchasable = IPurchasableCourse(entry, None)
 			assert_that(purchasable, is_not(none()))
-			assert_that(purchasable, has_property('NTIID', is_('tag:nextthought.com,2011-10:NTI-purchasable_course-CLC_3403')))
+			assert_that(purchasable, has_property('NTIID', is_('tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice')))
 			assert_that(purchasable, has_property('Items', has_length(1)))
 			assert_that(purchasable, has_property('Amount', is_(599.0)))
 			assert_that(purchasable, has_property('Currency', is_('USD')))

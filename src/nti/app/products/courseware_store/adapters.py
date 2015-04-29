@@ -26,7 +26,6 @@ from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
-from nti.ntiids.ntiids import make_specific_safe
 
 from nti.store import PURCHASABLE_COURSE
 from nti.store.interfaces import IPurchasableCourse
@@ -63,9 +62,8 @@ def _entry_to_purchasable(entry):
 @interface.implementer(IString)
 def _entry_to_purchasable_ntiid(entry):
 	parts = get_parts(entry.ntiid)
-	specific = make_specific_safe(entry.ProviderUniqueID)
 	ntiid = make_ntiid(date=parts.date, provider=parts.provider,
-					   nttype=PURCHASABLE_COURSE, specific=specific)
+					   nttype=PURCHASABLE_COURSE, specific=parts.specific)
 	return ntiid
 
 @component.adapter(ICourseInstance)
