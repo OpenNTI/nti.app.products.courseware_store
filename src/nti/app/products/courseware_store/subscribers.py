@@ -127,6 +127,7 @@ def _process_successful_purchase(purchasables, user=None, request=None, check=Fa
 
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
+	## CS: use Items property of the purchase object in case it has been proxied
 	if 	not IGiftPurchaseAttempt.providedBy(purchase) and \
 		_process_successful_purchase(purchase.Items, 
 									 user=purchase.creator, 
@@ -139,6 +140,7 @@ def _purchase_invitation_accepted(event):
 	if 	IStorePurchaseInvitation.providedBy(invitation) and \
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
+		## CS: use Items property of the purchase object in case it has been proxied
 		_process_successful_purchase(original.Items, user=event.user)
 		logger.info("Course invitation %s was accepted", invitation.code)
 
@@ -165,6 +167,7 @@ def _redeemed_purchase_attempt_refunded(purchase, event):
 def _gift_purchase_attempt_redeemed(purchase, event):
 	user = event.user
 	request = event.request
+	## CS: use Items property of the purchase object  in case it has been proxied
 	if _process_successful_purchase(purchase.Items, user, request=request, check=True):
 		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
 
