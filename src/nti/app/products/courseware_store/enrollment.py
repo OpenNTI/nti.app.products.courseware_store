@@ -40,7 +40,7 @@ def get_entry_purchasable(context):
 	
 def get_entry_context(context):
 	course = ICourseInstance(context)
-	purchasable = get_purchasable(context)
+	purchasable = get_entry_purchasable(context)
 	## CS: if we cannot get a purchasable and the context course is a 
 	## sub-instance try with its parent course. This may happen
 	## with mapped courses
@@ -72,9 +72,9 @@ class StoreEnrollmentOptionProvider(object):
 	def get_purchasables(self, context):
 		result = []
 		direct = get_entry_purchasable(context)
-		if direct is not None: ## direct purchasable
+		if direct is not None and direct.Public: ## direct purchasable
 			result.append(direct)
-			result.extend(get_purchasable_course_bundles(context))
+		result.extend(get_purchasable_course_bundles(context))
 		return result
 
 	def get_context(self):
