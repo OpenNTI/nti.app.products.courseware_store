@@ -152,7 +152,7 @@ def _purchase_attempt_transformer(purchase, user=None):
 		course = ICourseInstance(purchasables[0], None)
 		if user is not None and course is not None:
 			record = get_any_enrollment(course, user)
-			result = record if record is None else purchase
+			result = record if record is not None else purchase
 	return result
 
 @component.adapter(IPurchaseAttempt)
