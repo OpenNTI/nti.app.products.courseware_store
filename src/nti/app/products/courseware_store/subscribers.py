@@ -23,10 +23,15 @@ from zope.security.management import queryInteraction
 from pyramid import httpexceptions as hexc
 from pyramid.threadlocal import get_current_request
 
+from nti.app.products.courseware.interfaces import ICoursesWorkspace
+from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
+
 from nti.app.products.courseware.utils import get_enrollment_record
 from nti.app.products.courseware.utils import drop_any_other_enrollments
 
 from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
+
+from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -60,6 +65,16 @@ def get_user(user):
 	result = User.get_user(str(user)) if user and not IUser.providedBy(user) else user
 	return result
 
+def _parent_course_instance_enrollemnt(course, user):
+	enrollment = component.queryMultiAdapter((course, user),
+											 ICourseInstanceEnrollment )
+	if enrollment is not None:
+		service = IUserService(user, None)
+		workspace = ICoursesWorkspace(service, None)
+		parent = workspace['EnrolledCourses'] if workspace is not None else None
+		if parent is not None and not enrollment.__parent__:
+			enrollment.__parent__ = parent
+
 def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
 	enrollment = get_enrollment_record(course, user)
 	if enrollment is not None and enrollment.Scope == ES_PURCHASED and check_enrollment:
@@ -72,6 +87,8 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 			enrollment_manager = ICourseEnrollmentManager(course)
 			enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
 												   context=purchasable)
+			_parent_course_instance_enrollemnt(course, user)
+			
 		elif enrollment.Scope != ES_PURCHASED:
 			logger.info("User %s now paying for course (old_scope %s)",
 						user, enrollment.Scope)
