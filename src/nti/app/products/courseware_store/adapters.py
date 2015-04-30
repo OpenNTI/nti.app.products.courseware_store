@@ -16,7 +16,7 @@ from datetime import datetime
 from zope import component
 from zope import interface
 
-from nti.store.interfaces import IObjectTransformer
+from nti.app.products.courseware.utils import get_any_enrollment
 
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
@@ -25,7 +25,9 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.store.interfaces import IPurchaseAttempt
+from nti.store.interfaces import IObjectTransformer
 from nti.store.interfaces import IPurchasableCourse
+from nti.store.store import get_purchase_purchasables
 
 from .interfaces import ICoursePrice
 from .interfaces import get_course_publishable_vendor_info
@@ -37,7 +39,6 @@ from .utils import find_catalog_entry
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
-from .utils import get_purchase_purchasables
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
 from .utils import get_course_purchasable_title
@@ -145,10 +146,14 @@ def _purchasable_to_course_instance(purchasable):
 	return result
 
 def _purchase_attempt_transformer(purchase, user=None):
+	result = purchase
 	purchasables = get_purchase_purchasables(purchase)
 	if len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]):
-		ICourseInstance(purchasables[0], None)
-	return purchase
+		course = ICourseInstance(purchasables[0], None)
+		if user is not None and course is not None:
+			record = get_any_enrollment(course, user)
+			result = record if record is None else purchase
+	return result
 
 @component.adapter(IPurchaseAttempt)
 @interface.implementer(IObjectTransformer)

@@ -43,7 +43,6 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import PURCHASABLE_COURSE
 from nti.store.store import get_purchasables
-from nti.store.purchasable import get_purchasable
 
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
@@ -216,8 +215,3 @@ def get_purchasable_course_bundles(entry):
 		if purchasable.Public and ntiid in purchasable.Items:
 			result.append(purchasable)
 	return result
-
-def get_purchase_purchasables(purchase):
-	purchasables = {get_purchasable(x) for x in purchase.Items}
-	purchasables.discard(None)
-	return list(purchasables)
