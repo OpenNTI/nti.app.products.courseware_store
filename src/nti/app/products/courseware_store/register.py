@@ -39,7 +39,7 @@ def process_choice_bundle(name, bundle):
 			logger.warn("Purchasable %s(%s) will not be included in bundle %s", 
 						purchasable.NTIID, p_state, name)
 	
-	# there is something to create
+	## there is something to create
 	if len(validated) > 1:
 		result = create_course_choice_bundle(name, validated)
 	else:

@@ -16,7 +16,7 @@ from datetime import datetime
 from zope import component
 from zope import interface
 
-from nti.appserver.interfaces import INewObjectTransformer
+from nti.store.interfaces import IObjectTransformer
 
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
@@ -144,14 +144,13 @@ def _purchasable_to_course_instance(purchasable):
 	result = ICourseInstance(entry, None)
 	return result
 
-
-def _purchase_attempt_transformer(purchase):
+def _purchase_attempt_transformer(purchase, user=None):
 	purchasables = get_purchase_purchasables(purchase)
 	if len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]):
 		ICourseInstance(purchasables[0], None)
 	return purchase
 
 @component.adapter(IPurchaseAttempt)
-@interface.implementer(INewObjectTransformer)
-def _purchase_newobject_transformer( obj ):
+@interface.implementer(IObjectTransformer)
+def _purchase_object_transformer( obj ):
 	return _purchase_attempt_transformer

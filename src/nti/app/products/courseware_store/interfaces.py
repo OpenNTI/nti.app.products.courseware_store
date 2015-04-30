@@ -56,6 +56,7 @@ def get_course_publishable_vendor_info(context):
 
 class IStoreEnrollmentOption(IEnrollmentOption):
 	IsEnabled = Bool(title="Is enabled flag", required=False, default=True)
+
 	Purchasables = ListOrTuple(Object(IPurchasableCourse),
 							   title="Purchasable course", 
 							   required=True,
@@ -66,8 +67,10 @@ class IStoreEnrollmentOption(IEnrollmentOption):
 
 class IStoreEnrollmentEvent(interface.Interface):
 	request = Object(IRequest, title="the request", required=False) 
+	
 	purchasable = Object(IPurchasableCourse, title="purchasable course", 
 						 required=False)
+
 	record = Object(ICourseInstanceEnrollmentRecord, title="enrollemnt record",
 					required=True)
 	

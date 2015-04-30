@@ -15,8 +15,11 @@ from itertools import chain
 import zope.intid
 
 from zope import component
-from zope.traversing.api import traverse
+
 from zope.catalog.interfaces import ICatalog
+
+from zope.traversing.api import traverse
+
 from zope.security.interfaces import IPrincipal
 
 from ZODB.interfaces import IBroken
@@ -182,17 +185,17 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 	for uid in intids_purchases:
 		try:
 			purchase = intids.queryObject(uid)
-			# filter any invalid object
+			## filter any invalid object
 			if 	purchase is None or IBroken.providedBy(purchase) or \
 				not IPurchaseAttempt.providedBy(purchase):
 				continue
-			# invitations may not be required
+			## invitations may not be required
 			if not invitation and IInvitationPurchaseAttempt.providedBy(purchase):
 				continue
-			# check the purchasable is in the purchase
+			## check the purchasable is in the purchase
 			if ntiid not in purchase.Items:
 				continue
-			# check vendor updates
+			## check vendor updates
 			context = CaseInsensitiveDict(purchase.Context or {})
 			if not context.get('AllowVendorUpdates', False):
 				continue
