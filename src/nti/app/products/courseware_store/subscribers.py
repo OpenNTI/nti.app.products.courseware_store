@@ -18,6 +18,8 @@ from zope import lifecycleevent
 
 from zope.event import notify
 
+from zope.proxy import removeAllProxies
+
 from zope.security.management import queryInteraction
 
 from pyramid import httpexceptions as hexc
@@ -169,7 +171,8 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 	request = event.request
 	## CS: use Items property of the purchase object  in case it has been proxied
 	if _process_successful_purchase(purchase.Items, user, request=request, check=True):
-		logger.info("Course gift %s has been redeemed", get_gift_code(purchase))
+		code = event.code or get_gift_code(removeAllProxies(purchase))
+		logger.info("Course gift %s has been redeemed", code)
 
 @component.adapter(ICourseInstanceEnrollmentRecord, IIntIdRemovedEvent)
 def _enrollment_record_dropped(record, event):
