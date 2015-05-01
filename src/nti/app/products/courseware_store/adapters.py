@@ -27,6 +27,8 @@ from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IObjectTransformer
 from nti.store.interfaces import IPurchasableCourse
+from nti.store.interfaces import IPurchasableChoiceBundle
+
 from nti.store.store import get_purchase_purchasables
 
 from .interfaces import ICoursePrice
@@ -148,7 +150,8 @@ def _purchasable_to_course_instance(purchasable):
 def _purchase_attempt_transformer(purchase, user=None):
 	result = purchase
 	purchasables = get_purchase_purchasables(purchase)
-	if len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]):
+	if 	len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]) and \
+		not IPurchasableChoiceBundle.providedBy(purchasables[0]):
 		course = ICourseInstance(purchasables[0], None)
 		if user is not None and course is not None:
 			record = get_any_enrollment(course, user)
