@@ -229,7 +229,7 @@ def create_course_choice_bundle(name, purchasables):
 	purchasables = to_list(purchasables)
 	reference_purchasable = purchasables[0]
 	
-	title = "%s Bundle" % name
+	title = name
 	specific = make_specific_safe(name)
 	ntiid = make_ntiid(provider=reference_purchasable.Provider,
 					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE, 

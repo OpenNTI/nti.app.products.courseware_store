@@ -53,7 +53,7 @@ class TestPurchasable(ApplicationLayerTest):
 			assert_that(bundle, has_property('Giftable', is_(True)))
 			assert_that(bundle, has_property('Provider', is_('Janux')))
 			assert_that(bundle, has_property('Description', is_('')))
-			assert_that(bundle, has_property('Title', is_('LAW Bundle')))
+			assert_that(bundle, has_property('Title', is_('LAW')))
 			assert_that(bundle, has_property('Public', is_(True)))
 			assert_that(bundle, has_property('Redeemable', is_(True)))
 			assert_that(bundle, has_property('Amount', is_(599.0)))
