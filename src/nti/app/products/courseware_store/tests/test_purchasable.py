@@ -52,7 +52,7 @@ class TestPurchasable(ApplicationLayerTest):
 			assert_that(bundle, has_property('NTIID', 'tag:nextthought.com,2011-10:Janux-purchasable_course_choice_bundle-LAW'))
 			assert_that(bundle, has_property('Giftable', is_(True)))
 			assert_that(bundle, has_property('Provider', is_('Janux')))
-			assert_that(bundle, has_property('Description', is_('')))
+			assert_that(bundle, has_property('Description', is_('LAW')))
 			assert_that(bundle, has_property('Title', is_('LAW')))
 			assert_that(bundle, has_property('Public', is_(True)))
 			assert_that(bundle, has_property('Redeemable', is_(True)))
