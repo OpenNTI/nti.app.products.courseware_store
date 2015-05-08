@@ -44,8 +44,8 @@ from .utils import get_nti_course_price
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
 from .utils import get_course_purchasable_title
-from .utils import is_course_enabled_for_purchase
 from .utils import get_entry_purchasable_provider
+from .utils import is_course_enabled_for_purchase
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
@@ -59,9 +59,8 @@ def _entry_to_purchasable(entry):
 	result = IPurchasableCourse(course_instance, None)
 	return result
 
-@component.adapter(ICourseInstance)
-@interface.implementer(IPurchasableCourse)
-def _course_to_purchasable(course):
+def create_purchasable_from_course(context):
+	course = ICourseInstance(context)
 	entry = ICourseCatalogEntry(course)
 	giftable = is_course_giftable(course)
 	redeemable = is_course_redeemable(course)
@@ -131,6 +130,12 @@ def _course_to_purchasable(course):
 								 department=entry.ProviderDepartmentTitle)
 	
 	result.CatalogEntryNTIID = entry.ntiid
+	return result
+
+@component.adapter(ICourseInstance)
+@interface.implementer(IPurchasableCourse)
+def _course_to_purchasable(course):
+	result = create_purchasable_from_course(course)
 	return result
 
 @component.adapter(IPurchasableCourse)
