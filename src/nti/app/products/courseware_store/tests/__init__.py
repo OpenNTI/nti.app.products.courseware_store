@@ -33,5 +33,36 @@ class CourseStoreApplicationTestLayer(InstructedCourseApplicationTestLayer):
     def testTearDown(cls):
         pass
 
-class OUCoursewareApplicationLayerTest(ApplicationLayerTest):
-    layer = CourseStoreApplicationTestLayer
+from nti.testing.layers import GCLayerMixin
+from nti.testing.layers import ZopeComponentLayer
+from nti.testing.layers import ConfiguringLayerMixin
+
+from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
+
+import zope.testing.cleanup
+
+class SharedConfiguringTestLayer(ZopeComponentLayer,
+                                 GCLayerMixin,
+                                 ConfiguringLayerMixin,
+                                 DSInjectorMixin):
+
+    set_up_packages = ('nti.dataserver',
+                       'nti.app.client_preferences',
+                       'nti.app.products.courseware_store')
+
+    @classmethod
+    def setUp(cls):
+        cls.setUpPackages()
+
+    @classmethod
+    def tearDown(cls):
+        cls.tearDownPackages()
+        zope.testing.cleanup.cleanUp()
+
+    @classmethod
+    def testSetUp(cls, test=None):
+        cls.setUpTestDS(test)
+
+    @classmethod
+    def testTearDown(cls):
+        pass

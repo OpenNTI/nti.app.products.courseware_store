@@ -17,6 +17,11 @@
 		<implements interface="nti.store.interfaces.IRedemptionException" />
 	</class>
 	
+	<!-- Generations -->
+	<utility factory=".generations.install._CoursewareStoreSchemaManager"
+			 name="nti.dataserver-courseware-store"
+			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
+			 
 	<!-- Adapters -->
 	<adapter factory=".adapters._entry_to_purchasable" />
 	<adapter factory=".adapters._course_to_purchasable" />
