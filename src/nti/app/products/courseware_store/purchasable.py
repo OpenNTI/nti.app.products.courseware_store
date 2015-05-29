@@ -48,15 +48,15 @@ from .utils import get_nti_choice_bundles
 from .utils import safe_find_catalog_entry
 from .utils import is_course_enabled_for_purchase
 from .utils import get_entry_purchasable_provider
-	
+
 def get_state(purchasable):
-	amount = int(purchasable.Amount * 100.0) #cents
+	amount = int(purchasable.Amount * 100.0)  # cents
 	result = (amount, purchasable.Currency.upper(),
 			  purchasable.Public, purchasable.Giftable, purchasable.Redeemable)
 	return result
 
-## CS: Make sure this getters and setters are only set
-## to properties defined in the IPurchasableCourse interface
+# CS: Make sure this getters and setters are only set
+# to properties defined in the IPurchasableCourse interface
 
 _marker = object()
 
@@ -72,20 +72,20 @@ def _getter(name):
 	return func
 
 def _alias(prop_name):
-	prop_name = str(prop_name) # native string
-	return property( _getter(prop_name), _setter(prop_name))
+	prop_name = str(prop_name)  # native string
+	return property(_getter(prop_name), _setter(prop_name))
 
 class BaseProxyMixin(object):
-	
+
 	AllowVendorUpdates = False
 
 	Amount = _alias('Amount')
 	Currency = _alias('Currency')
-	
+
 	Public = _alias('Public')
 	Giftable = _alias('Giftable')
 	Redeemable = _alias('Redeemable')
-	
+
 	@property
 	def lastSynchronized(self):
 		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
@@ -96,32 +96,32 @@ class BaseProxyMixin(object):
 		pass
 
 class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
-	
-	__external_class_name__ = 'PurchasableCourse'	
-	mimeType = mime_type  = 'application/vnd.nextthought.store.purchasablecourse'
+
+	__external_class_name__ = 'PurchasableCourse'
+	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecourse'
 
 	CatalogEntryNTIID = None
-		
+
 	@CachedProperty('lastSynchronized')
 	def __state(self):
 		if not self.CatalogEntryNTIID:
 			return _marker
 		try:
 			entry = find_object_with_ntiid(self.CatalogEntryNTIID)
-			if entry is None: # course removed
+			if entry is None:  # course removed
 				self.Public = False
 			else:
 				provider = get_entry_purchasable_provider(entry)
 				price = get_course_price(entry, provider)
-				if price is None: # price removed
+				if price is None:  # price removed
 					self.Public = False
-				else: # Update properties after sync
+				else:  # Update properties after sync
 					self.Amount = price.Amount
 					self.Currency = price.Currency
 					self.Giftable = is_course_giftable(entry)
 					self.Redeemable = is_course_redeemable(entry)
 					self.Public = is_course_enabled_for_purchase(entry)
-					self.AllowVendorUpdates = allow_vendor_updates(entry) 
+					self.AllowVendorUpdates = allow_vendor_updates(entry)
 					vendor_info = get_course_publishable_vendor_info(entry)
 					self.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
 		except Exception:
@@ -130,14 +130,14 @@ class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 		return _marker
 
 	def check_state(self):
-		return self.__state # force a check on the properties values
-			
+		return self.__state  # force a check on the properties values
+
 def create_proxy_course(**kwargs):
 	kwargs['factory'] = PurchasableProxy
 	result = create_course(**kwargs)
-	result.check_state() # fix cached property
+	result.check_state()  # fix cached property
 	return result
-	
+
 def _items_and_ntiids(purchasables):
 	items = set()
 	ntiids = set()
@@ -160,7 +160,7 @@ def _get_common_vendor_info(purchasables):
 		for k, v in p.VendorInfo.items():
 			if isinstance(v, types):
 				data[k].add(v)
-				
+
 	for k, s in data.items():
 		if len(s) == 1:
 			result[k] = s.__iter__().next()
@@ -170,18 +170,18 @@ def _get_common_vendor_info(purchasables):
 
 @interface.implementer(IPurchasableCourseChoiceBundle)
 class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProxyMixin):
-	
+
 	__external_class_name__ = 'PurchasableCourseChoiceBundle'
 	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecoursechoicebundle'
-	
+
 	Bundle = None
 	Purchasables = ()
-	
+
 	@CachedProperty('lastSynchronized')
-	def __state(self):		
+	def __state(self):
 		if not self.Purchasables:
 			return _marker
-		
+
 		validated = []
 		ref_state = get_state(self)
 		for name in self.Purchasables:
@@ -190,7 +190,7 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 			if purchasable is None:
 				logger.warn("Purchasable %s was not found", name)
 				continue
-			
+
 			# make sure choice bundles have not changed
 			ntiid = getattr(purchasable, 'CatalogEntryNTIID', None)
 			entry = safe_find_catalog_entry(ntiid)
@@ -206,10 +206,10 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 			if p_state != ref_state:
 				logger.warn(
 					"Purchasable %s has been dropped from bundle %s because "
-					"its state %s changed",	purchasable.NTIID, self.NTIID, p_state)
+					"its state %s changed", 	purchasable.NTIID, self.NTIID, p_state)
 				continue
 			validated.append(purchasable)
-		
+
 		if len(validated) > 1:
 			if len(validated) != len(self.Purchasables):
 				items, ntiids = _items_and_ntiids(validated)
@@ -223,7 +223,7 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 		return _marker
 
 	def check_state(self):
-		self.__state # force a check on the properties values
+		self.__state  # force a check on the properties values
 
 def create_course_choice_bundle(name, purchasables):
 	purchasables = to_list(purchasables)
@@ -231,25 +231,25 @@ def create_course_choice_bundle(name, purchasables):
 
 	specific = make_specific_safe(name)
 	ntiid = make_ntiid(provider=reference_purchasable.Provider,
-					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE, 
+					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
 					   specific=specific)
 
 	# gather items and ntiids
-	items, ntiids = _items_and_ntiids(purchasables)	
-	result = create_course(	ntiid=ntiid,
-							items=items,
-							name=name, 
-							title=name,
-							description=name,
-							public=reference_purchasable.Public,
-							amount=reference_purchasable.Amount,
-							currency=reference_purchasable.Currency,
-							provider=reference_purchasable.Provider,
-							giftable=reference_purchasable.Giftable,
-							redeemable=reference_purchasable.Redeemable,
-							vendor_info=_get_common_vendor_info(purchasables),
-							factory=PurchasableCourseChoiceBundleProxy)
-	
+	items, ntiids = _items_and_ntiids(purchasables)
+	result = create_course(ntiid=ntiid,
+						   items=items,
+						   name=name,
+						   title=name,
+						   description=name,
+						   public=reference_purchasable.Public,
+						   amount=reference_purchasable.Amount,
+						   currency=reference_purchasable.Currency,
+						   provider=reference_purchasable.Provider,
+						   giftable=reference_purchasable.Giftable,
+						   redeemable=reference_purchasable.Redeemable,
+						   vendor_info=_get_common_vendor_info(purchasables),
+						   factory=PurchasableCourseChoiceBundleProxy)
+
 	# fix cached property
 	result.check_state()
 

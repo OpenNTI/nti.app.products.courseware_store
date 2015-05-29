@@ -19,4 +19,3 @@ def evolve(context):
 	Evolve to generation 2 by registering purchasables for courses
 	"""
 	do_evolve(context)
-

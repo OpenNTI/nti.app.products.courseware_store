@@ -41,9 +41,9 @@ def get_entry_purchasable(context):
 def get_entry_context(context):
 	course = ICourseInstance(context)
 	purchasable = get_entry_purchasable(context)
-	## CS: if we cannot get a purchasable and the context course is a 
-	## sub-instance try with its parent course. This may happen
-	## with mapped courses
+	# CS: if we cannot get a purchasable and the context course is a 
+	# sub-instance try with its parent course. This may happen
+	# with mapped courses
 	if 	(purchasable is None or not purchasable.Public) and \
 		ICourseSubInstance.providedBy(course):
 		result = ICourseCatalogEntry(course.__parent__.__parent__)
@@ -72,7 +72,7 @@ class StoreEnrollmentOptionProvider(object):
 	def get_purchasables(self, context):
 		result = []
 		direct = get_entry_purchasable(context)
-		if direct is not None and direct.Public: ## direct purchasable
+		if direct is not None and direct.Public: # direct purchasable
 			result.append(direct)
 		result.extend(get_purchasable_course_bundles(context))
 		return result
@@ -88,7 +88,7 @@ class StoreEnrollmentOptionProvider(object):
 			result.Purchasables = purchasables
 			IsEnabled = reduce(lambda x,y: x or y.Public, purchasables, True)
 			result.IsEnabled = IsEnabled
-			## CS: We want to use the original data
+			# CS: We want to use the original data
 			result.CatalogEntryNTIID = self.context.ntiid
 			result.AllowVendorUpdates = allow_vendor_updates(self.context)
 			return (result,)

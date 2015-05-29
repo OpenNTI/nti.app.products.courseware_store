@@ -27,7 +27,7 @@ from .utils import get_nti_choice_bundles
 def process_choice_bundle(name, bundle):
 	state = None
 	validated = []
-	
+
 	for purchasable in bundle or ():
 		p_state = get_state(purchasable)
 		if state is None:
@@ -36,10 +36,10 @@ def process_choice_bundle(name, bundle):
 		elif state == p_state:
 			validated.append(purchasable)
 		else:
-			logger.warn("Purchasable %s(%s) will not be included in bundle %s", 
+			logger.warn("Purchasable %s(%s) will not be included in bundle %s",
 						purchasable.NTIID, p_state, name)
-	
-	## there is something to create
+
+	# there is something to create
 	if len(validated) > 1:
 		result = create_course_choice_bundle(name, validated)
 	else:
@@ -54,9 +54,9 @@ def register_choice_bundles(bundle_map, registry=component):
 		purchasable = process_choice_bundle(name, bundle)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
-			registry.provideUtility(purchasable, 
-									IPurchasableCourseChoiceBundle, 
-									name=name)		
+			registry.provideUtility(purchasable,
+									IPurchasableCourseChoiceBundle,
+									name=name)
 			lifecycleevent.created(purchasable)
 			result.append(purchasable)
 			logger.debug("Purchasable choice bundle %s has been registered", name)
@@ -70,18 +70,18 @@ def register_purchasables(catalog=None, registry=component):
 		purchasable = IPurchasableCourse(entry, None)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and registry.queryUtility(IPurchasableCourse, name=name) is None:
-			
-			## register purchasable course
+
+			# register purchasable course
 			registry.provideUtility(purchasable, IPurchasableCourse, name=name)
 			result.append(purchasable)
 			lifecycleevent.created(purchasable)
 			logger.debug("Purchasable %s was registered for course %s",
 						 purchasable.NTIID, entry.ntiid)
 
-			## collect choice bundle data
+			# collect choice bundle data
 			for name in get_nti_choice_bundles(entry):
 				choice_bundle_map[name].append(purchasable)
-			
+
 	choice_bundles = register_choice_bundles(choice_bundle_map, registry)
 	result.extend(choice_bundles)
 	return result

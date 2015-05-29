@@ -27,7 +27,7 @@ MIMETYPE = StandardExternalFields.MIMETYPE
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IInternalObjectExternalizer)
 class _StoreEnrollmentOptionExternalizer(object):
-	
+
 	def __init__(self, obj):
 		self.obj = obj
 
@@ -38,7 +38,7 @@ class _StoreEnrollmentOptionExternalizer(object):
 		result['RequiresAdmission'] = False
 		result['IsEnabled'] = self.obj.IsEnabled
 		result['AllowVendorUpdates'] = self.obj.AllowVendorUpdates
-		## purchasables
+		# purchasables
 		items = []
 		defaultGifting = None
 		defaultPurchase = None
@@ -50,7 +50,7 @@ class _StoreEnrollmentOptionExternalizer(object):
 				defaultPurchase = purchasable.NTIID
 			ext_obj = to_external_object(purchasable, name='summary')
 			items.append(ext_obj)
-			purchasable = self.obj.Purchasables[length-idx-1]
+			purchasable = self.obj.Purchasables[length - idx - 1]
 			if not defaultGifting:
 				defaultGifting = purchasable.NTIID
 		result['Purchasables']['DefaultGiftingNTIID'] = defaultGifting

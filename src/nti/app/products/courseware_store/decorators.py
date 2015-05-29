@@ -30,7 +30,7 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 
 	def _predicate(self, context, result):
 		return self._is_authenticated
-	
+
 	@classmethod
 	def _get_enrollment_record(cls, context, remoteUser):
 		entry = get_catalog_entry(context.CatalogEntryNTIID)
@@ -41,4 +41,4 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 		result['IsEnrolled'] = bool(record is not None and record.Scope == ES_PURCHASED)
 		isAvailable = (record is None or record.Scope == ES_PUBLIC) and context.IsEnabled
 		result['Enabled'] = result['IsAvailable'] = isAvailable
-		result.pop('IsEnabled', None) # redundant
+		result.pop('IsEnabled', None)  # redundant

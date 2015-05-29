@@ -33,7 +33,7 @@ class _CourseCatalogPublishableVendorInfo(object):
 		self.context = context
 
 	def info(self):
-		catalog_entry = ICourseCatalogEntry( self.context, None )
+		catalog_entry = ICourseCatalogEntry(self.context, None)
 		if not catalog_entry:
 			return None
 
@@ -44,10 +44,10 @@ class _CourseCatalogPublishableVendorInfo(object):
 				  'Duration': catalog_entry.Duration,
 				  'AllowVendorUpdates' : does_allow_vendor_updates }
 
-		credit_info = getattr( catalog_entry, 'Credit', None )
+		credit_info = getattr(catalog_entry, 'Credit', None)
 		if credit_info:
 			# Just grabbing the first entry
 			credit_info = credit_info[0]
 			hours = credit_info.Hours
-			result.update( { 'Hours': hours } )
+			result.update({ 'Hours': hours })
 		return result

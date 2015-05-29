@@ -67,7 +67,7 @@ def get_user(user):
 
 def _parent_course_instance_enrollemnt(course, user):
 	enrollment = component.queryMultiAdapter((course, user),
-											 ICourseInstanceEnrollment )
+											 ICourseInstanceEnrollment)
 	if enrollment is not None:
 		service = IUserService(user, None)
 		workspace = ICoursesWorkspace(service, None)
@@ -83,18 +83,18 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 	send_event = True
 	if enrollment is None or enrollment.Scope != ES_PURCHASED:
 		drop_any_other_enrollments(course, user)
-		if enrollment is None: 	# Never before been enrolled
+		if enrollment is None:  # Never before been enrolled
 			enrollment_manager = ICourseEnrollmentManager(course)
 			enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
 												   context=purchasable)
 			_parent_course_instance_enrollemnt(course, user)
-			
+
 		elif enrollment.Scope != ES_PURCHASED:
 			logger.info("User %s now paying for course (old_scope %s)",
 						user, enrollment.Scope)
-			## change scope and mark record
+			# change scope and mark record
 			enrollment.Scope = ES_PURCHASED
-			## notify to reflect changes
+			# notify to reflect changes
 			lifecycleevent.modified(enrollment)
 	else:
 		send_event = False
@@ -114,7 +114,7 @@ def _unenroll(course, user, purchasable=None):
 		return True
 	return False
 
-def _get_courses_from_purchasables(purchasables=()):			
+def _get_courses_from_purchasables(purchasables=()):
 	catalog = component.getUtility(ICourseCatalog)
 	for item in purchasables or ():
 		purchasable = get_purchasable(item)
@@ -131,7 +131,7 @@ def _get_courses_from_purchasables(purchasables=()):
 def _to_sequence(items=(), unique=True):
 	result = items.split() if isinstance(items, six.string_types) else items
 	return set(result or ()) if unique else result
-					
+
 def _process_successful_purchase(purchasables, user=None, request=None, check=False):
 	result = False
 	user = get_user(user)
@@ -144,10 +144,10 @@ def _process_successful_purchase(purchasables, user=None, request=None, check=Fa
 
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptSuccessful)
 def _purchase_attempt_successful(purchase, event):
-	## CS: use Items property of the purchase object in case it has been proxied
+	# CS: use Items property of the purchase object in case it has been proxied
 	if 	not IGiftPurchaseAttempt.providedBy(purchase) and \
-		_process_successful_purchase(purchase.Items, 
-									 user=purchase.creator, 
+		_process_successful_purchase(purchase.Items,
+									 user=purchase.creator,
 									 request=event.request):
 		logger.info("Course purchase %s was successful", purchase.id)
 
@@ -157,7 +157,7 @@ def _purchase_invitation_accepted(event):
 	if 	IStorePurchaseInvitation.providedBy(invitation) and \
 		IInvitationPurchaseAttempt.providedBy(invitation.purchase):
 		original = invitation.purchase
-		## CS: use Items property of the purchase object in case it has been proxied
+		# CS: use Items property of the purchase object in case it has been proxied
 		_process_successful_purchase(original.Items, user=event.user)
 		logger.info("Course invitation %s was accepted", invitation.code)
 
@@ -179,12 +179,12 @@ def _purchase_attempt_refunded(purchase, event):
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
 def _redeemed_purchase_attempt_refunded(purchase, event):
 	_process_refunded_purchase(purchase)
-	
+
 @component.adapter(IGiftPurchaseAttempt, IGiftPurchaseAttemptRedeemed)
 def _gift_purchase_attempt_redeemed(purchase, event):
 	user = event.user
 	request = event.request
-	## CS: use Items property of the purchase object  in case it has been proxied
+	# CS: use Items property of the purchase object  in case it has been proxied
 	if _process_successful_purchase(purchase.Items, user, request=request, check=True):
 		code = event.code or get_gift_code(purchase)
 		logger.info("Course gift %s has been redeemed", code)

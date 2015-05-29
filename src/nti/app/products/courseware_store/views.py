@@ -45,10 +45,10 @@ def _tx_string(s):
 			 permission=nauth.ACT_NTI_ADMIN,
 			 name='VendorUpdatesPurchasedCourse')
 class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
-	
+
 	def __call__(self):
 		params = CaseInsensitiveDict(self.request.params)
-		
+
 		ntiid = params.get('ntiid') or \
 				params.get('entry') or \
 				params.get('course')
@@ -68,11 +68,11 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 
 		bio = BytesIO()
 		csv_writer = csv.writer(bio)
-		
+
 		# header
-		header = ['username', 'name', 'email'] 
+		header = ['username', 'name', 'email']
 		csv_writer.writerow(header)
-		
+
 		purchases = find_allow_vendor_updates_purchases(entry)
 		for purchase in purchases:
 			creator = purchase.creator

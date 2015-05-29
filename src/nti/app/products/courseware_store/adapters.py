@@ -51,7 +51,7 @@ from .utils import is_course_enabled_for_purchase
 def _nti_course_price_finder(context):
 	result = get_nti_course_price(context)
 	return result
-	
+
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):
@@ -66,38 +66,38 @@ def create_purchasable_from_course(context):
 	redeemable = is_course_redeemable(course)
 	public = is_course_enabled_for_purchase(course)
 	provider = get_entry_purchasable_provider(entry)
-	
+
 	# find course price
-	price = get_course_price(course, provider)	
+	price = get_course_price(course, provider)
 	if price is None:
 		return None
 	amount = price.Amount
 	currency = price.Currency
-	
+
 	ntiid = get_course_purchasable_ntiid(entry, provider)
 	assert ntiid, 'No purchasable NTIID was derived for course'
-	
+
 	preview = False
 	icon = thumbnail = None
 	if ICourseCatalogLegacyEntry.providedBy(entry):
 		preview = entry.Preview
 		icon = entry.LegacyPurchasableIcon
 		thumbnail = entry.LegacyPurchasableThumbnail
-	items = [entry.ntiid] # course is to be purchased
-	
+	items = [entry.ntiid]  # course is to be purchased
+
 	if icon is None or thumbnail is None:
 		try:
 			packages = course.ContentPackageBundle.ContentPackages
 		except AttributeError:
 			packages = (course.legacy_content_package,)
-			
+
 		if icon is None and packages:
 			icon = packages[0].icon
 			icon = IContentUnitHrefMapper(icon).href if icon else None
 		if thumbnail is None and packages:
 			thumbnail = packages[0].thumbnail
 			thumbnail = IContentUnitHrefMapper(thumbnail).href if thumbnail else None
-	
+
 	if isinstance(entry.StartDate, datetime):
 		start_date = unicode(isodate.datetime_isoformat(entry.StartDate))
 	elif isinstance(entry.StartDate, date):
@@ -107,13 +107,13 @@ def create_purchasable_from_course(context):
 
 	name = get_course_purchasable_name(course) or entry.title
 	title = get_course_purchasable_title(course) or entry.title
-	
+
 	vendor_info = get_course_publishable_vendor_info(course)
 	result = create_proxy_course(ntiid=ntiid,
 								 items=items,
-								 name=name, 
+								 name=name,
 								 title=title,
-								 provider=provider, 
+								 provider=provider,
 								 public=public,
 								 amount=amount,
 								 currency=currency,
@@ -128,7 +128,7 @@ def create_purchasable_from_course(context):
 								 startdate=start_date,
 								 signature=entry.InstructorsSignature,
 								 department=entry.ProviderDepartmentTitle)
-	
+
 	result.CatalogEntryNTIID = entry.ntiid
 	return result
 
@@ -165,5 +165,5 @@ def _purchase_attempt_transformer(purchase, user=None):
 
 @component.adapter(IPurchaseAttempt)
 @interface.implementer(IObjectTransformer)
-def _purchase_object_transformer( obj ):
+def _purchase_object_transformer(obj):
 	return _purchase_attempt_transformer
