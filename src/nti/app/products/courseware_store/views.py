@@ -17,9 +17,12 @@ from io import BytesIO
 from zope import component
 
 from pyramid.view import view_config
+from pyramid.view import view_defaults
 from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
+
+from nti.app.products.courseware.views import CourseAdminPathAdapter
 
 from nti.common.maps import CaseInsensitiveDict
 
@@ -39,32 +42,38 @@ def _tx_string(s):
 		s = s.encode('utf-8')
 	return s
 
-@view_config(route_name='objects.generic.traversal',
-			 renderer='rest',
-			 context=IDataserverFolder,
-			 permission=nauth.ACT_NTI_ADMIN,
-			 name='VendorUpdatesPurchasedCourse')
+def _parse_course(params):
+	ntiid = params.get('ntiid') or \
+			params.get('entry') or \
+			params.get('course')
+	if not ntiid:
+		return None
+
+	context = find_object_with_ntiid(ntiid)
+	entry = ICourseCatalogEntry(context, None)
+	if entry is None:
+		try:
+			catalog = component.getUtility(ICourseCatalog)
+			entry = catalog.getCatalogEntry(ntiid)
+		except LookupError:
+			raise hexc.HTTPUnprocessableEntity(detail=_('Catalog not found'))
+		except KeyError:
+			pass
+	return entry
+
+@view_config(context=IDataserverFolder)
+@view_config(context=CourseAdminPathAdapter)
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			 	name='VendorUpdatesPurchasedCourse')
 class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 
 	def __call__(self):
 		params = CaseInsensitiveDict(self.request.params)
-
-		ntiid = params.get('ntiid') or \
-				params.get('entry') or \
-				params.get('course')
-		if not ntiid:
-			raise hexc.HTTPUnprocessableEntity(detail=_('No course entry identifier'))
-
-		context = find_object_with_ntiid(ntiid)
-		entry = ICourseCatalogEntry(context, None)
+		entry = _parse_course(params)
 		if entry is None:
-			try:
-				catalog = component.getUtility(ICourseCatalog)
-				entry = catalog.getCatalogEntry(ntiid)
-			except LookupError:
-				raise hexc.HTTPUnprocessableEntity(detail=_('Catalog not found'))
-			except KeyError:
-				raise hexc.HTTPUnprocessableEntity(detail=_('Course not found'))
+			raise hexc.HTTPUnprocessableEntity(detail=_('Course not found or specified'))
 
 		bio = BytesIO()
 		csv_writer = csv.writer(bio)
