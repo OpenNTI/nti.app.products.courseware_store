@@ -9,51 +9,16 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from collections import defaultdict
-
-from zope import component
-
 from zope.component.hooks import setHooks
 from zope.component.hooks import site as current_site
 
 from zope.traversing.interfaces import IEtcNamespace
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-
 from nti.site.interfaces import IHostPolicyFolder
 
-from nti.store.store import register_purchasable
-
-from ..adapters import create_purchasable_from_course
-
-from ..utils import get_nti_choice_bundles
-
-from ..register import process_choice_bundle
+from ..register import register_site_purchasables
 
 generation = 2
-
-def register_purchasables(registry, seen):
-	result = []
-	choice_bundle_map = defaultdict(list)
-	catalog = component.getUtility(ICourseCatalog)
-	for entry in catalog.iterCatalogEntries():
-		if entry.ntiid in seen:
-			continue
-		seen.add(entry.ntiid)
-		purchasable = create_purchasable_from_course(entry)
-		if purchasable is not None:
-			item = register_purchasable(purchasable, registry=registry)
-			result.append(item)
-			# collect choice bundle data
-			for name in get_nti_choice_bundles(entry):
-				choice_bundle_map[name].append(purchasable)
-
-	for name, bundle in choice_bundle_map.items():
-		purchasable = process_choice_bundle(name, bundle, notify=False, proxy=False)
-		if purchasable is not None:
-			item = register_purchasable(purchasable, registry=registry)
-			result.append(item)
-	return result
 
 def do_evolve(context):
 	setHooks()
@@ -67,7 +32,7 @@ def do_evolve(context):
 			continue	
 		with current_site(site):
 			registry = site.getSiteManager()
-			register_purchasables(registry=registry, seen=seen)
+			register_site_purchasables(registry=registry, seen=seen)
 
 def evolve(context):
 	"""

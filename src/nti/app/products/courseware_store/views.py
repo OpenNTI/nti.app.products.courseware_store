@@ -29,13 +29,20 @@ from nti.common.maps import CaseInsensitiveDict
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
+from nti.dataserver import authorization as nauth
+
 from nti.dataserver.interfaces import IDataserverFolder
 
-from nti.dataserver import authorization as nauth
+from nti.externalization.interfaces import LocatedExternalDict
+from nti.externalization.interfaces import StandardExternalFields
 
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from .utils import find_allow_vendor_updates_purchases
+
+from .register import register_site_purchasables
+
+ITEMS = StandardExternalFields.ITEMS
 
 def _tx_string(s):
 	if s and isinstance(s, unicode):
@@ -97,3 +104,16 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		response.body = bio.getvalue()
 		response.content_disposition = b'attachment; filename="updates.csv"'
 		return response
+
+@view_config(context=IDataserverFolder)
+@view_config(context=CourseAdminPathAdapter)
+@view_defaults(	route_name='objects.generic.traversal',
+				renderer='rest',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			 	name='RegisterCoursePurchasables')
+class RegisterCoursePurchasables(AbstractAuthenticatedView):
+
+	def __call__(self):
+		result = LocatedExternalDict()
+		result[ITEMS] = register_site_purchasables()
+		return result

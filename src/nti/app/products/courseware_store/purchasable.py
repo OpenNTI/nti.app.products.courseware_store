@@ -253,8 +253,9 @@ def create_course_choice_bundle(name, purchasables, proxy=True):
 						   vendor_info=_get_common_vendor_info(purchasables),
 						   factory=factory)
 
-	# fix cached property
-	result.check_state()
+	if hasattr(result, "check_state"):
+		# fix cached property
+		result.check_state()
 
 	# save properties
 	result.Bundle = name
