@@ -24,7 +24,7 @@ from .purchasable import create_course_choice_bundle
 
 from .utils import get_nti_choice_bundles
 
-def process_choice_bundle(name, bundle, notify=True):
+def process_choice_bundle(name, bundle, proxy=True, notify=True):
 	state = None
 	validated = []
 
@@ -41,7 +41,7 @@ def process_choice_bundle(name, bundle, notify=True):
 
 	# there is something to create
 	if len(validated) > 1:
-		result = create_course_choice_bundle(name, validated)
+		result = create_course_choice_bundle(name, validated, proxy=proxy)
 	elif notify:
 		result = None
 		logger.warn("Bundle %s will not be created. Not enough purchasables", name)

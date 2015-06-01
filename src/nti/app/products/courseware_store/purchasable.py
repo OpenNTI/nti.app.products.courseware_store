@@ -225,7 +225,7 @@ class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProx
 	def check_state(self):
 		self.__state  # force a check on the properties values
 
-def create_course_choice_bundle(name, purchasables):
+def create_course_choice_bundle(name, purchasables, proxy=True):
 	purchasables = to_list(purchasables)
 	reference_purchasable = purchasables[0]
 
@@ -233,6 +233,9 @@ def create_course_choice_bundle(name, purchasables):
 	ntiid = make_ntiid(provider=reference_purchasable.Provider,
 					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
 					   specific=specific)
+
+	factory = PurchasableCourseChoiceBundleProxy \
+			  if proxy else PurchasableCourseChoiceBundle
 
 	# gather items and ntiids
 	items, ntiids = _items_and_ntiids(purchasables)
@@ -248,7 +251,7 @@ def create_course_choice_bundle(name, purchasables):
 						   giftable=reference_purchasable.Giftable,
 						   redeemable=reference_purchasable.Redeemable,
 						   vendor_info=_get_common_vendor_info(purchasables),
-						   factory=PurchasableCourseChoiceBundleProxy)
+						   factory=factory)
 
 	# fix cached property
 	result.check_state()
