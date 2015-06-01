@@ -32,11 +32,14 @@ from ..register import process_choice_bundle
 
 generation = 2
 
-def register_purchasables(registry):
+def register_purchasables(registry, seen):
 	result = []
 	choice_bundle_map = defaultdict(list)
 	catalog = component.getUtility(ICourseCatalog)
 	for entry in catalog.iterCatalogEntries():
+		if entry.ntiid in seen:
+			continue
+		seen.add(entry.ntiid)
 		purchasable = create_purchasable_from_course(entry)
 		if purchasable is not None:
 			item = register_purchasable(purchasable, registry=registry)
@@ -54,9 +57,9 @@ def register_purchasables(registry):
 
 def do_evolve(context):
 	setHooks()
+	seen = set()
 	conn = context.connection
-	root = conn.root()
-	ds_folder = root['nti.dataserver']
+	ds_folder = conn.root()['nti.dataserver']
 	lsm = ds_folder.getSiteManager()		
 	sites_folder = lsm.getUtility(IEtcNamespace, name='hostsites')
 	for _, site in sites_folder.items():
@@ -64,7 +67,7 @@ def do_evolve(context):
 			continue	
 		with current_site(site):
 			registry = site.getSiteManager()
-			register_purchasables(registry=registry)
+			register_purchasables(registry=registry, seen=seen)
 
 def evolve(context):
 	"""
