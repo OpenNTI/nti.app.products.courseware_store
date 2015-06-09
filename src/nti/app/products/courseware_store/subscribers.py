@@ -29,8 +29,6 @@ from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
 from nti.app.products.courseware.utils import get_enrollment_record
 from nti.app.products.courseware.utils import drop_any_other_enrollments
 
-from nti.appserver.invitations.interfaces import IInvitationAcceptedEvent
-
 from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
@@ -45,6 +43,8 @@ from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
 
 from nti.intid.interfaces import IIntIdRemovedEvent
+
+from nti.invitations.interfaces import IInvitationAcceptedEvent
 
 from nti.store.store import get_gift_code
 from nti.store.purchasable import get_purchasable
