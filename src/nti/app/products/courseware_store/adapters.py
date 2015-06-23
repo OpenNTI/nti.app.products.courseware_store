@@ -41,11 +41,13 @@ from .utils import find_catalog_entry
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
+from .utils import get_purchasable_cutoff_date
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
 from .utils import get_course_purchasable_title
 from .utils import get_entry_purchasable_provider
 from .utils import is_course_enabled_for_purchase
+from .utils import get_purchasable_redeem_cutoff_date
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
@@ -105,6 +107,9 @@ def create_purchasable_from_course(context):
 	else:
 		start_date = unicode(entry.StartDate) if entry.StartDate else None
 
+	purchase_cutoff_date = get_purchasable_cutoff_date(course)
+	redeem_cutoff_date = get_purchasable_redeem_cutoff_date(course)
+	
 	name = get_course_purchasable_name(course) or entry.title
 	title = get_course_purchasable_title(course) or entry.title
 
@@ -121,6 +126,8 @@ def create_purchasable_from_course(context):
 								 redeemable=redeemable,
 								 vendor_info=vendor_info,
 								 description=entry.description,
+								 purchase_cutoff_date=purchase_cutoff_date, 
+								 redeem_cutoff_date=redeem_cutoff_date,
 								 # deprecated/legacy
 								 icon=icon,
 								 preview=preview,

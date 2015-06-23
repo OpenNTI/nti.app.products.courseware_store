@@ -83,6 +83,16 @@ def get_course_purchasable_name(context):
 	result = traverse(vendor_info, 'NTI/Purchasable/Name', default=None)
 	return result
 
+def get_purchasable_redeem_cutoff_date(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/RedeemCutOffDate', default=None)
+	return result
+
+def get_purchasable_cutoff_date(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/PurchaseCutOffDate', default=None)
+	return result
+
 def get_course_purchasable_title(context):
 	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/Title', default=None)
