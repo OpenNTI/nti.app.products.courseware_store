@@ -86,7 +86,7 @@ class StoreEnrollmentOptionProvider(object):
 		if purchasables:
 			result = StoreEnrollmentOption()
 			result.Purchasables = purchasables
-			IsEnabled = reduce(lambda x,y: x or y.Public, purchasables, True)
+			IsEnabled = reduce(lambda x,y: x or y.Public, purchasables, False)
 			result.IsEnabled = IsEnabled
 			# CS: We want to use the original data
 			result.CatalogEntryNTIID = self.context.ntiid
