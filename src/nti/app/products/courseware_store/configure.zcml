@@ -55,14 +55,6 @@
 	<subscriber handler=".subscribers._purchase_invitation_accepted" />
 	<subscriber handler=".subscribers._gift_purchase_attempt_redeemed" />
 	<subscriber handler=".subscribers._redeemed_purchase_attempt_refunded" />
-
-	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
-				for="nti.contenttypes.courses.interfaces.ICourseInstance"
-				provides=".interfaces.ICoursePublishableVendorInfo" />
-
-	<subscriber	factory=".vendorinfo._DefaultCoursePublishableVendorInfo"
-				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
-				provides=".interfaces.ICoursePublishableVendorInfo" />
 				
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseInstance"

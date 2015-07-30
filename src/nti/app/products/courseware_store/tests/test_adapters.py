@@ -21,8 +21,9 @@ import fudge
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware.interfaces import ICoursePublishableVendorInfo
+
 from nti.app.products.courseware_store.interfaces import ICoursePrice
-from nti.app.products.courseware_store.interfaces import ICoursePublishableVendorInfo
 from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
