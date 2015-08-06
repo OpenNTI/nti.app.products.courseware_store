@@ -32,7 +32,7 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-from nti.contenttypes.courses.interfaces import ICourseInstanceVendorInfo
+from nti.contenttypes.courses import get_vendor_info as safe_vendor_info
 
 from nti.dataserver.metadata_index import IX_MIMETYPE, IX_CREATOR
 from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
@@ -55,8 +55,8 @@ from .model import CoursePrice
 from .interfaces import ICoursePrice
 
 def get_vendor_info(context):
-	course = ICourseInstance(context, None)
-	return ICourseInstanceVendorInfo(course, {})
+	info = safe_vendor_info(context, False)
+	return info or {}
 
 def is_course_enabled_for_purchase(context):
 	vendor_info = get_vendor_info(context)
