@@ -40,7 +40,7 @@ def process_choice_bundle(name, bundle, proxy=True, notify=True):
 						purchasable.NTIID, p_state, name)
 
 	# there is something to create
-	if len(validated) > 1:
+	if len(validated) >= 1:
 		result = create_course_choice_bundle(name, validated, proxy=proxy)
 	elif notify:
 		result = None
