@@ -16,10 +16,9 @@ from datetime import datetime
 from zope import component
 from zope import interface
 
-from nti.app.products.courseware.utils import get_any_enrollment
-
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
+from nti.contenttypes.courses.utils import get_any_enrollment
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry

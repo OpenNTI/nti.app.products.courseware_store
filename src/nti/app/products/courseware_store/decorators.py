@@ -12,13 +12,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from nti.app.products.courseware.utils import get_catalog_entry
-from nti.app.products.courseware.utils import get_enrollment_record
-
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
+
+from nti.contenttypes.courses.utils import get_catalog_entry
+from nti.contenttypes.courses.utils import get_enrollment_record
 
 from nti.externalization.interfaces import IExternalObjectDecorator
 

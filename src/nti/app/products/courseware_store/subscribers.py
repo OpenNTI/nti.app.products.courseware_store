@@ -26,9 +26,6 @@ from pyramid.threadlocal import get_current_request
 from nti.app.products.courseware.interfaces import ICoursesWorkspace
 from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
 
-from nti.app.products.courseware.utils import get_enrollment_record
-from nti.app.products.courseware.utils import drop_any_other_enrollments
-
 from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
@@ -38,6 +35,9 @@ from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
+
+from nti.contenttypes.courses.utils import get_enrollment_record
+from nti.contenttypes.courses.utils import drop_any_other_enrollments
 
 from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
