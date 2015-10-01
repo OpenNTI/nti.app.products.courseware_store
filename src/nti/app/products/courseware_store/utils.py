@@ -98,6 +98,12 @@ def get_course_purchasable_title(context):
 	result = traverse(vendor_info, 'NTI/Purchasable/Title', default=None)
 	return result
 
+def get_course_purchasable_fee(context):
+	vendor_info = get_vendor_info(context)
+	result = traverse(vendor_info, 'NTI/Purchasable/Fee', default=None)
+	return result
+get_course_fee = get_course_purchasable_fee
+
 def get_entry_purchasable_provider(context):
 	entry = ICourseCatalogEntry(context)
 	course = ICourseInstance(entry)
@@ -209,7 +215,7 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 			if not context.get('AllowVendorUpdates', False):
 				continue
 			result.append(purchase)
-		except (POSError, TypeError):
+		except (TypeError, POSError):
 			continue	
 	return result
 

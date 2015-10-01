@@ -35,6 +35,7 @@ from .interfaces import get_course_publishable_vendor_info
 
 from .purchasable import create_proxy_course
 
+from .utils import get_course_fee
 from .utils import get_course_price
 from .utils import find_catalog_entry
 from .utils import is_course_giftable
@@ -69,12 +70,14 @@ def create_purchasable_from_course(context):
 	provider = get_entry_purchasable_provider(entry)
 
 	# find course price
+	fee = get_course_fee(course)
 	price = get_course_price(course, provider)
 	if price is None:
 		return None
 	amount = price.Amount
 	currency = price.Currency
-
+	fee = float(fee) if fee is not None else fee
+	
 	ntiid = get_course_purchasable_ntiid(entry, provider)
 	assert ntiid, 'No purchasable NTIID was derived for course'
 
@@ -119,6 +122,7 @@ def create_purchasable_from_course(context):
 								 title=title,
 								 provider=provider,
 								 public=public,
+								 fee=fee,
 								 amount=amount,
 								 currency=currency,
 								 giftable=giftable,

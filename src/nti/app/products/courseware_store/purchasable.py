@@ -40,6 +40,7 @@ from nti.store.utils import to_frozenset
 
 from .interfaces import get_course_publishable_vendor_info
 
+from .utils import get_course_fee
 from .utils import get_course_price
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
@@ -52,7 +53,8 @@ from .utils import get_entry_purchasable_provider
 def get_state(purchasable):
 	amount = int(purchasable.Amount * 100.0)  # cents
 	result = (amount, purchasable.Currency.upper(),
-			  purchasable.Public, purchasable.Giftable, purchasable.Redeemable)
+			  purchasable.Public, purchasable.Giftable, 
+			  purchasable.Redeemable, purchasable.Fee)
 	return result
 
 # CS: Make sure this getters and setters are only set
@@ -79,13 +81,14 @@ class BaseProxyMixin(object):
 
 	AllowVendorUpdates = False
 
+	Fee = _alias('Fee')
 	Amount = _alias('Amount')
 	Currency = _alias('Currency')
 
 	Public = _alias('Public')
 	Giftable = _alias('Giftable')
 	Redeemable = _alias('Redeemable')
-
+	
 	@property
 	def lastSynchronized(self):
 		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
@@ -111,6 +114,7 @@ class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 			if entry is None:  # course removed
 				self.Public = False
 			else:
+				fee = get_course_fee(entry)
 				provider = get_entry_purchasable_provider(entry)
 				price = get_course_price(entry, provider)
 				if price is None:  # price removed
@@ -120,6 +124,7 @@ class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 					self.Currency = price.Currency
 					self.Giftable = is_course_giftable(entry)
 					self.Redeemable = is_course_redeemable(entry)
+					self.Fee = float(fee) if fee is not None else fee
 					self.Public = is_course_enabled_for_purchase(entry)
 					self.AllowVendorUpdates = allow_vendor_updates(entry)
 					vendor_info = get_course_publishable_vendor_info(entry)
@@ -244,6 +249,7 @@ def create_course_choice_bundle(name, purchasables, proxy=True):
 						   name=name,
 						   title=name,
 						   description=name,
+						   fee=reference_purchasable.Fee,
 						   public=reference_purchasable.Public,
 						   amount=reference_purchasable.Amount,
 						   currency=reference_purchasable.Currency,
