@@ -196,19 +196,14 @@ def _enrollment_record_dropped(record, event):
 
 from zope.component.hooks import site as current_site
 
-from zope.traversing.interfaces import IEtcNamespace
-
 from nti.processlifetime import IApplicationTransactionOpenedEvent
 
-from nti.site.interfaces import IHostPolicyFolder
+from nti.site.hostpolicy import get_all_host_sites
 
 from .register import register_purchasables
 
 @component.adapter(IApplicationTransactionOpenedEvent)
 def register_course_purchasables(*args, **kwargs):
-	sites_folder = component.getUtility(IEtcNamespace, name='hostsites')
-	for _, site in sites_folder.items():
-		if not IHostPolicyFolder.providedBy(site):
-			continue
+	for site in get_all_host_sites():
 		with current_site(site):
 			register_purchasables()
