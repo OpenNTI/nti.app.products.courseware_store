@@ -54,23 +54,17 @@ def register_choice_bundles(bundle_map, registry, notify=True):
 		purchasable = process_choice_bundle(name, bundle, notify=notify)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
-			registry.registerUtility(purchasable,
-									 IPurchasableCourseChoiceBundle,
-									 name=name)
+			registry.provideUtility(purchasable,
+									IPurchasableCourseChoiceBundle,
+									name=name)
 			if notify:
 				lifecycleevent.created(purchasable)
 			result.append(purchasable)
 			logger.debug("Purchasable choice bundle %s has been registered", name)
 	return result
 
-from zope.component.hooks import getSite
-
-from nti.site.site import find_site_components
-
-def register_purchasables(notify=True):
+def register_purchasables(registry=component, notify=True):
 	result = []
-	site_names = (getSite().__name__,)
-	registry = find_site_components(site_names)
 	choice_bundle_map = defaultdict(list)
 	catalog = component.getUtility(ICourseCatalog)
 	for entry in catalog.iterCatalogEntries():
@@ -78,7 +72,7 @@ def register_purchasables(notify=True):
 		name = getattr(purchasable, 'NTIID', None)
 		if name and registry.queryUtility(IPurchasableCourse, name=name) is None:
 			# register purchasable course
-			registry.registerUtility(purchasable, IPurchasableCourse, name=name)
+			registry.provideUtility(purchasable, IPurchasableCourse, name=name)
 			result.append(purchasable)
 			if notify:
 				lifecycleevent.created(purchasable)
@@ -102,7 +96,7 @@ def register_site_purchasables(registry=None, seen=None):
 	choice_bundle_map = defaultdict(list)
 	seen = set() if seen is None else seen
 	catalog = component.getUtility(ICourseCatalog)
-	registry = registry if registry is not None else component.getSiteManager()
+	registry = registry if registry is not None else component.getGlobalSiteManager()
 	for entry in catalog.iterCatalogEntries():
 		if entry.ntiid in seen:
 			continue
