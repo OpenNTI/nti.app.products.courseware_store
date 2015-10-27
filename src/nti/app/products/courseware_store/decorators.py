@@ -12,15 +12,29 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from zope.traversing.api import traverse
+
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import ICourseSubInstance
+from nti.contenttypes.courses.interfaces import ICourseInstanceVenderInfo
 
 from nti.contenttypes.courses.utils import get_catalog_entry
 from nti.contenttypes.courses.utils import get_enrollment_record
 
 from nti.externalization.interfaces import IExternalObjectDecorator
+from nti.externalization.interfaces import IExternalMappingDecorator
+
+from nti.externalization.singleton import SingletonDecorator
+
+from nti.store.interfaces import IPurchasableCourse
+from nti.store.interfaces import IGiftPurchaseAttempt
+
+from nti.store.purchasable import get_purchasable
 
 from .interfaces import IStoreEnrollmentOption
 
@@ -42,3 +56,43 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 		isAvailable = (record is None or record.Scope == ES_PUBLIC) and context.IsEnabled
 		result['Enabled'] = result['IsAvailable'] = isAvailable
 		result.pop('IsEnabled', None)  # redundant
+
+@interface.implementer(IExternalMappingDecorator)
+@component.adapter(IGiftPurchaseAttempt)
+class _VendorThankYouInfoDecorator(object):
+	"""
+	Decorate the thank you page information for gifts.
+	"""
+
+	__metaclass__ = SingletonDecorator
+
+	thank_you_context_key = 'Gifting'
+
+	def _predicate(self, context, result):
+		return self._is_authenticated
+
+	def get_course( self, purchase_attempt ):
+		purchaseables = purchase_attempt.Items
+		catalog = component.getUtility(ICourseCatalog)
+		for item in purchaseables or ():
+			purchasable = get_purchasable(item)
+			if not IPurchasableCourse.providedBy(purchasable):
+				continue
+			for catalog_ntiid in purchasable.Items:
+				try:
+					entry = catalog.getCatalogEntry( catalog_ntiid )
+					course = ICourseInstance( entry )
+					return course
+				except KeyError:
+					logger.error("Could not find course entry %s", catalog_ntiid)
+
+	def decorateExternalMapping(self, context, result):
+		course = self.get_course( context )
+		vendor_info = ICourseInstanceVenderInfo( course, None )
+		if vendor_info is None and ICourseSubInstance.providedBy( course ):
+			vendor_info = ICourseInstanceVenderInfo( course.__parent__.__parent__, None )
+
+		if vendor_info is not None:
+			tracking = traverse( vendor_info, 'NTI/VendorThankYouPage', default=False )
+			if tracking and self.thank_you_context_key in tracking:
+				result['VendorThankYouPage'] = tracking.get( self.thank_you_context_key )

@@ -12,23 +12,23 @@
 
 	<include package="nti.store" />
 	<include package="nti.contenttypes.courses" />
-	
+
 	<class class="nti.contenttypes.courses.interfaces.AlreadyEnrolledException">
 		<implements interface="nti.store.interfaces.IRedemptionException" />
 	</class>
-	
+
 	<!-- Generations -->
 	<utility factory=".generations.install._CoursewareStoreSchemaManager"
 			 name="nti.dataserver-courseware-store"
 			 provides="zope.generations.interfaces.IInstallableSchemaManager" />
-			 
+
 	<!-- Adapters -->
 	<adapter factory=".adapters._entry_to_purchasable" />
 	<adapter factory=".adapters._course_to_purchasable" />
-	<adapter factory=".adapters._purchase_object_transformer" />	
+	<adapter factory=".adapters._purchase_object_transformer" />
 	<adapter factory=".adapters._purchasable_to_catalog_entry" />
 	<adapter factory=".adapters._purchasable_to_course_instance" />
-	
+
 	<!-- Price Finders -->
 	<adapter factory=".adapters._nti_course_price_finder"
 			 for="nti.contenttypes.courses.interfaces.ICourseInstance"
@@ -55,7 +55,7 @@
 	<subscriber handler=".subscribers._purchase_invitation_accepted" />
 	<subscriber handler=".subscribers._gift_purchase_attempt_redeemed" />
 	<subscriber handler=".subscribers._redeemed_purchase_attempt_refunded" />
-				
+
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseInstance"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>
@@ -63,7 +63,7 @@
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 				provides=".interfaces.ICoursePublishableVendorInfo"/>
-				
+
 	<subscriber	factory=".enrollment.StoreEnrollmentOptionProvider"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
@@ -72,7 +72,7 @@
 	Register outside the site to listen to IApplicationTransactionOpenedEvent
 	-->
 	<subscriber handler=".subscribers.register_course_purchasables" />
-	
+
 	<!-- Decorators -->
 	<subscriber factory=".decorators._StoreEnrollmentOptionDecorator"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"
@@ -87,10 +87,13 @@
 		root_interfaces=".interfaces.IStoreEnrollmentOption"
 		modules=".enrollment" />
 
+	<subscriber factory=".decorators._VendorThankYouInfoDecorator"
+				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+
 	<adapter factory=".externalization._StoreEnrollmentOptionExternalizer"
 			 for=".interfaces.IStoreEnrollmentOption"
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer" />
-			 
+
 	<!-- Keys -->
 	<configure zcml:condition="have testmode">
 		<include package="nti.store.payments.stripe" file="meta.zcml" />
