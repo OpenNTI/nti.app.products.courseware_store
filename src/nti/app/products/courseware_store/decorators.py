@@ -12,19 +12,16 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from zope.traversing.api import traverse
-
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import ICourseSubInstance
-from nti.contenttypes.courses.interfaces import ICourseInstanceVenderInfo
 
 from nti.contenttypes.courses.utils import get_catalog_entry
 from nti.contenttypes.courses.utils import get_enrollment_record
+from nti.contenttypes.courses.utils import get_vendor_thank_you_page
 
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
@@ -88,11 +85,6 @@ class _VendorThankYouInfoDecorator(object):
 
 	def decorateExternalMapping(self, context, result):
 		course = self.get_course( context )
-		vendor_info = ICourseInstanceVenderInfo( course, None )
-		if vendor_info is None and ICourseSubInstance.providedBy( course ):
-			vendor_info = ICourseInstanceVenderInfo( course.__parent__.__parent__, None )
-
-		if vendor_info is not None:
-			tracking = traverse( vendor_info, 'NTI/VendorThankYouPage', default=False )
-			if tracking and self.thank_you_context_key in tracking:
-				result['VendorThankYouPage'] = tracking.get( self.thank_you_context_key )
+		thank_you_page = get_vendor_thank_you_page( course, self.thank_you_context_key )
+		if thank_you_page:
+			result['VendorThankYouPage'] = thank_you_page
