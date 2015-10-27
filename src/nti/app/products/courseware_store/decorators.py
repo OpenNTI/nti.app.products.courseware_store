@@ -12,8 +12,9 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
-from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 from nti.app.products.courseware.utils import get_vendor_thank_you_page
+
+from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
@@ -68,7 +69,7 @@ class _VendorThankYouInfoDecorator(object):
 	def _predicate(self, context, result):
 		return self._is_authenticated
 
-	def get_course( self, purchase_attempt ):
+	def get_course(self, purchase_attempt):
 		purchaseables = purchase_attempt.Items
 		catalog = component.getUtility(ICourseCatalog)
 		for item in purchaseables or ():
@@ -77,14 +78,14 @@ class _VendorThankYouInfoDecorator(object):
 				continue
 			for catalog_ntiid in purchasable.Items:
 				try:
-					entry = catalog.getCatalogEntry( catalog_ntiid )
-					course = ICourseInstance( entry )
+					entry = catalog.getCatalogEntry(catalog_ntiid)
+					course = ICourseInstance(entry)
 					return course
 				except KeyError:
 					logger.error("Could not find course entry %s", catalog_ntiid)
 
 	def decorateExternalMapping(self, context, result):
-		course = self.get_course( context )
-		thank_you_page = get_vendor_thank_you_page( course, self.thank_you_context_key )
+		course = self.get_course(context)
+		thank_you_page = get_vendor_thank_you_page(course, self.thank_you_context_key)
 		if thank_you_page:
 			result['VendorThankYouPage'] = thank_you_page
