@@ -112,6 +112,7 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that( vendor_info, has_key( 'StartDate' ))
 			assert_that( vendor_info, has_key( 'EndDate' ))
 			assert_that( vendor_info, has_key( 'Duration' ))
+			assert_that( vendor_info, has_key( 'Title' ))
 			
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_already_enrolled_exception(self):
