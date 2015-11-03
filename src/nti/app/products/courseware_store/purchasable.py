@@ -53,19 +53,16 @@ from .utils import get_entry_purchasable_provider
 def get_state(purchasable):
 	amount = int(purchasable.Amount * 100.0)  # cents
 	result = (amount, purchasable.Currency.upper(),
-			  purchasable.Public, purchasable.Giftable, 
+			  purchasable.Public, purchasable.Giftable,
 			  purchasable.Redeemable, purchasable.Fee)
 	return result
-
-# CS: Make sure this getters and setters are only set
-# to properties defined in the IPurchasableCourse interface
 
 _marker = object()
 
 class BaseProxyMixin(object):
 
 	AllowVendorUpdates = False
-	
+
 	@property
 	def lastSynchronized(self):
 		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
@@ -85,12 +82,12 @@ def StateChecker(clazz):
 		def __getattr__(self, attrname):
 			self.wrapped.check_state()
 			return getattr(self.wrapped, attrname)
-		
+
 		def __setattr__(self, attrname, attrvalue):
 			setattr(self.wrapped, attrname, attrvalue)
-	
+
 	return Wrapper
-		
+
 @StateChecker
 class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 
@@ -99,7 +96,7 @@ class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 
 	AllowVendorUpdates = False
 	CatalogEntryNTIID = None
-	
+
 	@CachedProperty('lastSynchronized')
 	def __state(self):
 		if not self.CatalogEntryNTIID:
