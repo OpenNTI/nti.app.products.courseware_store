@@ -62,32 +62,9 @@ def get_state(purchasable):
 
 _marker = object()
 
-def _setter(name):
-	def func(self, value):
-		self.__dict__[name] = value
-	return func
-
-def _getter(name):
-	def func(self):
-		self.check_state()
-		return self.__dict__.get(name, None)
-	return func
-
-def _alias(prop_name):
-	prop_name = str(prop_name)  # native string
-	return property(_getter(prop_name), _setter(prop_name))
-
 class BaseProxyMixin(object):
 
 	AllowVendorUpdates = False
-
-	Fee = _alias('Fee')
-	Amount = _alias('Amount')
-	Currency = _alias('Currency')
-
-	Public = _alias('Public')
-	Giftable = _alias('Giftable')
-	Redeemable = _alias('Redeemable')
 	
 	@property
 	def lastSynchronized(self):
@@ -98,13 +75,31 @@ class BaseProxyMixin(object):
 	def check_state(self):
 		pass
 
+def StateChecker(clazz):
+
+	class Wrapper(object):
+
+		def __init__(self, *args, **kargs):
+			self.__dict__['wrapped'] = clazz(*args, **kargs)
+
+		def __getattr__(self, attrname):
+			self.wrapped.check_state()
+			return getattr(self.wrapped, attrname)
+		
+		def __setattr__(self, attrname, attrvalue):
+			setattr(self.wrapped, attrname, attrvalue)
+	
+	return Wrapper
+		
+@StateChecker
 class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 
 	__external_class_name__ = 'PurchasableCourse'
 	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecourse'
 
+	AllowVendorUpdates = False
 	CatalogEntryNTIID = None
-
+	
 	@CachedProperty('lastSynchronized')
 	def __state(self):
 		if not self.CatalogEntryNTIID:
@@ -174,6 +169,7 @@ def _get_common_vendor_info(purchasables):
 	return result
 
 @interface.implementer(IPurchasableCourseChoiceBundle)
+@StateChecker
 class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProxyMixin):
 
 	__external_class_name__ = 'PurchasableCourseChoiceBundle'
