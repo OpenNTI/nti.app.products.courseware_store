@@ -111,6 +111,7 @@ class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
 				price = get_course_price(entry, provider)
 				if price is None:  # price removed
 					self.Public = False
+					logger.warn('Could not find price for %s', self.NTIID)
 				else:  # Update properties after sync
 					self.Amount = price.Amount
 					self.Currency = price.Currency
