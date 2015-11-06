@@ -27,6 +27,9 @@ from ZODB.POSException import POSError
 
 from nti.common.maps import CaseInsensitiveDict
 
+from nti.contenttypes.courses.interfaces import NTIID_ENTRY_TYPE
+from nti.contenttypes.courses.interfaces import NTIID_ENTRY_PROVIDER
+
 from nti.contenttypes.courses import get_course_vendor_info
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -44,6 +47,7 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 from nti.store import PURCHASABLE_COURSE
 from nti.store.store import get_purchasables
 
+from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
@@ -127,6 +131,13 @@ def get_course_purchasable_ntiid(context, name=None):
 					   nttype=PURCHASABLE_COURSE, specific=parts.specific)
 	return ntiid
 get_entry_purchasable_ntiid = get_course_purchasable_ntiid
+
+def get_entry_ntiid_from_purchasable(context, provider=NTIID_ENTRY_PROVIDER):
+	purchasable = IPurchasable(context)
+	parts = get_parts(purchasable.NTIID)
+	ntiid = make_ntiid(date=parts.date, provider=provider,
+					   nttype=NTIID_ENTRY_TYPE, specific=parts.specific)
+	return ntiid
 
 def get_nti_course_price(context):
 	vendor_info = get_vendor_info(context)
