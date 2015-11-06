@@ -204,13 +204,14 @@ from .register import register_purchasables
 
 @component.adapter(IApplicationTransactionOpenedEvent)
 def register_course_purchasables(*args, **kwargs):
-	total = 0
-	public = 0
-	logger.info("Registering purchasables")
+	result = []
+	logger.info("Registering course purchasables")
 	for site in get_all_host_sites():
 		with current_site(site):
-			result = register_purchasables()
-			total += len(result)
-			public += len([x for x in result if x.Public])
-			logger.info("%s purchasable(s) in site %s", len(result), site)
-	logger.info("%s purchasable(s) registered. %s  public one(s)", total, public)
+			registered = register_purchasables()
+			result.extend(registered)
+			logger.info("%s course purchasable(s) found in site %s", 
+						len(registered), site)
+	public = sum(1 for x in result if x.Public)
+	logger.info("%s course purchasable(s) registered. %s is/are public", 
+				len(result), public)

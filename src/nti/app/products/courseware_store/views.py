@@ -38,9 +38,11 @@ from nti.externalization.interfaces import StandardExternalFields
 
 from nti.ntiids.ntiids import find_object_with_ntiid
 
+from nti.store.interfaces import IPurchasableCourse
+
 from .utils import find_allow_vendor_updates_purchases
 
-from .register import register_site_purchasables
+from .register import register_purchasables
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -70,7 +72,7 @@ def _parse_course(params):
 
 @view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
-@view_defaults(	route_name='objects.generic.traversal',
+@view_defaults(route_name='objects.generic.traversal',
 				renderer='rest',
 			 	permission=nauth.ACT_NTI_ADMIN,
 			 	name='VendorUpdatesPurchasedCourse')
@@ -105,15 +107,36 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		response.content_disposition = b'attachment; filename="updates.csv"'
 		return response
 
+from zope.component.hooks import site as current_site
+
+from nti.site.hostpolicy import get_all_host_sites
+
 @view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
-@view_defaults(	route_name='objects.generic.traversal',
-				renderer='rest',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			 	name='RegisterCoursePurchasables')
-class RegisterCoursePurchasables(AbstractAuthenticatedView):
+@view_defaults(route_name='objects.generic.traversal',
+			   renderer='rest',
+			   request_method='POST',
+			   permission=nauth.ACT_NTI_ADMIN,
+			   name='ResetCoursePurchasables')
+class ResetCoursePurchasablesView(AbstractAuthenticatedView):
+
+	def _unregister(self):
+		result = 0
+		for name, purchasable in list(component.getUtilitiesFor(IPurchasableCourse)):
+			if component.getGlobalSiteManager().unregisterUtility(purchasable,
+															   	  IPurchasableCourse,
+																  name):
+				result += 1
+		return result
 
 	def __call__(self):
+		unregistered = self._unregister()
 		result = LocatedExternalDict()
-		result[ITEMS] = register_site_purchasables()
+		result[ITEMS] = items = []
+		for site in get_all_host_sites():
+			with current_site(site):
+				items.extend(register_purchasables())
+		result['Unregistered'] = unregistered
+		result['ItemCount'] = result['TotalCount'] = len(items)
+		result['PublicCount'] = sum(1 for x in items if x.Public)
 		return result
