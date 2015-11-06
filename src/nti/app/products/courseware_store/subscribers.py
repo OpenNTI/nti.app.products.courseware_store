@@ -206,4 +206,5 @@ from .register import register_purchasables
 def register_course_purchasables(*args, **kwargs):
 	for site in get_all_host_sites():
 		with current_site(site):
-			register_purchasables()
+			result = register_purchasables()
+			logger.info("%s purchasable(s) in site %s", len(result), site)
