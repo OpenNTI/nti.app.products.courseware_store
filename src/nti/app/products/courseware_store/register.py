@@ -54,6 +54,7 @@ def register_choice_bundles(bundle_map, registry=component, notify=True):
 		purchasable = process_choice_bundle(name, bundle, notify=notify)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
+			# TODO: Register in site manager when persistent purchasables are ready
 			registry.getGlobalSiteManager().registerUtility(purchasable,
 															IPurchasableCourseChoiceBundle,
 															name=name)
@@ -71,7 +72,7 @@ def register_purchasables(registry=component, notify=True):
 		purchasable = IPurchasableCourse(entry, None)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and registry.queryUtility(IPurchasableCourse, name=name) is None:
-			# register purchasable course
+			# TODO: Register in site manager when persistent purchasables are ready
 			registry.getGlobalSiteManager().registerUtility(purchasable, 
 															IPurchasableCourse, 
 															name=name)
