@@ -31,7 +31,6 @@ from nti.store.course import create_course
 from nti.store.course import PurchasableCourse
 from nti.store.course import PurchasableCourseChoiceBundle
 
-from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableVendorInfo
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
@@ -75,7 +74,6 @@ class BaseProxyMixin(object):
 
 def StateChecker(clazz):
 
-	@interface.implementer(IPurchasable)
 	class Wrapper(object):
 
 		def __init__(self, *args, **kargs):
