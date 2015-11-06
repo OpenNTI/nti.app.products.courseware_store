@@ -41,6 +41,7 @@ from .utils import find_catalog_entry
 from .utils import is_course_giftable
 from .utils import is_course_redeemable
 from .utils import get_nti_course_price
+from .utils import allow_vendor_updates
 from .utils import get_purchasable_cutoff_date
 from .utils import get_course_purchasable_name
 from .utils import get_course_purchasable_ntiid
@@ -140,6 +141,7 @@ def create_purchasable_from_course(context):
 								 department=entry.ProviderDepartmentTitle)
 
 	result.CatalogEntryNTIID = entry.ntiid
+	result.AllowVendorUpdates = allow_vendor_updates(entry)
 	return result
 
 @component.adapter(ICourseInstance)

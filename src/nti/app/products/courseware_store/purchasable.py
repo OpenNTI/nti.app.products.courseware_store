@@ -14,16 +14,10 @@ import datetime
 from numbers import Number
 from collections import defaultdict
 
-from zope import component
-from zope import interface
-
-from zope.traversing.interfaces import IEtcNamespace
-
-from nti.common.property import CachedProperty
+from zope.proxy import ProxyBase
 
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
-from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import PURCHASABLE_COURSE_CHOICE_BUNDLE
 
@@ -31,24 +25,10 @@ from nti.store.course import create_course
 from nti.store.course import PurchasableCourse
 from nti.store.course import PurchasableCourseChoiceBundle
 
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableVendorInfo
-from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.store.utils import to_list
 from nti.store.utils import to_frozenset
-
-from .interfaces import get_course_publishable_vendor_info
-
-from .utils import get_course_fee
-from .utils import get_course_price
-from .utils import is_course_giftable
-from .utils import is_course_redeemable
-from .utils import allow_vendor_updates
-from .utils import get_nti_choice_bundles
-from .utils import safe_find_catalog_entry
-from .utils import is_course_enabled_for_purchase
-from .utils import get_entry_purchasable_provider
 
 def get_state(purchasable):
 	amount = int(purchasable.Amount * 100.0)  # cents
@@ -59,81 +39,28 @@ def get_state(purchasable):
 
 _marker = object()
 
-class BaseProxyMixin(object):
+class PurchasableCourseProxy(ProxyBase):
 
-	AllowVendorUpdates = False
+	AllowVendorUpdates = property(
+					lambda s: s.__dict__.get('_v_allow_vendor_updates'),
+					lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
 
-	@property
-	def lastSynchronized(self):
-		hostsites = component.queryUtility(IEtcNamespace, name='hostsites')
-		result = getattr(hostsites, 'lastSynchronized', 0)
-		return result
+	CatalogEntryNTIID = property(
+					lambda s: s.__dict__.get('_v_catalog_entry_ntiid'),
+					lambda s, v: s.__dict__.__setitem__('_v_catalog_entry_ntiid', v))
+	
+	def __new__(cls, base, *args, **kwargs):
+		return ProxyBase.__new__(cls, base)
 
-	def check_state(self):
-		pass
-
-def StateChecker(clazz):
-
-	class Wrapper(object):
-
-		def __init__(self, *args, **kargs):
-			self.__dict__['wrapped'] = clazz(*args, **kargs)
-
-		def __getattr__(self, attrname):
-			self.wrapped.check_state()
-			return getattr(self.wrapped, attrname)
-
-		def __setattr__(self, attrname, attrvalue):
-			setattr(self.wrapped, attrname, attrvalue)
-
-	return Wrapper
-
-@StateChecker
-class PurchasableProxy(PurchasableCourse, BaseProxyMixin):
-
-	__external_class_name__ = 'PurchasableCourse'
-	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecourse'
-
-	AllowVendorUpdates = False
-	CatalogEntryNTIID = None
-
-	@CachedProperty('lastSynchronized')
-	def __state(self):
-		if not self.CatalogEntryNTIID:
-			return _marker
-		try:
-			entry = find_object_with_ntiid(self.CatalogEntryNTIID)
-			if entry is None:  # course removed
-				self.Public = False
-			else:
-				fee = get_course_fee(entry)
-				provider = get_entry_purchasable_provider(entry)
-				price = get_course_price(entry, provider)
-				if price is None:  # price removed
-					self.Public = False
-					logger.warn('Could not find price for %s', self.NTIID)
-				else:  # Update properties after sync
-					self.Amount = price.Amount
-					self.Currency = price.Currency
-					self.Giftable = is_course_giftable(entry)
-					self.Redeemable = is_course_redeemable(entry)
-					self.Fee = float(fee) if fee is not None else fee
-					self.Public = is_course_enabled_for_purchase(entry)
-					self.AllowVendorUpdates = allow_vendor_updates(entry)
-					vendor_info = get_course_publishable_vendor_info(entry)
-					self.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
-		except Exception:
-			# running outside a transaction?
-			self.Public = False
-		return _marker
-
-	def check_state(self):
-		return self.__state  # force a check on the properties values
+	def __init__(self, base, allow=None, entry=None):
+		ProxyBase.__init__(self, base)
+		self.AllowVendorUpdates = allow
+		self.CatalogEntryNTIID = entry
 
 def create_proxy_course(**kwargs):
-	kwargs['factory'] = PurchasableProxy
+	kwargs['factory'] = PurchasableCourse
 	result = create_course(**kwargs)
-	result.check_state()  # fix cached property
+	result = PurchasableCourseProxy(result)
 	return result
 
 def _items_and_ntiids(purchasables):
@@ -166,63 +93,25 @@ def _get_common_vendor_info(purchasables):
 	result = IPurchasableVendorInfo(result, None)
 	return result
 
-@interface.implementer(IPurchasableCourseChoiceBundle)
-@StateChecker
-class PurchasableCourseChoiceBundleProxy(PurchasableCourseChoiceBundle, BaseProxyMixin):
+class PurchasableCourseChoiceBundleProxy(ProxyBase):
 
-	__external_class_name__ = 'PurchasableCourseChoiceBundle'
-	mimeType = mime_type = 'application/vnd.nextthought.store.purchasablecoursechoicebundle'
+	AllowVendorUpdates = property(
+				lambda s: s.__dict__.get('_v_allow_vendor_updates'),
+				lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
 
-	Bundle = None
-	Purchasables = ()
+	Bundle = property(
+				lambda s: s.__dict__.get('_v_bundle'),
+				lambda s, v: s.__dict__.__setitem__('_v_bundle', v))
 
-	@CachedProperty('lastSynchronized')
-	def __state(self):
-		if not self.Purchasables:
-			return _marker
-
-		validated = []
-		ref_state = get_state(self)
-		for name in self.Purchasables:
-			# make sure underlying purchasable course exists
-			purchasable = component.getUtility(IPurchasableCourse, name=name)
-			if purchasable is None:
-				logger.warn("Purchasable %s was not found", name)
-				continue
-
-			# make sure choice bundles have not changed
-			ntiid = getattr(purchasable, 'CatalogEntryNTIID', None)
-			entry = safe_find_catalog_entry(ntiid)
-			choice_bundles = get_nti_choice_bundles(entry)
-			if choice_bundles and not self.Bundle in choice_bundles:
-				logger.warn(
-					"Purchasable %s has been dropped from bundle %s for course %s",
-					purchasable.NTIID, self.NTIID, ntiid)
-				continue
-
-			# make sure state has not changed
-			p_state = get_state(purchasable)
-			if p_state != ref_state:
-				logger.warn(
-					"Purchasable %s has been dropped from bundle %s because "
-					"its state %s changed", 	purchasable.NTIID, self.NTIID, p_state)
-				continue
-			validated.append(purchasable)
-
-		if len(validated) > 1:
-			if len(validated) != len(self.Purchasables):
-				items, ntiids = _items_and_ntiids(validated)
-				self.Items = items
-				self.Purchasables = ntiids
-				self.VendorInfo = _get_common_vendor_info(validated)
-				logger.warn("Purchasable bundle %s now refers to %s", self.NTIID, items)
-		else:
-			self.Public = False
-			logger.warn("Purchasable bundle %s is no longer valid", self.NTIID)
-		return _marker
-
-	def check_state(self):
-		self.__state  # force a check on the properties values
+	Purchasables = property(
+				lambda s: s.__dict__.get('_v_purchasables'),
+				lambda s, v: s.__dict__.__setitem__('_v_purchasables', v))
+	
+	def __init__(self, base, allow=None, bundle=None, purchasables=()):
+		ProxyBase.__init__(self, base)
+		self.Bundle = bundle
+		self.AllowVendorUpdates = allow
+		self.Purchasables = purchasables
 
 def create_course_choice_bundle(name, purchasables, proxy=True):
 	purchasables = to_list(purchasables)
@@ -232,9 +121,6 @@ def create_course_choice_bundle(name, purchasables, proxy=True):
 	ntiid = make_ntiid(provider=reference_purchasable.Provider,
 					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
 					   specific=specific)
-
-	factory = PurchasableCourseChoiceBundleProxy \
-			  if proxy else PurchasableCourseChoiceBundle
 
 	# gather items and ntiids
 	items, ntiids = _items_and_ntiids(purchasables)
@@ -251,13 +137,9 @@ def create_course_choice_bundle(name, purchasables, proxy=True):
 						   giftable=reference_purchasable.Giftable,
 						   redeemable=reference_purchasable.Redeemable,
 						   vendor_info=_get_common_vendor_info(purchasables),
-						   factory=factory)
+						   factory=PurchasableCourseChoiceBundle)
 
-	if hasattr(result, "check_state"):
-		# fix cached property
-		result.check_state()
-
-	# save properties
+	result = PurchasableCourseChoiceBundleProxy(result)
 	result.Bundle = name
 	result.Purchasables = ntiids
 	return result
