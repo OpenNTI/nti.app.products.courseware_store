@@ -47,16 +47,16 @@ def process_choice_bundle(name, bundle, proxy=True, notify=True):
 		logger.warn("Bundle %s will not be created. Not enough purchasables", name)
 	return result
 
-def register_choice_bundles(bundle_map, registry, notify=True):
+def register_choice_bundles(bundle_map, registry=component, notify=True):
 	result = []
 	for name, bundle in bundle_map.items():
 		logger.debug("Creating purchasable bundle %s", name)
 		purchasable = process_choice_bundle(name, bundle, notify=notify)
 		name = getattr(purchasable, 'NTIID', None)
 		if name and not registry.queryUtility(IPurchasableCourseChoiceBundle, name=name):
-			registry.provideUtility(purchasable,
-									IPurchasableCourseChoiceBundle,
-									name=name)
+			registry.getGlobalSiteManager().registerUtility(purchasable,
+															IPurchasableCourseChoiceBundle,
+															name=name)
 			if notify:
 				lifecycleevent.created(purchasable)
 			result.append(purchasable)
@@ -72,7 +72,9 @@ def register_purchasables(registry=component, notify=True):
 		name = getattr(purchasable, 'NTIID', None)
 		if name and registry.queryUtility(IPurchasableCourse, name=name) is None:
 			# register purchasable course
-			registry.provideUtility(purchasable, IPurchasableCourse, name=name)
+			registry.getGlobalSiteManager().registerUtility(purchasable, 
+															IPurchasableCourse, 
+															name=name)
 			result.append(purchasable)
 			if notify:
 				lifecycleevent.created(purchasable)
@@ -87,16 +89,17 @@ def register_purchasables(registry=component, notify=True):
 	result.extend(choice_bundles)
 	return result
 
+# XXX: Persistent purchasables
+
 from nti.store.store import register_purchasable as store_register_purchasable
 
 from .adapters import create_purchasable_from_course
 
-def register_site_purchasables(registry=None, seen=None):
+def register_site_purchasables(registry=component, seen=None):
 	result = []
 	choice_bundle_map = defaultdict(list)
 	seen = set() if seen is None else seen
 	catalog = component.getUtility(ICourseCatalog)
-	registry = registry if registry is not None else component.getGlobalSiteManager()
 	for entry in catalog.iterCatalogEntries():
 		if entry.ntiid in seen:
 			continue
