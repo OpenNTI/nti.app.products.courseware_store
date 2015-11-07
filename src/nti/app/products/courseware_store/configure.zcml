@@ -56,10 +56,12 @@
 	<subscriber handler=".subscribers._gift_purchase_attempt_redeemed" />
 	<subscriber handler=".subscribers._redeemed_purchase_attempt_refunded" />
 
+	<!-- 
 	<subscriber handler=".subscribers.on_course_instance_removed" />
 	<subscriber handler=".subscribers.on_course_catalog_did_sync" />
 	<subscriber handler=".subscribers.on_course_vendor_info_synced" />
-	
+	 -->
+	 
 	<!-- publishable vendor info -->
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseInstance"
