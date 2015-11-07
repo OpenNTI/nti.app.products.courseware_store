@@ -12,7 +12,7 @@ logger = __import__('logging').getLogger(__name__)
 import six
 from itertools import chain
 
-import zope.intid
+from zope.intid import IIntIds
 
 from zope import component
 
@@ -27,10 +27,11 @@ from ZODB.POSException import POSError
 
 from nti.common.maps import CaseInsensitiveDict
 
+from nti.contenttypes.courses import get_course_vendor_info
+
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_TYPE
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_PROVIDER
 
-from nti.contenttypes.courses import get_course_vendor_info
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -207,7 +208,7 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 	ntiid = get_entry_purchasable_ntiid(entry, provider)
 			
 	result = []
-	intids = component.getUtility(zope.intid.IIntIds)	
+	intids = component.getUtility(IIntIds)	
 	for uid in intids_purchases:
 		try:
 			purchase = intids.queryObject(uid)

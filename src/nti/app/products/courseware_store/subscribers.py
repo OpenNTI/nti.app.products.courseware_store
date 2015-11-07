@@ -37,7 +37,6 @@ from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
 from nti.contenttypes.courses.interfaces import ICourseCatalogDidSyncEvent
 from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
@@ -69,8 +68,6 @@ from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 from .interfaces import StoreEnrollmentEvent
 
 from .purchasable import sync_purchasable_course
-
-from .utils import get_course_purchasable_ntiid
 
 # enrollment subscribers
 
@@ -211,24 +208,25 @@ def _enrollment_record_dropped(record, event):
 
 @component.adapter(ICourseVendorInfoSynchronized)
 def on_course_vendor_info_synced(event):
-	if component.getSiteManager() != component.getGlobalSiteManager():
-		context = event.object
-		purchasable = sync_purchasable_course(context)
-		if purchasable is not None:
-			lifecycleevent.modified(purchasable)
+	if component.getSiteManager() == component.getGlobalSiteManager():
+		return
+	else:
+		sync_purchasable_course(event.object)
 
 @component.adapter(ICourseCatalogDidSyncEvent)
 def on_course_catalog_did_sync(event):
-	pass
+	if component.getSiteManager() == component.getGlobalSiteManager():
+		return
 		
 @component.adapter(ICourseInstance, IObjectRemovedEvent)
 def on_course_instance_removed(course, event):
-	entry = ICourseCatalogEntry(course, None)
-	ntiid = get_course_purchasable_ntiid(entry) if entry is not None else None
-	purchasable = get_purchasable(ntiid) if ntiid else None
-	if purchasable is not None:
-		purchasable.Public = False
-		lifecycleevent.modified(purchasable)
+	if component.getSiteManager() == component.getGlobalSiteManager():
+		return
+	else:
+		purchasable = IPurchasableCourse(course, None)
+		if purchasable is not None:
+			purchasable.Public = False
+			lifecycleevent.modified(purchasable)
 		
 from zope.component.hooks import site as current_site
 

@@ -55,8 +55,8 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 		result['Enabled'] = result['IsAvailable'] = isAvailable
 		result.pop('IsEnabled', None)  # redundant
 
-@interface.implementer(IExternalMappingDecorator)
 @component.adapter(IGiftPurchaseAttempt)
+@interface.implementer(IExternalMappingDecorator)
 class _VendorThankYouInfoDecorator(object):
 	"""
 	Decorate the thank you page information for gifts.
@@ -81,7 +81,7 @@ class _VendorThankYouInfoDecorator(object):
 					entry = catalog.getCatalogEntry(catalog_ntiid)
 					course = ICourseInstance(entry)
 					return course
-				except KeyError:
+				except (KeyError, LookupError):
 					logger.error("Could not find course entry %s", catalog_ntiid)
 
 	def decorateExternalMapping(self, context, result):

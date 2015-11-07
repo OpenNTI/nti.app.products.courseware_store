@@ -21,8 +21,10 @@ from numbers import Number
 from collections import defaultdict
 
 from zope import component
+from zope import interface
+from zope import lifecycleevent
 
-from zope.proxy import ProxyBase
+from nti.common.property import alias
 
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
@@ -31,6 +33,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
+from nti.dataserver_core.interfaces import IContained
+
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
 from nti.ntiids.ntiids import find_object_with_ntiid
@@ -38,8 +42,8 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 from nti.store import PURCHASABLE_COURSE_CHOICE_BUNDLE
 
 from nti.store.course import create_course
-from nti.store.course import PurchasableCourse
-from nti.store.course import PurchasableCourseChoiceBundle
+from nti.store.course import PurchasableCourse as StorePurchasableCourse
+from nti.store.course import PurchasableCourseChoiceBundle as StorePurchasableCourseChoiceBundle
 
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableVendorInfo
@@ -71,28 +75,18 @@ from .interfaces import get_course_publishable_vendor_info
 
 # Purchasable courses
 
-class PurchasableCourseProxy(ProxyBase):
+@interface.implementer(IContained)
+class PurchasableCourse(StorePurchasableCourse):
 
-	AllowVendorUpdates = property(
-					lambda s: s.__dict__.get('_v_allow_vendor_updates'),
-					lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
+	containerId = None
+	allow_vendor_updates = None
 
-	CatalogEntryNTIID = property(
-					lambda s: s.__dict__.get('_v_catalog_entry_ntiid'),
-					lambda s, v: s.__dict__.__setitem__('_v_catalog_entry_ntiid', v))
-
-	def __new__(cls, base, *args, **kwargs):
-		return ProxyBase.__new__(cls, base)
-
-	def __init__(self, base, allow=None, entry=None):
-		ProxyBase.__init__(self, base)
-		self.AllowVendorUpdates = allow
-		self.CatalogEntryNTIID = entry
+	CatalogEntryNTIID = alias('containerId')
+	AllowVendorUpdates = alias('allow_vendor_updates')
 
 def create_proxy_course(**kwargs):
 	kwargs['factory'] = PurchasableCourse
 	result = create_course(**kwargs)
-	result = PurchasableCourseProxy(result)
 	return result
 
 def create_purchasable_from_course(context):
@@ -172,8 +166,8 @@ def create_purchasable_from_course(context):
 								 signature=entry.InstructorsSignature,
 								 department=entry.ProviderDepartmentTitle)
 
-	result.CatalogEntryNTIID = entry.ntiid
-	result.AllowVendorUpdates = allow_vendor_updates(entry)
+	result.containerId = entry.ntiid
+	result.allow_vendor_updates = allow_vendor_updates(entry)
 	return result
 
 def adjust_purchasable_course(purchasable, entry=None):
@@ -213,9 +207,11 @@ def sync_purchasable_course(context):
 	purchasable = get_purchasable(ntiid)
 	if purchasable is not None:
 		adjust_purchasable_course(purchasable, entry)
+		lifecycleevent.modified(purchasable)
 	else:
 		purchasable = create_purchasable_from_course(context)
 		if purchasable is not None:
+			lifecycleevent.created(purchasable)
 			register_purchasable(purchasable)
 	return purchasable
 
@@ -258,25 +254,14 @@ def get_common_vendor_info(purchasables):
 	result = IPurchasableVendorInfo(result, None)
 	return result
 
-class PurchasableCourseChoiceBundleProxy(ProxyBase):
+class PurchasableCourseChoiceBundle(StorePurchasableCourseChoiceBundle):
 
-	AllowVendorUpdates = property(
-				lambda s: s.__dict__.get('_v_allow_vendor_updates'),
-				lambda s, v: s.__dict__.__setitem__('_v_allow_vendor_updates', v))
+	bundle = None
+	purchasables = None
+	allow_vendor_updates = None
 
-	Bundle = property(
-				lambda s: s.__dict__.get('_v_bundle'),
-				lambda s, v: s.__dict__.__setitem__('_v_bundle', v))
-
-	Purchasables = property(
-				lambda s: s.__dict__.get('_v_purchasables'),
-				lambda s, v: s.__dict__.__setitem__('_v_purchasables', v))
-
-	def __init__(self, base, allow=None, bundle=None, purchasables=()):
-		ProxyBase.__init__(self, base)
-		self.Bundle = bundle
-		self.AllowVendorUpdates = allow
-		self.Purchasables = purchasables
+	Bundle = alias('bundle')
+	Purchasables = alias('purchasables')
 
 def get_course_choice_bundle_ntiid(name, purchasables):
 	purchasables = to_list(purchasables)
@@ -309,7 +294,6 @@ def create_course_choice_bundle(name, purchasables):
 						   vendor_info=get_common_vendor_info(purchasables),
 						   factory=PurchasableCourseChoiceBundle)
 
-	result = PurchasableCourseChoiceBundleProxy(result)
 	result.Bundle = name
 	result.Purchasables = ntiids
 	return result
