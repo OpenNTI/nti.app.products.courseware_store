@@ -39,6 +39,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
+from nti.contenttypes.courses.interfaces import ICourseCatalogDidSyncEvent
 from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
@@ -215,6 +216,10 @@ def on_course_vendor_info_synced(event):
 	if purchasable is not None:
 		lifecycleevent.modified(purchasable)
 
+@component.adapter(ICourseCatalogDidSyncEvent)
+def on_course_catalog_did_sync(event):
+	pass
+		
 @component.adapter(ICourseInstance, IObjectRemovedEvent)
 def on_course_instance_removed(course, event):
 	entry = ICourseCatalogEntry(course, None)
@@ -223,7 +228,7 @@ def on_course_instance_removed(course, event):
 	if purchasable is not None:
 		purchasable.Public = False
 		lifecycleevent.modified(purchasable)
-
+		
 from zope.component.hooks import site as current_site
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
