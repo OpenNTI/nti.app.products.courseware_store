@@ -103,7 +103,7 @@ def adjust_purchasable_course(purchasable, entry=None):
 			purchasable.AllowVendorUpdates = allow_vendor_updates(entry)
 	return purchasable
 
-def adjust_purchasable_course_from_course(context):
+def sync_purchasable_course(context):
 	entry = ICourseCatalogEntry(context)
 	ntiid = get_course_purchasable_ntiid(entry)
 	purchasable = get_purchasable(ntiid)

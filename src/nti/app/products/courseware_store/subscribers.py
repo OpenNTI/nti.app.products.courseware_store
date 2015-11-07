@@ -18,6 +18,8 @@ from zope import lifecycleevent
 
 from zope.event import notify
 
+from zope.lifecycleevent.interfaces import IObjectRemovedEvent
+
 from zope.security.management import queryInteraction
 
 from pyramid import httpexceptions as hexc
@@ -29,11 +31,15 @@ from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
 from nti.appserver.workspaces.interfaces import IUserService
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
+
+from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
-from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseEnrollmentManager
+from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
 from nti.contenttypes.courses.utils import get_enrollment_record
@@ -60,6 +66,12 @@ from nti.store.interfaces import IPurchaseAttemptSuccessful
 from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 
 from .interfaces import StoreEnrollmentEvent
+
+from .purchasable import sync_purchasable_course
+
+from .utils import get_course_purchasable_ntiid
+
+# enrollment subscribers
 
 def get_user(user):
 	result = User.get_user(str(user)) if user and not IUser.providedBy(user) else user
@@ -193,6 +205,24 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 def _enrollment_record_dropped(record, event):
 	if record.Scope == ES_PURCHASED and queryInteraction() is not None:
 		raise hexc.HTTPForbidden('Cannot drop a purchased course.')
+
+# course subscribers
+
+@component.adapter(ICourseVendorInfoSynchronized)
+def on_course_vendor_info_synced(event):
+	context = event.object
+	purchasable = sync_purchasable_course(context)
+	if purchasable is not None:
+		lifecycleevent.modified(purchasable)
+
+@component.adapter(ICourseInstance, IObjectRemovedEvent)
+def on_course_instance_removed(course, event):
+	entry = ICourseCatalogEntry(course, None)
+	ntiid = get_course_purchasable_ntiid(entry) if entry is not None else None
+	purchasable = get_purchasable(ntiid) if ntiid else None
+	if purchasable is not None:
+		purchasable.Public = False
+		lifecycleevent.modified(purchasable)
 
 from zope.component.hooks import site as current_site
 
