@@ -72,7 +72,7 @@ from nti.store.store import register_purchasable as store_register_purchasable
 
 from .adapters import create_purchasable_from_course
 
-def register_site_purchasables(registry=component, seen=None):
+def register_site_purchasables(registry=None, seen=None):
 	result = []
 	choice_bundle_map = defaultdict(list)
 	seen = set() if seen is None else seen
@@ -91,7 +91,7 @@ def register_site_purchasables(registry=component, seen=None):
 				choice_bundle_map[name].append(purchasable)
 
 	for name, bundle in choice_bundle_map.items():
-		purchasable = process_choice_bundle(name, bundle, notify=False, proxy=False)
+		purchasable = process_choice_bundle(name, bundle, notify=False)
 		if purchasable is not None:
 			item = store_register_purchasable(purchasable, registry=registry)
 			if item is not None:

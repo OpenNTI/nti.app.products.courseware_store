@@ -55,7 +55,7 @@ class TestAdapters(ApplicationLayerTest):
 				return entry
 
 	@WithSharedApplicationMockDS(testapp=True,users=True)
-	@fudge.patch('nti.app.products.courseware_store.adapters.is_course_enabled_for_purchase')
+	@fudge.patch('nti.app.products.courseware_store.purchasable.is_course_enabled_for_purchase')
 	def test_adapter(self, mock_isce):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			# is enabled

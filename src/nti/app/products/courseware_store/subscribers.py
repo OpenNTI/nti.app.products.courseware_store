@@ -211,10 +211,11 @@ def _enrollment_record_dropped(record, event):
 
 @component.adapter(ICourseVendorInfoSynchronized)
 def on_course_vendor_info_synced(event):
-	context = event.object
-	purchasable = sync_purchasable_course(context)
-	if purchasable is not None:
-		lifecycleevent.modified(purchasable)
+	if component.getSiteManager() != component.getGlobalSiteManager():
+		context = event.object
+		purchasable = sync_purchasable_course(context)
+		if purchasable is not None:
+			lifecycleevent.modified(purchasable)
 
 @component.adapter(ICourseCatalogDidSyncEvent)
 def on_course_catalog_did_sync(event):
