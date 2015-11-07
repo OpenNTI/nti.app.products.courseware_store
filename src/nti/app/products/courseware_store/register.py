@@ -19,33 +19,9 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
-from .purchasable import get_state
-from .purchasable import create_course_choice_bundle
+from .purchasable import process_choice_bundle
 
 from .utils import get_nti_choice_bundles
-
-def process_choice_bundle(name, bundle, proxy=True, notify=True):
-	state = None
-	validated = []
-
-	for purchasable in bundle or ():
-		p_state = get_state(purchasable)
-		if state is None:
-			state = p_state
-			validated.append(purchasable)
-		elif state == p_state:
-			validated.append(purchasable)
-		elif notify:
-			logger.warn("Purchasable %s(%s) will not be included in bundle %s",
-						purchasable.NTIID, p_state, name)
-
-	# there is something to create
-	if len(validated) >= 1:
-		result = create_course_choice_bundle(name, validated, proxy=proxy)
-	elif notify:
-		result = None
-		logger.warn("Bundle %s will not be created. Not enough purchasables", name)
-	return result
 
 def register_choice_bundles(bundle_map, registry=component, notify=True):
 	result = []

@@ -46,14 +46,7 @@ from .utils import get_entry_ntiid_from_purchasable
 
 from .interfaces import get_course_publishable_vendor_info
 
-def get_state(purchasable):
-	amount = int(purchasable.Amount * 100.0)  # cents
-	result = (amount, purchasable.Currency.upper(),
-			  purchasable.Public, purchasable.Giftable,
-			  purchasable.Redeemable, purchasable.Fee)
-	return result
-
-_marker = object()
+# Purchasable courses
 
 class PurchasableCourseProxy(ProxyBase):
 
@@ -77,6 +70,54 @@ def create_proxy_course(**kwargs):
 	kwargs['factory'] = PurchasableCourse
 	result = create_course(**kwargs)
 	result = PurchasableCourseProxy(result)
+	return result
+
+def adjust_purchasable_course(purchasable, entry=None):
+	if entry is None:
+		ntiid = getattr(purchasable, 'CatalogEntryNTIID', None)
+		ntiid = ntiid or get_entry_ntiid_from_purchasable(purchasable)
+		entry = find_object_with_ntiid(ntiid)
+	if entry is None: # course removed
+		purchasable.Public = False 
+	else:
+		fee = get_course_fee(entry)
+		provider = get_entry_purchasable_provider(entry)
+		price = get_course_price(entry, provider)
+		if price is None:  # price removed
+			purchasable.Public = False
+			logger.warn('Could not find price for %s', purchasable.NTIID)
+		else:  
+			purchasable.Public = True
+
+			# Update price properties
+			purchasable.Amount = price.Amount
+			purchasable.Currency = price.Currency
+			purchasable.Giftable = is_course_giftable(entry)
+			purchasable.Redeemable = is_course_redeemable(entry)
+			purchasable.Fee = float(fee) if fee is not None else fee
+			purchasable.Public = is_course_enabled_for_purchase(entry)
+			
+			# set vendor info fields
+			vendor_info = get_course_publishable_vendor_info(entry)
+			purchasable.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
+			purchasable.AllowVendorUpdates = allow_vendor_updates(entry)
+	return purchasable
+
+def adjust_purchasable_course_from_course(context):
+	entry = ICourseCatalogEntry(context)
+	ntiid = get_course_purchasable_ntiid(entry)
+	purchasable = get_purchasable(ntiid)
+	if purchasable is not None:
+		adjust_purchasable_course(purchasable, entry)
+	return purchasable
+
+# purchasable course choice bundles
+
+def get_state(purchasable):
+	amount = int(purchasable.Amount * 100.0)  # cents
+	result = (amount, purchasable.Currency.upper(),
+			  purchasable.Public, purchasable.Giftable,
+			  purchasable.Redeemable, purchasable.Fee)
 	return result
 
 def _items_and_ntiids(purchasables):
@@ -129,14 +170,19 @@ class PurchasableCourseChoiceBundleProxy(ProxyBase):
 		self.AllowVendorUpdates = allow
 		self.Purchasables = purchasables
 
-def create_course_choice_bundle(name, purchasables, proxy=True):
+def get_course_choice_bundle_ntiid(name, purchasables):
 	purchasables = to_list(purchasables)
 	reference_purchasable = purchasables[0]
-
 	specific = make_specific_safe(name)
 	ntiid = make_ntiid(provider=reference_purchasable.Provider,
 					   nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
 					   specific=specific)
+	return ntiid
+
+def create_course_choice_bundle(name, purchasables):
+	purchasables = to_list(purchasables)
+	reference_purchasable = purchasables[0]
+	ntiid = get_course_choice_bundle_ntiid(name, purchasables)
 
 	# gather items and ntiids
 	items, ntiids = _items_and_ntiids(purchasables)
@@ -160,43 +206,25 @@ def create_course_choice_bundle(name, purchasables, proxy=True):
 	result.Purchasables = ntiids
 	return result
 
-def adjust_purchasable_course(purchasable, ntiid=None):
-	ntiid = ntiid or getattr(purchasable, 'CatalogEntryNTIID', None)
-	ntiid = ntiid or get_entry_ntiid_from_purchasable(purchasable)
-	entry = find_object_with_ntiid(ntiid)
-	if entry is None: # course removed
-		purchasable.Public = False 
-	else:
-		fee = get_course_fee(entry)
-		provider = get_entry_purchasable_provider(entry)
-		price = get_course_price(entry, provider)
-		if price is None:  # price removed
-			purchasable.Public = False
-			logger.warn('Could not find price for %s', purchasable.NTIID)
-		else:  
-			purchasable.Public = True
+def process_choice_bundle(name, purchasables, notify=True):
+	state = None
+	validated = []
 
-			# Update price properties
-			purchasable.Amount = price.Amount
-			purchasable.Currency = price.Currency
-			purchasable.Giftable = is_course_giftable(entry)
-			purchasable.Redeemable = is_course_redeemable(entry)
-			purchasable.Fee = float(fee) if fee is not None else fee
-			purchasable.Public = is_course_enabled_for_purchase(entry)
-			
-			# set publishable vendor info
-			vendor_info = get_course_publishable_vendor_info(entry)
-			purchasable.VendorInfo = IPurchasableVendorInfo(vendor_info, None)
-			
-			# reset it just in case
-			purchasable.CatalogEntryNTIID = ntiid
-			purchasable.AllowVendorUpdates = allow_vendor_updates(entry)
-	return purchasable
+	for purchasable in purchasables or ():
+		p_state = get_state(purchasable)
+		if state is None:
+			state = p_state
+			validated.append(purchasable)
+		elif state == p_state:
+			validated.append(purchasable)
+		elif notify:
+			logger.warn("Purchasable %s(%s) will not be included in bundle %s",
+						purchasable.NTIID, p_state, name)
 
-def adjust_purchasable_course_from_course(context):
-	entry = ICourseCatalogEntry(context)
-	ntiid = get_course_purchasable_ntiid(entry)
-	purchasable = get_purchasable(ntiid)
-	if purchasable is not None:
-		adjust_purchasable_course(purchasable, entry.ntiid)
-	return purchasable
+	# there is something to process
+	if validated:
+		result = create_course_choice_bundle(name, validated)
+	elif notify:
+		result = None
+		logger.warn("Bundle %s will not be created. Not enough purchasables", name)
+	return result
