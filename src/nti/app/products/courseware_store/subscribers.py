@@ -68,6 +68,7 @@ from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 from .interfaces import StoreEnrollmentEvent
 
 from .purchasable import sync_purchasable_course
+from .purchasable import sync_purchasable_course_choice_bundles
 
 # enrollment subscribers
 
@@ -217,7 +218,9 @@ def on_course_vendor_info_synced(event):
 def on_course_catalog_did_sync(event):
 	if component.getSiteManager() == component.getGlobalSiteManager():
 		return
-		
+	else:
+		sync_purchasable_course_choice_bundles()
+
 @component.adapter(ICourseInstance, IObjectRemovedEvent)
 def on_course_instance_removed(course, event):
 	if component.getSiteManager() == component.getGlobalSiteManager():
@@ -227,7 +230,7 @@ def on_course_instance_removed(course, event):
 		if purchasable is not None:
 			purchasable.Public = False
 			lifecycleevent.modified(purchasable)
-		
+
 from zope.component.hooks import site as current_site
 
 from nti.processlifetime import IApplicationTransactionOpenedEvent
