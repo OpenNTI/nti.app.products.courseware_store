@@ -21,10 +21,7 @@ from numbers import Number
 from collections import defaultdict
 
 from zope import component
-from zope import interface
 from zope import lifecycleevent
-
-from nti.common.property import alias
 
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
@@ -32,8 +29,6 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
-
-from nti.dataserver_core.interfaces import IContained
 
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
@@ -73,19 +68,9 @@ from .interfaces import get_course_publishable_vendor_info
 
 # Purchasable courses
 
-@interface.implementer(IContained)
 class PurchasableCourse(StorePurchasableCourse):
-
-	containerId = None
-	allow_vendor_updates = None
-
-	CatalogEntryNTIID = alias('containerId')
-	AllowVendorUpdates = alias('allow_vendor_updates')
-
-def create_proxy_course(**kwargs):
-	kwargs['factory'] = PurchasableCourse
-	result = create_course(**kwargs)
-	return result
+	CatalogEntryNTIID = None
+	AllowVendorUpdates = None
 
 def create_purchasable_from_course(context):
 	course = ICourseInstance(context)
@@ -141,31 +126,33 @@ def create_purchasable_from_course(context):
 	title = get_course_purchasable_title(course) or entry.title
 
 	vendor_info = get_course_publishable_vendor_info(course)
-	result = create_proxy_course(ntiid=ntiid,
-								 items=items,
-								 name=name,
-								 title=title,
-								 provider=provider,
-								 public=public,
-								 fee=fee,
-								 amount=amount,
-								 currency=currency,
-								 giftable=giftable,
-								 redeemable=redeemable,
-								 vendor_info=vendor_info,
-								 description=entry.description,
-								 purchase_cutoff_date=purchase_cutoff_date,
-								 redeem_cutoff_date=redeem_cutoff_date,
-								 # deprecated/legacy
-								 icon=icon,
-								 preview=preview,
-								 thumbnail=thumbnail,
-								 startdate=start_date,
-								 signature=entry.InstructorsSignature,
-								 department=entry.ProviderDepartmentTitle)
-
-	result.containerId = entry.ntiid
-	result.allow_vendor_updates = allow_vendor_updates(entry)
+	result = create_course(	ntiid=ntiid,
+							items=items,
+							name=name,
+							title=title,
+							provider=provider,
+							public=public,
+							fee=fee,
+							amount=amount,
+							currency=currency,
+							giftable=giftable,
+							redeemable=redeemable,
+							vendor_info=vendor_info,
+							description=entry.description,
+							purchase_cutoff_date=purchase_cutoff_date,
+							redeem_cutoff_date=redeem_cutoff_date,
+							# deprecated/legacy
+							icon=icon,
+							preview=preview,
+							thumbnail=thumbnail,
+							startdate=start_date,
+							signature=entry.InstructorsSignature,
+							department=entry.ProviderDepartmentTitle,
+							# initializer
+							factory=PurchasableCourse)	
+	# save non-public properties
+	result.CatalogEntryNTIID = entry.ntiid
+	result.AllowVendorUpdates = allow_vendor_updates(entry)
 	return result
 
 def update_purchasable_course(purchasable, entry):
@@ -246,13 +233,8 @@ def get_common_vendor_info(purchasables):
 	return result
 
 class PurchasableCourseChoiceBundle(StorePurchasableCourseChoiceBundle):
-
-	bundle = None
-	purchasables = None
-	allow_vendor_updates = None
-
-	Bundle = alias('bundle')
-	Purchasables = alias('purchasables')
+	Bundle = None
+	Purchasables = None
 
 def get_course_choice_bundle_ntiid(name, purchasables):
 	purchasables = to_list(purchasables)
@@ -289,6 +271,7 @@ def create_course_choice_bundle(name, purchasables):
 						   vendor_info=get_common_vendor_info(purchasables),
 						   factory=PurchasableCourseChoiceBundle)
 
+	# save non-public properties
 	result.Bundle = name
 	result.Purchasables = ntiids
 	return result
@@ -333,8 +316,10 @@ def get_registered_choice_bundles(registry=component):
 	return result
 
 def update_purchasable_course_choice_bundle(stored, source, validated):
+	# update non-publicp properties
 	stored.Bundle = source.Bundle
 	stored.Purchasables = source.Purchasables
+	# update public properties
 	reference_purchasable = get_reference_purchasable(validated)
 	stored.Fee = reference_purchasable.Fee,
 	stored.Public = reference_purchasable.Public,
