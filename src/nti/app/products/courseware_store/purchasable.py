@@ -43,8 +43,6 @@ from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableVendorInfo
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
-from nti.store.purchasable import get_purchasable
-
 from nti.store.store import register_purchasable
 
 from nti.store.utils import to_list
@@ -180,9 +178,8 @@ def update_purchasable_course(purchasable, entry):
 	return purchasable
 
 def sync_purchasable_course(context):
-	entry = ICourseCatalogEntry(context)
-	ntiid = get_course_purchasable_ntiid(entry)
-	purchasable = get_purchasable(ntiid)
+	entry = ICourseCatalogEntry(context, None)
+	purchasable = IPurchasableCourse(entry, None)
 	if purchasable is not None:
 		update_purchasable_course(purchasable, entry)
 		lifecycleevent.modified(purchasable)
