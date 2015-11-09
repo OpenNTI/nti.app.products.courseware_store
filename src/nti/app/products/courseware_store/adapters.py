@@ -30,6 +30,7 @@ from .purchasable import create_purchasable_from_course
 
 from .utils import find_catalog_entry
 from .utils import get_nti_course_price
+from .utils import get_entry_ntiid_from_purchasable
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
@@ -52,7 +53,10 @@ def _course_to_purchasable(course):
 @component.adapter(IPurchasableCourse)
 @interface.implementer(ICourseCatalogEntry)
 def _purchasable_to_catalog_entry(purchasable):
-	ntiid = getattr(purchasable, 'CatalogEntryNTIID', None) or u''
+	try:
+		ntiid = purchasable.CatalogEntryNTIID
+	except AttributeError:
+		ntiid = get_entry_ntiid_from_purchasable(purchasable)
 	result = find_catalog_entry(ntiid) if ntiid else None
 	return result
 
