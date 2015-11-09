@@ -56,11 +56,9 @@
 	<subscriber handler=".subscribers._gift_purchase_attempt_redeemed" />
 	<subscriber handler=".subscribers._redeemed_purchase_attempt_refunded" />
 
-	<!--
 	<subscriber handler=".subscribers.on_course_instance_removed" />
 	<subscriber handler=".subscribers.on_course_catalog_did_sync" /> 
 	<subscriber handler=".subscribers.on_course_vendor_info_synced" />
- 	-->
 
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseInstance"
@@ -73,11 +71,6 @@
 	<subscriber	factory=".enrollment.StoreEnrollmentOptionProvider"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
 				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
-
-	<!--
-	Register outside the site to listen to IApplicationTransactionOpenedEvent
-	-->
-	<subscriber handler=".subscribers.register_course_purchasables" />
 
 	<!-- Decorators -->
 	<subscriber factory=".decorators._StoreEnrollmentOptionDecorator"

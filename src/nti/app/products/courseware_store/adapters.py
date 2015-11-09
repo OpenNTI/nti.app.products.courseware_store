@@ -22,14 +22,14 @@ from nti.store.interfaces import IObjectTransformer
 from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableChoiceBundle
 
+from nti.store.store import get_purchasable
 from nti.store.store import get_purchase_purchasables
 
 from .interfaces import ICoursePrice
 
-from .purchasable import create_purchasable_from_course
-
 from .utils import find_catalog_entry
 from .utils import get_nti_course_price
+from .utils import get_course_purchasable_ntiid
 from .utils import get_entry_ntiid_from_purchasable
 
 @interface.implementer(ICoursePrice)
@@ -40,14 +40,15 @@ def _nti_course_price_finder(context):
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):
-	course_instance = ICourseInstance(entry, None)
-	result = IPurchasableCourse(course_instance, None)
+	ntiid = get_course_purchasable_ntiid(entry)
+	result = get_purchasable(ntiid) if ntiid else None
 	return result
 
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
-	result = create_purchasable_from_course(course)
+	entry = ICourseCatalogEntry(course, None)
+	result = IPurchasableCourse(entry, None)
 	return result
 
 @component.adapter(IPurchasableCourse)
@@ -70,8 +71,9 @@ def _purchasable_to_course_instance(purchasable):
 def _purchase_attempt_transformer(purchase, user=None):
 	result = purchase
 	purchasables = get_purchase_purchasables(purchase)
-	if 	len(purchasables) == 1 and IPurchasableCourse.providedBy(purchasables[0]) and \
-		not IPurchasableChoiceBundle.providedBy(purchasables[0]):
+	if 	(	 len(purchasables) == 1
+		 and IPurchasableCourse.providedBy(purchasables[0])
+		 and not IPurchasableChoiceBundle.providedBy(purchasables[0])):
 		course = ICourseInstance(purchasables[0], None)
 		if user is not None and course is not None:
 			record = get_any_enrollment(course, user)

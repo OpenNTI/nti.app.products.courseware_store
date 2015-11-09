@@ -230,20 +230,3 @@ def on_course_instance_removed(course, event):
 		if purchasable is not None:
 			purchasable.Public = False
 			lifecycleevent.modified(purchasable)
-
-from zope.component.hooks import site as current_site
-
-from nti.processlifetime import IApplicationTransactionOpenedEvent
-
-from nti.site.hostpolicy import get_all_host_sites
-
-from .register import register_purchasables
-
-@component.adapter(IApplicationTransactionOpenedEvent)
-def register_course_purchasables(*args, **kwargs):
-	result = []
-	for site in get_all_host_sites():
-		with current_site(site):
-			registered = register_purchasables()
-			result.extend(registered)
-	return result

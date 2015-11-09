@@ -24,9 +24,8 @@ from nti.site.hostpolicy import get_all_host_sites
 
 from nti.store.store import register_purchasable as store_register_purchasable
 
-from ..adapters import create_purchasable_from_course
-
 from ..purchasable import process_choice_bundle
+from ..purchasable import create_purchasable_from_course
 
 from ..utils import get_nti_choice_bundles
 
@@ -43,6 +42,7 @@ def register_site_purchasables(registry=None, seen=None):
 		if purchasable is not None:
 			item = store_register_purchasable(purchasable, registry=registry)
 			if item is not None:
+				logger.info("Purchasable %s was registered", item.NTIID)
 				result.append(item)
 			# collect choice bundle data
 			for name in get_nti_choice_bundles(entry):
@@ -54,15 +54,17 @@ def register_site_purchasables(registry=None, seen=None):
 			item = store_register_purchasable(purchasable, registry=registry)
 			if item is not None:
 				result.append(item)
+				logger.info("Purchasable %s was registered", item.NTIID)
 	return result
 
 def register_purchasables():
+	result = []
 	seen = set()
 	for site in get_all_host_sites():
 		with current_site(site):
 			registry = site.getSiteManager()
-			register_site_purchasables(registry=registry, seen=seen)
-	return seen
+			result.extend(register_site_purchasables(registry=registry, seen=seen))
+	return result
 
 def do_evolve(context, generation=generation):
 	setHooks()
@@ -71,9 +73,9 @@ def do_evolve(context, generation=generation):
 	with current_site(ds_folder):
 		assert	component.getSiteManager() == ds_folder.getSiteManager(), \
 				"Hooks not installed?"
-		s = register_purchasables()
-	logger.info('courseware-store %s generation completed, %s purchasable(s) registered',
-				 generation, len(s))
+		result = register_purchasables()
+	logger.info('courseware-store %s generation completed, %s purchasables registered', 
+				generation, len(result))
 
 def evolve(context):
 	"""
