@@ -54,7 +54,7 @@ class TestAdapters(ApplicationLayerTest):
 			if entry.ntiid == self.course_ntiid:
 				return entry
 
-	@WithSharedApplicationMockDS(testapp=True,users=True)
+	@WithSharedApplicationMockDS(testapp=True, users=True)
 	@fudge.patch('nti.app.products.courseware_store.purchasable.is_course_enabled_for_purchase')
 	def test_adapter(self, mock_isce):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
@@ -99,21 +99,21 @@ class TestAdapters(ApplicationLayerTest):
 
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
 			catalog_entry = self.catalog_entry()
-			course = ICourseInstance( catalog_entry )
+			course = ICourseInstance(catalog_entry)
 			vendor_infos = component.subscribers((course,), ICoursePublishableVendorInfo)
 
 			vendor_info = None
 
 			for vi in vendor_infos:
-				if isinstance( vi, _CourseCatalogPublishableVendorInfo ):
+				if isinstance(vi, _CourseCatalogPublishableVendorInfo):
 					vendor_info = vi.info()
 
-			assert_that( vendor_info, not_none() )
-			assert_that( vendor_info, has_key( 'StartDate' ))
-			assert_that( vendor_info, has_key( 'EndDate' ))
-			assert_that( vendor_info, has_key( 'Duration' ))
-			assert_that( vendor_info, has_key( 'Title' ))
-			
+			assert_that(vendor_info, not_none())
+			assert_that(vendor_info, has_key('StartDate'))
+			assert_that(vendor_info, has_key('EndDate'))
+			assert_that(vendor_info, has_key('Duration'))
+			assert_that(vendor_info, has_key('Title'))
+
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_already_enrolled_exception(self):
 		e = AlreadyEnrolledException()

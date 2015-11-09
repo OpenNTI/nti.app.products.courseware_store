@@ -16,18 +16,18 @@ from hamcrest import assert_that
 from hamcrest import has_property 
 
 from zope import component
+
 from zope.event import notify
 
 from nti.appserver.interfaces import IApplicationSettings
+
+from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
-
-from nti.app.products.courseware_store.register import register_purchasables
-from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
 
 from nti.dataserver.users import User
 
@@ -100,7 +100,6 @@ class TestPurchase(ApplicationLayerTest):
 		settings['purchase_additional_confirmation_addresses'] = 'foo@bar.com\nbiz@baz.com'
 		
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			register_purchasables()
 			p = get_purchasable(self.purchasable_id)
 			assert_that(p, is_not(none()))
 			assert_that(IPurchasableCourse.providedBy(p), is_(True))
@@ -135,8 +134,6 @@ class TestPurchase(ApplicationLayerTest):
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_gift_redeemed(self):	
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			register_purchasables()
-
 			ichigo = 'ichigo@bleach.org'
 			gift = self.create_gift_attempt(ichigo, self.purchasable_id,
 											state=PA_STATE_SUCCESS)

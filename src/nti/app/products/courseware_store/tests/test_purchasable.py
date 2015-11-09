@@ -17,8 +17,6 @@ from hamcrest import has_property
 
 from nti.app.products.courseware_store.purchasable import create_course_choice_bundle
 
-from nti.app.products.courseware_store.register import register_purchasables
-
 from nti.store.purchasable import get_purchasable
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
@@ -42,7 +40,6 @@ class TestPurchasable(ApplicationLayerTest):
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_create_course_choice_bundle(self):	
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			register_purchasables()
 			purchasables = (get_purchasable(self.purchasable_id),)
 			
 			bundle = create_course_choice_bundle("LAW", purchasables)

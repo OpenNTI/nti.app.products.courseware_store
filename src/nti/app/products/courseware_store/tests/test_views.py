@@ -11,11 +11,10 @@ from hamcrest import is_
 from hamcrest import assert_that
 
 from zope import component
+
 from zope.event import notify
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
-
-from nti.app.products.courseware_store.register import register_purchasables
 
 from nti.dataserver.users import User
 
@@ -67,8 +66,6 @@ class TestViews(ApplicationLayerTest):
 	def test_course_allow_vendor_updates(self):	
 		
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			register_purchasables()
-			
 			purchase = self.create_purchase_attempt(self.purchasable_id)
 			user = User.get_user(self.default_username)
 			register_purchase_attempt(purchase, user)

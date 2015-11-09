@@ -19,7 +19,6 @@ does_not = is_not
 
 from zope import component
 
-from nti.app.products.courseware_store.register import register_purchasables
 from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -36,39 +35,37 @@ from nti.dataserver.tests import mock_dataserver
 from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
 
 class TestEnrollmentOptions(ApplicationLayerTest):
-	
+
 	layer = InstructedCourseApplicationTestLayer
 
 	course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
-	
+
 	def catalog_entry(self):
 		catalog = component.getUtility(ICourseCatalog)
 		for entry in catalog.iterCatalogEntries():
 			if entry.ntiid == self.course_ntiid:
 				return entry
-			
+
 	@WithSharedApplicationMockDS(testapp=True, users=True)
 	def test_get_enrollment_options(self):
 		with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-			register_purchasables()
-			
 			entry = self.catalog_entry()
 			bundles = get_purchasable_course_bundles(entry)
 			assert_that(bundles, has_length(0))
-			
+
 			options = get_enrollment_options(entry)
 			assert_that(options, is_not(none()))
-			assert_that(options, has_entry('StoreEnrollment', 
+			assert_that(options, has_entry('StoreEnrollment',
 										   has_property('Purchasables', is_not(none()))))
 
 			ext_obj = to_external_object(options)
-			assert_that(ext_obj, 
+			assert_that(ext_obj,
 				has_entry('Items',
 					has_entry('StoreEnrollment',
-							   has_entries(	'IsEnabled', is_(True),
+							   has_entries('IsEnabled', is_(True),
 											'RequiresAdmission', is_(False),
 											'AllowVendorUpdates', is_(True),
-								  			'MimeType','application/vnd.nextthought.courseware.storeenrollmentoption',
+								  			'MimeType', 'application/vnd.nextthought.courseware.storeenrollmentoption',
 								  			'Purchasables', has_entries('Items', has_length(1),
 																		'DefaultGiftingNTIID', is_not(none()),
-																		'DefaultPurchaseNTIID', is_not(none())) ) ) ))
+																		'DefaultPurchaseNTIID', is_not(none()))))))
