@@ -209,23 +209,17 @@ def _enrollment_record_dropped(record, event):
 
 @component.adapter(ICourseVendorInfoSynchronized)
 def on_course_vendor_info_synced(event):
-	if component.getSiteManager() == component.getGlobalSiteManager():
-		return
-	else:
+	if component.getSiteManager() != component.getGlobalSiteManager():
 		sync_purchasable_course(event.object)
 
 @component.adapter(ICourseCatalogDidSyncEvent)
 def on_course_catalog_did_sync(event):
-	if component.getSiteManager() == component.getGlobalSiteManager():
-		return
-	else:
+	if component.getSiteManager() != component.getGlobalSiteManager():
 		sync_purchasable_course_choice_bundles()
 
 @component.adapter(ICourseInstance, IObjectRemovedEvent)
 def on_course_instance_removed(course, event):
-	if component.getSiteManager() == component.getGlobalSiteManager():
-		return
-	else:
+	if component.getSiteManager() != component.getGlobalSiteManager():
 		purchasable = IPurchasableCourse(course, None)
 		if purchasable is not None:
 			purchasable.Public = False
