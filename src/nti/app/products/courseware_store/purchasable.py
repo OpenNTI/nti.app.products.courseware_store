@@ -161,6 +161,11 @@ def update_purchasable_course(purchasable, entry):
 		purchasable.Public = False
 		logger.warn('Could not find price for %s', purchasable.NTIID)
 	else:
+		name = get_course_purchasable_name(entry) or entry.title
+		title = get_course_purchasable_title(entry) or entry.title
+		
+		purchasable.Name = name
+		purchasable.Title = title
 		purchasable.Public = True
 
 		# Update price properties
