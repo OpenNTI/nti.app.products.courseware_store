@@ -37,11 +37,11 @@ def get_entry_purchasable(context):
 	ntiid = get_entry_purchasable_ntiid(context, provider)
 	purchasable = get_purchasable(ntiid) if ntiid else None
 	return purchasable
-	
+
 def get_entry_context(context):
 	course = ICourseInstance(context)
 	purchasable = get_entry_purchasable(context)
-	# CS: if we cannot get a purchasable and the context course is a 
+	# CS: if we cannot get a purchasable and the context course is a
 	# sub-instance try with its parent course. This may happen
 	# with mapped courses
 	if 	(purchasable is None or not purchasable.Public) and \
@@ -68,7 +68,7 @@ class StoreEnrollmentOptionProvider(object):
 
 	def __init__(self, context):
 		self.context = context
-		
+
 	def get_purchasables(self, context):
 		result = []
 		direct = get_entry_purchasable(context)
