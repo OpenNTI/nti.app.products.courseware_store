@@ -122,6 +122,9 @@ def get_template(catalog_entry, base_template, default_package=None):
 	entry.  Returns the package where this template should be found.
 	"""
 	package = _get_policy_package()
+	if not package:
+		return base_template, default_package
+
 	package = dottedname.resolve(package)
 	provider_unique_id = _get_entry_id( catalog_entry )
 	full_provider_id = provider_unique_id.replace('-', '')
