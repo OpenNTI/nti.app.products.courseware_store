@@ -9,35 +9,30 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from . import MessageFactory as _
-
 import csv
 from io import BytesIO
 
-from zope import component
+from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from pyramid import httpexceptions as hexc
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.products.courseware_store import MessageFactory as _
+
 from nti.app.products.courseware.views import CourseAdminPathAdapter
 
-from nti.common.maps import CaseInsensitiveDict
+from nti.app.products.courseware_store.utils import find_catalog_entry
+from nti.app.products.courseware_store.utils import find_allow_vendor_updates_purchases
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.common.maps import CaseInsensitiveDict
 
 from nti.dataserver import authorization as nauth
 
 from nti.dataserver.interfaces import IDataserverFolder
 
 from nti.externalization.interfaces import StandardExternalFields
-
-from nti.ntiids.ntiids import find_object_with_ntiid
-
-from .utils import find_allow_vendor_updates_purchases
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -47,22 +42,10 @@ def _tx_string(s):
 	return s
 
 def _parse_course(params):
-	ntiid = params.get('ntiid') or \
-			params.get('entry') or \
-			params.get('course')
+	ntiid = params.get('ntiid') or params.get('course')
 	if not ntiid:
 		return None
-
-	context = find_object_with_ntiid(ntiid)
-	entry = ICourseCatalogEntry(context, None)
-	if entry is None:
-		try:
-			catalog = component.getUtility(ICourseCatalog)
-			entry = catalog.getCatalogEntry(ntiid)
-		except LookupError:
-			raise hexc.HTTPUnprocessableEntity(detail=_('Catalog not found'))
-		except KeyError:
-			pass
+	entry = find_catalog_entry(ntiid)
 	return entry
 
 @view_config(context=IDataserverFolder)
@@ -77,7 +60,7 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		params = CaseInsensitiveDict(self.request.params)
 		entry = _parse_course(params)
 		if entry is None:
-			raise hexc.HTTPUnprocessableEntity(detail=_('Course not found or specified'))
+			raise hexc.HTTPUnprocessableEntity(detail=_('Course not found or specified.'))
 
 		bio = BytesIO()
 		csv_writer = csv.writer(bio)
