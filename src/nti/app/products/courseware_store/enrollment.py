@@ -17,6 +17,13 @@ from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 from nti.app.products.courseware.enrollment import EnrollmentOption
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 
+from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
+
+from nti.app.products.courseware_store.utils import allow_vendor_updates
+from nti.app.products.courseware_store.utils import get_entry_purchasable_ntiid
+from nti.app.products.courseware_store.utils import get_entry_purchasable_provider
+from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
+
 from nti.common.representation import WithRepr
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -24,13 +31,6 @@ from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.store.purchasable import get_purchasable
-
-from .interfaces import IStoreEnrollmentOption
-
-from .utils import allow_vendor_updates
-from .utils import get_entry_purchasable_ntiid
-from .utils import get_entry_purchasable_provider
-from .utils import get_purchasable_course_bundles
 
 def get_entry_purchasable(context):
 	provider = get_entry_purchasable_provider(context)

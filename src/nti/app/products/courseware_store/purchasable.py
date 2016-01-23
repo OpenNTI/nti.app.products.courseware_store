@@ -23,6 +23,22 @@ from collections import defaultdict
 from zope import component
 from zope import lifecycleevent
 
+from nti.app.products.courseware_store.interfaces import get_course_publishable_vendor_info
+
+from nti.app.products.courseware_store.utils import get_course_fee
+from nti.app.products.courseware_store.utils import get_course_price
+from nti.app.products.courseware_store.utils import is_course_giftable
+from nti.app.products.courseware_store.utils import allow_vendor_updates
+from nti.app.products.courseware_store.utils import is_course_redeemable
+from nti.app.products.courseware_store.utils import get_nti_choice_bundles
+from nti.app.products.courseware_store.utils import get_course_purchasable_name
+from nti.app.products.courseware_store.utils import get_purchasable_cutoff_date
+from nti.app.products.courseware_store.utils import get_course_purchasable_ntiid
+from nti.app.products.courseware_store.utils import get_course_purchasable_title
+from nti.app.products.courseware_store.utils import get_entry_purchasable_provider
+from nti.app.products.courseware_store.utils import is_course_enabled_for_purchase
+from nti.app.products.courseware_store.utils import get_purchasable_redeem_cutoff_date
+
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -47,22 +63,6 @@ from nti.store.store import register_purchasable
 
 from nti.store.utils import to_list
 from nti.store.utils import to_frozenset
-
-from .utils import get_course_fee
-from .utils import get_course_price
-from .utils import is_course_giftable
-from .utils import allow_vendor_updates
-from .utils import is_course_redeemable
-from .utils import get_nti_choice_bundles
-from .utils import get_course_purchasable_name
-from .utils import get_purchasable_cutoff_date
-from .utils import get_course_purchasable_ntiid
-from .utils import get_course_purchasable_title
-from .utils import get_entry_purchasable_provider
-from .utils import is_course_enabled_for_purchase
-from .utils import get_purchasable_redeem_cutoff_date
-
-from .interfaces import get_course_publishable_vendor_info
 
 # Purchasable courses
 
@@ -124,7 +124,7 @@ def create_purchasable_from_course(context):
 	title = get_course_purchasable_title(course) or entry.title
 
 	vendor_info = get_course_publishable_vendor_info(course)
-	result = create_course(	ntiid=ntiid,
+	result = create_course(ntiid=ntiid,
 							items=items,
 							name=name,
 							title=title,
@@ -147,7 +147,7 @@ def create_purchasable_from_course(context):
 							signature=entry.InstructorsSignature,
 							department=entry.ProviderDepartmentTitle,
 							# initializer
-							factory=PurchasableCourse)	
+							factory=PurchasableCourse)
 	# save non-public properties
 	result.CatalogEntryNTIID = entry.ntiid
 	result.AllowVendorUpdates = allow_vendor_updates(entry)
@@ -163,7 +163,7 @@ def update_purchasable_course(purchasable, entry):
 	else:
 		name = get_course_purchasable_name(entry) or entry.title
 		title = get_course_purchasable_title(entry) or entry.title
-		
+
 		purchasable.Name = name
 		purchasable.Title = title
 		purchasable.Public = True
@@ -318,10 +318,11 @@ def get_registered_choice_bundles(registry=component):
 	return result
 
 def update_purchasable_course_choice_bundle(stored, source, validated):
-	# update non-publicp properties
+	# update non-public properties
 	stored.Bundle = source.Bundle
 	stored.Purchasables = source.Purchasables
 	# update public properties
+	stored.Items = source.Items
 	reference_purchasable = get_reference_purchasable(validated)
 	stored.Fee = reference_purchasable.Fee,
 	stored.Public = reference_purchasable.Public,
@@ -343,6 +344,7 @@ def sync_purchasable_course_choice_bundles(registry=component):
 		if processed is None:
 			if stored is not None:  # removed
 				stored.Public = False
+				lifecycleevent.modified(stored)
 		elif stored is not None:  # update
 			update_purchasable_course_choice_bundle(stored, processed, validated)
 			lifecycleevent.modified(stored)
