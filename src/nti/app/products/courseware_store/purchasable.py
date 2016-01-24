@@ -343,10 +343,10 @@ def update_purchasable_course_choice_bundle(stored, source, validated):
 	stored.VendorInfo = IPurchasableVendorInfo(get_common_vendor_info(validated))
 
 def sync_purchasable_course_choice_bundles(registry=component):
-	site_bundles = get_registered_choice_bundles(registry)
 	bundle_map = get_choice_bundle_map(registry)
+	site_bundles = get_registered_choice_bundles(registry, by_name=True)
 	for name, purchasables in bundle_map.items():
-		stored = site_bundles.get(name, by_name=True)
+		stored = site_bundles.get(name)
 		if stored is not None and stored.__parent__ != registry.getSiteManager():
 			continue
 		processed, validated = process_choice_bundle(name, purchasables)
