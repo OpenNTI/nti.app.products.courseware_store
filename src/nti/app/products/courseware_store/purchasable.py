@@ -333,13 +333,13 @@ def update_purchasable_course_choice_bundle(stored, source, validated):
 	# update public properties
 	stored.Items = source.Items
 	reference_purchasable = get_reference_purchasable(validated)
-	stored.Fee = reference_purchasable.Fee,
-	stored.Public = reference_purchasable.Public,
-	stored.Amount = reference_purchasable.Amount,
-	stored.Currency = reference_purchasable.Currency,
-	stored.Provider = reference_purchasable.Provider,
-	stored.Giftable = reference_purchasable.Giftable,
-	stored.Redeemable = reference_purchasable.Redeemable,
+	stored.Fee = reference_purchasable.Fee
+	stored.Public = reference_purchasable.Public
+	stored.Amount = reference_purchasable.Amount
+	stored.Currency = reference_purchasable.Currency
+	stored.Provider = reference_purchasable.Provider
+	stored.Giftable = reference_purchasable.Giftable
+	stored.Redeemable = reference_purchasable.Redeemable
 	stored.VendorInfo = IPurchasableVendorInfo(get_common_vendor_info(validated))
 
 def sync_purchasable_course_choice_bundles(registry=component):
