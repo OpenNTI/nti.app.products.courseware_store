@@ -273,7 +273,7 @@ def create_course_choice_bundle(name, purchasables):
 						   vendor_info=get_common_vendor_info(purchasables),
 						   factory=PurchasableCourseChoiceBundle)
 
-	# save non-public properties
+	# save course properties
 	result.Bundle = name
 	result.Purchasables = ntiids
 	return result
@@ -311,18 +311,21 @@ def get_choice_bundle_map(registry=component):
 				choice_bundle_map[name].append(purchasable)
 	return choice_bundle_map
 
-def get_registered_choice_bundles(registry=component):
+def get_registered_choice_bundles(registry=component, by_name=False):
 	result = {}
 	for name, obj in list(registry.getUtilitiesFor(IPurchasableCourseChoiceBundle)):
-		result[name] = obj
+		if by_name:
+			result[obj.Name] = obj
+		else:
+			result[name] = obj
 	return result
 
 def update_purchasable_course_choice_bundle(stored, source, validated):
 	# update non-public properties
-	stored.Bundle = source.Bundle
 	stored.Purchasables = source.Purchasables
 	# update public properties
 	stored.Items = source.Items
+	stored.Bundle = source.Bundle
 	reference_purchasable = get_reference_purchasable(validated)
 	stored.Fee = reference_purchasable.Fee,
 	stored.Public = reference_purchasable.Public,
@@ -336,11 +339,11 @@ def update_purchasable_course_choice_bundle(stored, source, validated):
 def sync_purchasable_course_choice_bundles(registry=component):
 	site_bundles = get_registered_choice_bundles(registry)
 	bundle_map = get_choice_bundle_map(registry)
-	for ntiid, purchasables in bundle_map.items():
-		stored = site_bundles.get(ntiid)
+	for name, purchasables in bundle_map.items():
+		stored = site_bundles.get(name, by_name=True)
 		if stored is not None and stored.__parent__ != registry.getSiteManager():
 			continue
-		processed, validated = process_choice_bundle(ntiid, purchasables)
+		processed, validated = process_choice_bundle(name, purchasables)
 		if processed is None:
 			if stored is not None:  # removed
 				stored.Public = False
