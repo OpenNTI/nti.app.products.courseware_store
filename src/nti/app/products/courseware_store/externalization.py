@@ -12,13 +12,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
+
 from nti.externalization.externalization import to_external_object
 
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
-
-from .interfaces import IStoreEnrollmentOption
 
 CLASS = StandardExternalFields.CLASS
 ITEMS = StandardExternalFields.ITEMS
@@ -34,7 +34,8 @@ class _StoreEnrollmentOptionExternalizer(object):
 	def toExternalObject(self, *args, **kwargs):
 		result = LocatedExternalDict()
 		result[MIMETYPE] = self.obj.mimeType
-		result[CLASS] = self.obj.__external_class_name__
+		result[CLASS] = 	getattr(self.obj, '__external_class_name__', None) \
+						or	self.obj.__class__.__name__
 		result['RequiresAdmission'] = False
 		result['IsEnabled'] = self.obj.IsEnabled
 		result['AllowVendorUpdates'] = self.obj.AllowVendorUpdates

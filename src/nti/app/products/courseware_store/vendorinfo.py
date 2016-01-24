@@ -13,9 +13,9 @@ from zope import interface
 
 from nti.app.products.courseware.interfaces import ICoursePublishableVendorInfo
 
-from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.app.products.courseware_store.utils import allow_vendor_updates
 
-from .utils import allow_vendor_updates
+from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 @interface.implementer(ICoursePublishableVendorInfo)
 class _CourseCatalogPublishableVendorInfo(object):

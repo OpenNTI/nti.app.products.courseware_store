@@ -24,18 +24,18 @@ from base64 import urlsafe_b64encode
 
 from zope import component
 from zope import lifecycleevent
-from zope.i18n import translate
 
 from zope.dottedname import resolve as dottedname
 
 from zope.event import notify
+
+from zope.i18n import translate
 
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 from zope.publisher.interfaces.browser import IBrowserRequest
 
 from zope.security.interfaces import IPrincipal
-
 from zope.security.management import queryInteraction
 
 from pyramid import httpexceptions as hexc
@@ -76,8 +76,9 @@ from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 from nti.contenttypes.courses.utils import get_enrollment_record
 from nti.contenttypes.courses.utils import drop_any_other_enrollments
 
-from nti.dataserver.users import User
 from nti.dataserver.interfaces import IUser
+
+from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
 from nti.dataserver.users.interfaces import IEmailAddressable
 
@@ -370,7 +371,6 @@ def _get_start_date(catalog_entry, request):
 def _get_course_start_date(course_ntiid, request):
 	catalog = component.getUtility(ICourseCatalog)
 	catalog_entry = catalog.getCatalogEntry(course_ntiid)
-
 	return _get_start_date(catalog_entry, request)
 
 def _get_purchase_args(attempt, purchasable, request):
@@ -611,7 +611,9 @@ def _user_enrolled(event):
 		catalog_entry = ICourseCatalogEntry(course)
 
 		base_template = 'enrollment_confirmation_email'
-		template, package = get_template(catalog_entry, base_template, DEFAULT_ENROLL_PACKAGE)
+		template, package = get_template(catalog_entry,
+										 base_template, 
+										 DEFAULT_ENROLL_PACKAGE)
 
 		args = _build_enrollment_args(event, creator, profile, catalog_entry)
 		subject = args.pop('subject')

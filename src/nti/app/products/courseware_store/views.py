@@ -12,6 +12,8 @@ logger = __import__('logging').getLogger(__name__)
 import csv
 from io import BytesIO
 
+from zope.component.hooks import site as current_site
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.view import view_config
@@ -19,9 +21,12 @@ from pyramid.view import view_defaults
 
 from nti.app.base.abstract_views import AbstractAuthenticatedView
 
+from nti.app.products.courseware.views import CourseAdminPathAdapter
+
 from nti.app.products.courseware_store import MessageFactory as _
 
-from nti.app.products.courseware.views import CourseAdminPathAdapter
+from nti.app.products.courseware_store.purchasable import get_registered_choice_bundles
+from nti.app.products.courseware_store.purchasable import sync_purchasable_course_choice_bundles
 
 from nti.app.products.courseware_store.utils import find_catalog_entry
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_purchases
@@ -32,7 +37,12 @@ from nti.dataserver import authorization as nauth
 
 from nti.dataserver.interfaces import IDataserverFolder
 
+from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
+
+from nti.site.hostpolicy import get_host_site
+
+from nti.site.site import get_component_hierarchy_names
 
 ITEMS = StandardExternalFields.ITEMS
 
@@ -84,3 +94,24 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 		response.body = bio.getvalue()
 		response.content_disposition = b'attachment; filename="updates.csv"'
 		return response
+
+@view_config(context=IDataserverFolder)
+@view_config(context=CourseAdminPathAdapter)
+@view_defaults(route_name='objects.generic.traversal',
+				renderer='rest',
+			 	permission=nauth.ACT_NTI_ADMIN,
+			 	name='SyncPurchasableCourseChoiceBundles')
+class SyncPurchasableCourseChoiceBundlesView(AbstractAuthenticatedView):
+
+	def __call__(self):
+		# sync in all hierarchy sites
+		for name in get_component_hierarchy_names():
+			site = get_host_site(name)
+			with current_site(site):
+				sync_purchasable_course_choice_bundles()
+
+		result = LocatedExternalDict()
+		bundles = get_registered_choice_bundles()
+		items = result[ITEMS] = list(bundles.values())
+		result['Total'] = result['ItemCount'] = len(items)
+		return result

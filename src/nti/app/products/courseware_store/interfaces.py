@@ -25,6 +25,7 @@ from nti.schema.field import Object
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidTextLine
 
+# Re-Export
 ICoursePublishableVendorInfo = ICoursePublishableVendorInfo
 get_course_publishable_vendor_info = get_course_publishable_vendor_info
 

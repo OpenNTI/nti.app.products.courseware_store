@@ -12,7 +12,7 @@ logger = __import__('logging').getLogger(__name__)
 import six
 from itertools import chain
 
-from zope.intid import IIntIds
+from zope.intid.interfaces import IIntIds
 
 from zope import component
 
@@ -24,6 +24,10 @@ from zope.security.interfaces import IPrincipal
 
 from ZODB.interfaces import IBroken
 from ZODB.POSException import POSError
+
+from nti.app.products.courseware_store.interfaces import ICoursePrice
+
+from nti.app.products.courseware_store.model import CoursePrice
 
 from nti.common.maps import CaseInsensitiveDict
 
@@ -38,7 +42,8 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
-from nti.dataserver.metadata_index import IX_MIMETYPE, IX_CREATOR
+from nti.dataserver.metadata_index import IX_CREATOR 
+from nti.dataserver.metadata_index import IX_MIMETYPE
 from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
 
 from nti.ntiids.ntiids import get_parts
@@ -46,18 +51,15 @@ from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import PURCHASABLE_COURSE
-from nti.store.store import get_purchasables
 
 from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
+from nti.store.store import get_purchasables
+
 from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
-
-from .model import CoursePrice
-
-from .interfaces import ICoursePrice
 
 def get_vendor_info(context):
 	info = get_course_vendor_info(context, False)
