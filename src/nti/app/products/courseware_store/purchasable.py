@@ -23,6 +23,8 @@ from collections import defaultdict
 from zope import component
 from zope import lifecycleevent
 
+from zope.cachedescriptors.property import readproperty
+
 from nti.app.products.courseware_store.interfaces import get_course_publishable_vendor_info
 
 from nti.app.products.courseware_store.utils import get_course_fee
@@ -235,8 +237,12 @@ def get_common_vendor_info(purchasables):
 	return result
 
 class PurchasableCourseChoiceBundle(StorePurchasableCourseChoiceBundle):
-	Bundle = None
+
 	Purchasables = None
+	
+	@readproperty
+	def Bundle(self):
+		return self.Name
 
 def get_course_choice_bundle_ntiid(name, purchasables):
 	purchasables = to_list(purchasables)
@@ -274,7 +280,7 @@ def create_course_choice_bundle(name, purchasables):
 						   factory=PurchasableCourseChoiceBundle)
 
 	# save course properties
-	result.Bundle = name
+	result.Bundle = name # alias
 	result.Purchasables = ntiids
 	return result
 
@@ -322,10 +328,10 @@ def get_registered_choice_bundles(registry=component, by_name=False):
 
 def update_purchasable_course_choice_bundle(stored, source, validated):
 	# update non-public properties
+	stored.Bundle = source.Bundle # alias
 	stored.Purchasables = source.Purchasables
 	# update public properties
 	stored.Items = source.Items
-	stored.Bundle = source.Bundle
 	reference_purchasable = get_reference_purchasable(validated)
 	stored.Fee = reference_purchasable.Fee,
 	stored.Public = reference_purchasable.Public,
