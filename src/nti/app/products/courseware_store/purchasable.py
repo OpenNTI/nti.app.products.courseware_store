@@ -122,6 +122,11 @@ def create_purchasable_from_course(context):
 	purchase_cutoff_date = get_purchasable_cutoff_date(course)
 	redeem_cutoff_date = get_purchasable_redeem_cutoff_date(course)
 
+	if 		purchase_cutoff_date \
+		and redeem_cutoff_date \
+		and purchase_cutoff_date > redeem_cutoff_date:
+		raise ValueError( 'RedeemCutOffDate cannot be before PurchaseCutOffDate' )
+
 	name = get_course_purchasable_name(course) or entry.title
 	title = get_course_purchasable_title(course) or entry.title
 
@@ -239,7 +244,7 @@ def get_common_vendor_info(purchasables):
 class PurchasableCourseChoiceBundle(StorePurchasableCourseChoiceBundle):
 
 	Purchasables = None
-	
+
 	@readproperty
 	def Bundle(self):
 		return self.Name
