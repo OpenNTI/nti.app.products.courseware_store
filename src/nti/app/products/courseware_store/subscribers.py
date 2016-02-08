@@ -90,8 +90,7 @@ from nti.invitations.interfaces import IInvitationAcceptedEvent
 
 from nti.mailer.interfaces import ITemplatedMailer
 
-from nti.store.store import get_gift_code
-from nti.store.purchasable import get_purchasable
+from nti.store import RedemptionException
 
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourse
@@ -103,8 +102,29 @@ from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptSuccessful
 from nti.store.interfaces import IGiftPurchaseAttemptRedeemed
 
+from nti.store.store import get_gift_code
+
+from nti.store.purchasable import get_purchasable
+
+from nti.store.purchase_attempt import get_purchasables
+
 #: The package to find enrollment templates.
 DEFAULT_ENROLL_PACKAGE = 'nti.app.products.courseware'
+
+def _get_redeem_cutoff_date( purchase ):
+	purchaseables = get_purchasables( purchase )
+	now = datetime.utcnow()
+	result = None
+	for purchasable in purchaseables:
+		if purchasable.RedeemCutOffDate is not None:
+			redeem_date = isodate.parse_datetime( purchasable.RedeemCutOffDate )
+			redeem_date = redeem_date.replace(tzinfo=None)
+			result = redeem_date if result is None else max( result, redeem_date )
+	if result and now > result:
+		raise RedemptionException(_("Gift cannot be redeemed at this time."))
+	if result:
+		result = result.strftime( '%B %d, %Y' )
+	return result
 
 def _get_policy_package():
 	"""
@@ -381,6 +401,11 @@ def _get_purchase_args(attempt, purchasable, request):
 	if IGiftPurchaseAttempt.providedBy(attempt):
 		purchase_item_suffix = _(' - Gift')
 
+		# TODO:
+# 		redeem_date = _get_redeem_cutoff_date( attempt )
+# 		if redeem_date:
+# 			args['redeem_by_date'] = redeem_date
+
 		for entry in purchasable.Items:
 			redeem_by = _get_course_start_date(entry, request)
 			# Not sure if this correct, implies one course per purchasable.
@@ -528,10 +553,9 @@ def _send_entry_gift_email(purchase, purchase_ntiids, event, request):
 	for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
 	site_alias = getattr(policy, 'COM_ALIAS', '')
 
-	# Sort by course start date; grab our final cutoff date for the gift.
 	gift_options = sorted(purchase_options, key=lambda x: x[0].StartDate)
 	gift_options = [x[1] for x in gift_options]
-	final_course_start_date = gift_options[-1].get('course_start_date')
+	redeem_by_date = _get_redeem_cutoff_date( purchase )
 
 	args = {
 		'sender_name' : purchase.SenderName,
@@ -539,7 +563,7 @@ def _send_entry_gift_email(purchase, purchase_ntiids, event, request):
 		'gift_message' : purchase.Message,
 		'for_credit_url': for_credit_url,
 		'site_alias': site_alias,
-		'final_course_start_date' : final_course_start_date,
+		'redeem_by_date' : redeem_by_date,
 		'redemption_code' : redemption_code,
 		'support_email' : policy.SUPPORT_EMAIL,
 		'gift_options' : gift_options
@@ -612,7 +636,7 @@ def _user_enrolled(event):
 
 		base_template = 'enrollment_confirmation_email'
 		template, package = get_template(catalog_entry,
-										 base_template, 
+										 base_template,
 										 DEFAULT_ENROLL_PACKAGE)
 
 		args = _build_enrollment_args(event, creator, profile, catalog_entry)
