@@ -70,7 +70,7 @@ class TestAdapters(ApplicationLayerTest):
 			assert_that(purchasable, has_property('Currency', is_('USD')))
 			assert_that(purchasable, has_property('Name', is_('Law and Justice')))
 			assert_that(purchasable, has_property('Title', is_('Law and Justice')))
-			assert_that(purchasable, has_property("PurchaseCutOffDate", is_("2024-08-29T05:00:00+00:00")))
+			assert_that(purchasable, has_property("PurchaseCutOffDate", is_("2024-08-09T05:00:00+00:00")))
 			assert_that(purchasable, has_property("RedeemCutOffDate", is_("2024-08-23T04:59:00+00:00")))
 			items = list(purchasable.Items)
 			assert_that(items, is_(['tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice']))
