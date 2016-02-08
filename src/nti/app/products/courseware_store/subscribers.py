@@ -396,24 +396,18 @@ def _get_course_start_date(course_ntiid, request):
 def _get_purchase_args(attempt, purchasable, request):
 	"Add gift specific args for purchase email."
 	purchase_item_suffix = ''
-	redeem_by_clauses = {}
+	redeem_by_clause = None
 
 	if IGiftPurchaseAttempt.providedBy(attempt):
 		purchase_item_suffix = _(' - Gift')
 
-		# TODO:
-# 		redeem_date = _get_redeem_cutoff_date( attempt )
-# 		if redeem_date:
-# 			args['redeem_by_date'] = redeem_date
-
-		for entry in purchasable.Items:
-			redeem_by = _get_course_start_date(entry, request)
-			# Not sure if this correct, implies one course per purchasable.
-			redeem_by_clauses[purchasable.NTIID] = _("Must redeem by ${redeem_by}",
-													mapping={'redeem_by' : redeem_by })
+		redeem_by_date = _get_redeem_cutoff_date( attempt )
+		if redeem_by_date:
+			redeem_by_clause = translate(_("Must redeem by ${redeem_by}",
+										mapping={'redeem_by' : redeem_by_date }))
 
 	args = {'purchase_item_suffix' : purchase_item_suffix,
-			'redeem_by_clauses' : redeem_by_clauses }
+			'redeem_by_clause': redeem_by_clause }
 
 	return args
 
