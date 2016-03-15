@@ -207,7 +207,7 @@ def sync_purchasable_course(context):
 def get_state(purchasable):
 	amount = int(purchasable.Amount * 100.0)  # cents
 	result = (amount, purchasable.Currency.upper(),
-			  purchasable.Public, purchasable.Giftable,
+			  purchasable.isPublic(), purchasable.Giftable,
 			  purchasable.Redeemable, purchasable.Fee)
 	return result
 
@@ -275,11 +275,11 @@ def create_course_choice_bundle(name, purchasables):
 						   title=name,
 						   description=name,
 						   fee=reference_purchasable.Fee,
-						   public=reference_purchasable.Public,
 						   amount=reference_purchasable.Amount,
 						   currency=reference_purchasable.Currency,
 						   provider=reference_purchasable.Provider,
 						   giftable=reference_purchasable.Giftable,
+						   public=reference_purchasable.isPublic(),
 						   redeemable=reference_purchasable.Redeemable,
 						   vendor_info=get_common_vendor_info(purchasables),
 						   factory=PurchasableCourseChoiceBundle)
@@ -339,11 +339,11 @@ def update_purchasable_course_choice_bundle(stored, source, validated):
 	stored.Items = source.Items
 	reference_purchasable = get_reference_purchasable(validated)
 	stored.Fee = reference_purchasable.Fee
-	stored.Public = reference_purchasable.Public
 	stored.Amount = reference_purchasable.Amount
 	stored.Currency = reference_purchasable.Currency
 	stored.Provider = reference_purchasable.Provider
 	stored.Giftable = reference_purchasable.Giftable
+	stored.Public = reference_purchasable.isPublic()
 	stored.Redeemable = reference_purchasable.Redeemable
 	stored.VendorInfo = IPurchasableVendorInfo(get_common_vendor_info(validated))
 
