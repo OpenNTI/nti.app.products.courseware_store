@@ -300,13 +300,13 @@ def _enrollment_record_dropped(record, event):
 
 # course subscribers
 
-@component.adapter(ICourseVendorInfoSynchronized)
-def on_course_vendor_info_synced(event):
+@component.adapter(ICourseInstance, ICourseVendorInfoSynchronized)
+def on_course_vendor_info_synced(course, event):
 	if component.getSiteManager() != component.getGlobalSiteManager():
-		sync_purchasable_course(event.object)
+		sync_purchasable_course(course)
 
-@component.adapter(ICourseCatalogDidSyncEvent)
-def on_course_catalog_did_sync(event):
+@component.adapter(ICourseInstance, ICourseCatalogDidSyncEvent)
+def on_course_catalog_did_sync(course, event):
 	if component.getSiteManager() != component.getGlobalSiteManager():
 		sync_purchasable_course_choice_bundles()
 
