@@ -39,12 +39,13 @@ from zope.security.interfaces import IPrincipal
 from zope.security.management import queryInteraction
 
 from pyramid import httpexceptions as hexc
-from pyramid.threadlocal import get_current_request
 
-from nti.app.products.courseware_store.interfaces import IStoreEnrollmentEvent
+from pyramid.threadlocal import get_current_request
 
 from nti.app.products.courseware.interfaces import ICoursesWorkspace
 from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
+
+from nti.app.products.courseware_store.interfaces import IStoreEnrollmentEvent
 
 from nti.app.products.courseware_store.interfaces import StoreEnrollmentEvent
 
@@ -341,7 +342,8 @@ def _build_base_args(event, user, profile):
 			'today': isodate.date_isoformat(datetime.now()) }
 	return args
 
-def _queue_email(request, username, profile, args, template, subject, package, text_template_extension='.txt'):
+def _queue_email(request, username, profile, args, template, subject, 
+				 package, text_template_extension='.txt'):
 	try:
 		mailer = component.getUtility(ITemplatedMailer)
 		mailer.queue_simple_html_text_email(
