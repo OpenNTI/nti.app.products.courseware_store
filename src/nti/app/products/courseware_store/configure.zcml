@@ -11,6 +11,8 @@
 	<include package="zope.security" />
 
 	<include package="nti.store" />
+	<include package="nti.store.payments.stripe" file="meta.zcml" />
+
 	<include package="nti.contenttypes.courses" />
 
 	<class class="nti.contenttypes.courses.interfaces.AlreadyEnrolledException">

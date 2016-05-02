@@ -12,6 +12,13 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware_store.interfaces import ICoursePrice
+
+from nti.app.products.courseware_store.utils import find_catalog_entry
+from nti.app.products.courseware_store.utils import get_nti_course_price
+from nti.app.products.courseware_store.utils import get_course_purchasable_ntiid
+from nti.app.products.courseware_store.utils import get_entry_ntiid_from_purchasable
+
 from nti.contenttypes.courses.utils import get_any_enrollment
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -24,13 +31,6 @@ from nti.store.interfaces import IPurchasableChoiceBundle
 
 from nti.store.store import get_purchasable
 from nti.store.store import get_purchase_purchasables
-
-from .interfaces import ICoursePrice
-
-from .utils import find_catalog_entry
-from .utils import get_nti_course_price
-from .utils import get_course_purchasable_ntiid
-from .utils import get_entry_ntiid_from_purchasable
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):

@@ -14,6 +14,8 @@ from zope import interface
 
 from nti.app.products.courseware.utils import get_vendor_thank_you_page
 
+from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
+
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
@@ -33,8 +35,6 @@ from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IGiftPurchaseAttempt
 
 from nti.store.purchasable import get_purchasable
-
-from .interfaces import IStoreEnrollmentOption
 
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IExternalObjectDecorator)
