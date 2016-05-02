@@ -9,18 +9,14 @@ __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
-from . import MessageFactory as _
-
 import os
 import six
 import isodate
-
-import pytz
-from pytz import timezone
-
 from urlparse import urljoin
 from datetime import datetime
 from base64 import urlsafe_b64encode
+
+import pytz
 
 from zope import component
 from zope import lifecycleevent
@@ -44,6 +40,8 @@ from pyramid.threadlocal import get_current_request
 
 from nti.app.products.courseware.interfaces import ICoursesWorkspace
 from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
+
+from nti.app.products.courseware_store import MessageFactory as _
 
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentEvent
 
@@ -476,7 +474,7 @@ def _get_session_length_args(catalog_entry):
 		# view as local timezone. Currently hard-coded to Central
 		# time. May want to consider adding a default timezone to
 		# policies if we make this more general at some point.
-		localTimeZone = timezone('US/Central')
+		localTimeZone = pytz.timezone('US/Central')
 		utc_start_date = pytz.utc.localize(catalog_entry.StartDate)
 		utc_end_date = pytz.utc.localize(catalog_entry.EndDate)
 		local_start_date = utc_start_date.astimezone(localTimeZone)
