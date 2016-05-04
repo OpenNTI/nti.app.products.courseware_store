@@ -29,7 +29,6 @@ class _CourseCatalogPublishableVendorInfo(object):
 			return None
 
 		does_allow_vendor_updates = allow_vendor_updates(self.context)
-
 		result = {
 			'Title': catalog_entry.title,
 			'StartDate': catalog_entry.StartDate,
@@ -37,11 +36,10 @@ class _CourseCatalogPublishableVendorInfo(object):
 			'Duration': catalog_entry.Duration,
 			'AllowVendorUpdates': does_allow_vendor_updates
 		}
-
 		credit_info = getattr(catalog_entry, 'Credit', None)
 		if credit_info:
 			# Just get the first entry
 			credit_info = credit_info[0]
 			hours = credit_info.Hours
-			result.update({ 'Hours': hours })
+			result.update({'Hours': hours})
 		return result

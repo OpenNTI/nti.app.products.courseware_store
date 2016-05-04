@@ -53,9 +53,7 @@ def _tx_string(s):
 
 def _parse_course(params):
 	ntiid = params.get('ntiid') or params.get('course')
-	if not ntiid:
-		return None
-	entry = find_catalog_entry(ntiid)
+	entry = find_catalog_entry(ntiid) if ntiid else None
 	return entry
 
 @view_config(context=IDataserverFolder)

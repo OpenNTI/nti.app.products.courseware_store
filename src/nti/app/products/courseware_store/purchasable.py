@@ -10,15 +10,14 @@ __docformat__ = "restructuredtext en"
 logger = __import__('logging').getLogger(__name__)
 
 import six
-import isodate
-
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+from collections import defaultdict
 
 from numbers import Number
 
-from collections import defaultdict
+import isodate
 
 from zope import component
 from zope import lifecycleevent

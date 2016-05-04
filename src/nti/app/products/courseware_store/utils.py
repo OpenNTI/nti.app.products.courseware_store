@@ -215,8 +215,9 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 		try:
 			purchase = intids.queryObject(uid)
 			# filter any invalid object
-			if 	purchase is None or IBroken.providedBy(purchase) or \
-				not IPurchaseAttempt.providedBy(purchase):
+			if 		purchase is None \
+				or	IBroken.providedBy(purchase) \
+				or 	not IPurchaseAttempt.providedBy(purchase):
 				continue
 			# invitations may not be required
 			if not invitation and IInvitationPurchaseAttempt.providedBy(purchase):
