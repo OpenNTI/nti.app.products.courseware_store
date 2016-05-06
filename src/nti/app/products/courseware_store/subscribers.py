@@ -159,9 +159,10 @@ def get_template(catalog_entry, base_template, default_package=None):
 		if not os.path.exists(os.path.join(path, template + ".pt")):
 			template = base_template
 	if template == base_template:
-		# Use our default package if not context specific template
+		# Use our default package if no context specific template
 		# is found in our site.
-		package = default_package
+		if not os.path.exists(os.path.join(path, template + ".pt")):
+			package = default_package
 	return template, package
 
 def get_user(user):
@@ -340,7 +341,7 @@ def _build_base_args(event, user, profile):
 			'today': isodate.date_isoformat(datetime.now()) }
 	return args
 
-def _queue_email(request, username, profile, args, template, subject, 
+def _queue_email(request, username, profile, args, template, subject,
 				 package, text_template_extension='.txt'):
 	try:
 		mailer = component.getUtility(ITemplatedMailer)
@@ -449,7 +450,7 @@ def _get_redeem_link(request, catalog_entry, redemption_code):
 	ntiid = '!@%s' % ntiid
 	encoded = urlsafe_b64encode(ntiid)
 	encoded_ntiid = encoded.replace('=', '')
-	url = '#!library/availablecourses/%s/redeem/%s' % (encoded_ntiid, redemption_code)
+	url = 'library/courses/available/%s/redeem/%s' % (encoded_ntiid, redemption_code)
 
 	app_url = request.application_url
 	redemption_link = urljoin(app_url, _web_root())
