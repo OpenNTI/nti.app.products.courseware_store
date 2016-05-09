@@ -599,6 +599,7 @@ def _build_course_args(event, catalog_entry):
 	html_sig = catalog_entry.InstructorsSignature.replace('\n', "<br />")
 
 	course_args = {	'course': catalog_entry,
+					'today': datetime.utcnow(),
 					'instructors_html_signature': html_sig,
 					'course_preview': course_preview,
 					'course_archived': course_archived,
