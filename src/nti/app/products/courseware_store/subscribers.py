@@ -12,9 +12,9 @@ logger = __import__('logging').getLogger(__name__)
 import os
 import six
 import isodate
+
 from urlparse import urljoin
 from datetime import datetime
-from base64 import urlsafe_b64encode
 
 import pytz
 
@@ -444,13 +444,10 @@ def _web_root():
 	return web_root
 
 def _get_redeem_link(request, catalog_entry, redemption_code):
-	ntiid = getattr(catalog_entry, 'ntiid', None)
-
-	# The webapp does this dance to get to the course library page
-	ntiid = '!@%s' % ntiid
-	encoded = urlsafe_b64encode(ntiid)
-	encoded_ntiid = encoded.replace('=', '')
-	url = 'library/courses/available/%s/redeem/%s' % (encoded_ntiid, redemption_code)
+	ntiid = catalog_entry.ntiid
+	# Clients remove the prefix.
+	ntiid = ntiid.replace( 'tag:nextthought.com,2011-10:', '' )
+	url = 'library/courses/available/%s/redeem/%s' % (ntiid, redemption_code)
 
 	app_url = request.application_url
 	redemption_link = urljoin(app_url, _web_root())
