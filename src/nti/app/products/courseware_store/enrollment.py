@@ -24,11 +24,11 @@ from nti.app.products.courseware_store.utils import get_entry_purchasable_ntiid
 from nti.app.products.courseware_store.utils import get_entry_purchasable_provider
 from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
 
-from nti.common.representation import WithRepr
-
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
+from nti.externalization.representation import WithRepr
 
 from nti.store.purchasable import get_purchasable
 
