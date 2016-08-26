@@ -15,9 +15,9 @@ from zope import interface
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
 
-from nti.common.property import alias
-
 from nti.externalization.representation import WithRepr
+
+from nti.property.property import alias
 
 from nti.schema.eqhash import EqHash
 
