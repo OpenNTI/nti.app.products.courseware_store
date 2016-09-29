@@ -36,6 +36,7 @@ setup(
 	install_requires=[
 		'setuptools',
         'nti.store',
+        'nti.app.store',
         'nti.app.products.courseware'
 	],
 	entry_points=entry_points
