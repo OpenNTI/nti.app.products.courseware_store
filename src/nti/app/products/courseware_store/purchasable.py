@@ -42,6 +42,8 @@ from nti.app.products.courseware_store.utils import get_purchasable_redeem_cutof
 
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
+from nti.contenttypes.courses.common import get_course_packages
+
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -99,11 +101,7 @@ def create_purchasable_from_course(context):
 	items = [entry.ntiid]  # course is to be purchased
 
 	if icon is None or thumbnail is None:
-		try:
-			packages = course.ContentPackageBundle.ContentPackages
-		except AttributeError:
-			packages = (course.legacy_content_package,)
-
+		packages = get_course_packages(course)
 		if icon is None and packages:
 			icon = packages[0].icon
 			icon = IContentUnitHrefMapper(icon).href if icon else None
