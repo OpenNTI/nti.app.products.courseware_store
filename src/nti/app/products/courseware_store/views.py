@@ -45,6 +45,8 @@ from nti.site.hostpolicy import get_host_site
 from nti.site.site import get_component_hierarchy_names
 
 ITEMS = StandardExternalFields.ITEMS
+TOTAL = StandardExternalFields.TOTAL
+ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 def _tx_string(s):
 	if s and isinstance(s, unicode):
@@ -111,5 +113,5 @@ class SyncPurchasableCourseChoiceBundlesView(AbstractAuthenticatedView):
 		result = LocatedExternalDict()
 		bundles = get_registered_choice_bundles()
 		items = result[ITEMS] = list(bundles.values())
-		result['Total'] = result['ItemCount'] = len(items)
+		result[TOTAL] = result[ITEM_COUNT] = len(items)
 		return result

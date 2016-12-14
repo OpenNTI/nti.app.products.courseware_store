@@ -34,22 +34,19 @@ from nti.store.store import get_purchase_purchasables
 
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
-	result = get_nti_course_price(context)
-	return result
+	return get_nti_course_price(context)
 
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):
 	ntiid = get_course_purchasable_ntiid(entry)
-	result = get_purchasable(ntiid) if ntiid else None
-	return result
+	return get_purchasable(ntiid) if ntiid else None
 
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
 	entry = ICourseCatalogEntry(course, None)
-	result = IPurchasableCourse(entry, None)
-	return result
+	return IPurchasableCourse(entry, None)
 
 @component.adapter(IPurchasableCourse)
 @interface.implementer(ICourseCatalogEntry)
@@ -58,15 +55,13 @@ def _purchasable_to_catalog_entry(purchasable):
 		ntiid = purchasable.CatalogEntryNTIID
 	except AttributeError:
 		ntiid = get_entry_ntiid_from_purchasable(purchasable)
-	result = find_catalog_entry(ntiid) if ntiid else None
-	return result
+	return find_catalog_entry(ntiid) if ntiid else None
 
 @component.adapter(IPurchasableCourse)
 @interface.implementer(ICourseInstance)
 def _purchasable_to_course_instance(purchasable):
 	entry = ICourseCatalogEntry(purchasable, None)
-	result = ICourseInstance(entry, None)
-	return result
+	return ICourseInstance(entry, None)
 
 def _purchase_attempt_transformer(purchase, user=None):
 	result = purchase

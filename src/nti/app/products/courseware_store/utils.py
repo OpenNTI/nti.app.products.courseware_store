@@ -67,56 +67,46 @@ def get_vendor_info(context):
 
 def is_course_enabled_for_purchase(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Enabled', default=False)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Enabled', default=False)
 
 def is_course_giftable(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
 
 def is_course_redeemable(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
 
 def get_course_purchasable_provider(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Provider', default=None)
 
 def get_course_purchasable_name(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Name', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Name', default=None)
 
 def get_purchasable_redeem_cutoff_date(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/RedeemCutOffDate', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/RedeemCutOffDate', default=None)
 
 def get_purchasable_cutoff_date(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/PurchaseCutOffDate', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/PurchaseCutOffDate', default=None)
 
 def get_course_purchasable_title(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Title', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Title', default=None)
 
 def get_course_purchasable_fee(context):
 	vendor_info = get_vendor_info(context)
-	result = traverse(vendor_info, 'NTI/Purchasable/Fee', default=None)
-	return result
+	return traverse(vendor_info, 'NTI/Purchasable/Fee', default=None)
 get_course_fee = get_course_purchasable_fee
 
 def get_entry_purchasable_provider(context):
 	entry = ICourseCatalogEntry(context)
 	course = ICourseInstance(entry)
 	parts = get_parts(entry.ntiid)
-	provider = get_course_purchasable_provider(course) or parts.provider
-	return provider
+	return get_course_purchasable_provider(course) or parts.provider
 
 def get_course_price(context, *names):
 	course = ICourseInstance(context, None)
@@ -160,8 +150,7 @@ def get_nti_choice_bundles(context):
 	vendor_info = get_vendor_info(context)
 	result = traverse(vendor_info, 'NTI/Purchasable/ChoiceBundles', default=())
 	result = result.split() if isinstance(result, six.string_types) else result
-	result = set(result) if result else ()
-	return result
+	return set(result) if result else ()
 
 def find_catalog_entry(context):
 	if isinstance(context, six.string_types):

@@ -52,7 +52,7 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 		record = self._get_enrollment_record(context, self.remoteUser)
 		result['IsEnrolled'] = bool(record is not None and record.Scope == ES_PURCHASED)
 		isAvailable = (record is None or record.Scope == ES_PUBLIC) and context.IsEnabled
-		result['Enabled'] = result['IsAvailable'] = isAvailable
+		result['Enabled'] = result['IsAvailable'] = isAvailable # alias property
 		result.pop('IsEnabled', None)  # redundant
 
 @component.adapter(IGiftPurchaseAttempt)
@@ -79,8 +79,7 @@ class _VendorThankYouInfoDecorator(object):
 			for catalog_ntiid in purchasable.Items:
 				try:
 					entry = catalog.getCatalogEntry(catalog_ntiid)
-					course = ICourseInstance(entry)
-					return course
+					return ICourseInstance(entry)
 				except (KeyError, LookupError):
 					logger.error("Could not find course entry %s", catalog_ntiid)
 
