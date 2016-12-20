@@ -34,6 +34,8 @@ from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.security.interfaces import IPrincipal
 from zope.security.management import queryInteraction
 
+from zc.intid.interfaces import IBeforeIdRemovedEvent
+
 from pyramid import httpexceptions as hexc
 
 from pyramid.threadlocal import get_current_request
@@ -82,8 +84,6 @@ from nti.dataserver.users.interfaces import IUserProfile
 from nti.dataserver.users.interfaces import IEmailAddressable
 
 from nti.externalization.externalization import to_external_object
-
-from nti.intid.interfaces import IIntIdRemovedEvent
 
 from nti.invitations.interfaces import IInvitationAcceptedEvent
 
@@ -293,7 +293,7 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 		code = event.code or get_gift_code(purchase)
 		logger.info("Course gift %s has been redeemed", code)
 
-@component.adapter(ICourseInstanceEnrollmentRecord, IIntIdRemovedEvent)
+@component.adapter(ICourseInstanceEnrollmentRecord, IBeforeIdRemovedEvent)
 def _enrollment_record_dropped(record, event):
 	if record.Scope == ES_PURCHASED and queryInteraction() is not None:
 		raise hexc.HTTPForbidden('Cannot drop a purchased course.')
