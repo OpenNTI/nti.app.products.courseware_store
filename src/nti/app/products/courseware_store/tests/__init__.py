@@ -15,11 +15,13 @@ from nti.app.products.courseware.tests import InstructedCourseApplicationTestLay
 
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
+
 class CourseStoreApplicationTestLayer(InstructedCourseApplicationTestLayer):
 
     @classmethod
     def setUp(cls):
-        xmlconfig.file('configure.zcml', package=nti.app.products.courseware_store)
+        xmlconfig.file('configure.zcml', 
+                       package=nti.app.products.courseware_store)
 
     @classmethod
     def tearDown(cls):
@@ -40,6 +42,7 @@ from nti.testing.layers import ConfiguringLayerMixin
 from nti.dataserver.tests.mock_dataserver import DSInjectorMixin
 
 import zope.testing.cleanup
+
 
 class SharedConfiguringTestLayer(ZopeComponentLayer,
                                  GCLayerMixin,

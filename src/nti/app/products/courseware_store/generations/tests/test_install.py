@@ -12,18 +12,19 @@ from hamcrest import assert_that
 
 import unittest
 
+from nti.app.products.courseware_store.tests import SharedConfiguringTestLayer
+
 from nti.dataserver.tests import mock_dataserver
 from nti.dataserver.tests.mock_dataserver import WithMockDSTrans
 
-from nti.app.products.courseware_store.tests import SharedConfiguringTestLayer
 
 class TestFunctionalInstall(unittest.TestCase):
-	
-	layer = SharedConfiguringTestLayer
 
-	@WithMockDSTrans
-	def test_installed(self):
-		conn = mock_dataserver.current_transaction
-		root = conn.root()
-		generations = root['zope.generations']
-		assert_that( generations, has_key('nti.dataserver-courseware-store'))
+    layer = SharedConfiguringTestLayer
+
+    @WithMockDSTrans
+    def test_installed(self):
+        conn = mock_dataserver.current_transaction
+        root = conn.root()
+        generations = root['zope.generations']
+        assert_that(generations, has_key('nti.dataserver-courseware-store'))
