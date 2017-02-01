@@ -32,50 +32,57 @@ from nti.store.interfaces import IPurchasableChoiceBundle
 from nti.store.store import get_purchasable
 from nti.store.store import get_purchase_purchasables
 
+
 @interface.implementer(ICoursePrice)
 def _nti_course_price_finder(context):
-	return get_nti_course_price(context)
+    return get_nti_course_price(context)
+
 
 @component.adapter(ICourseCatalogEntry)
 @interface.implementer(IPurchasableCourse)
 def _entry_to_purchasable(entry):
-	ntiid = get_course_purchasable_ntiid(entry)
-	return get_purchasable(ntiid) if ntiid else None
+    ntiid = get_course_purchasable_ntiid(entry)
+    return get_purchasable(ntiid) if ntiid else None
+
 
 @component.adapter(ICourseInstance)
 @interface.implementer(IPurchasableCourse)
 def _course_to_purchasable(course):
-	entry = ICourseCatalogEntry(course, None)
-	return IPurchasableCourse(entry, None)
+    entry = ICourseCatalogEntry(course, None)
+    return IPurchasableCourse(entry, None)
+
 
 @component.adapter(IPurchasableCourse)
 @interface.implementer(ICourseCatalogEntry)
 def _purchasable_to_catalog_entry(purchasable):
-	try:
-		ntiid = purchasable.CatalogEntryNTIID
-	except AttributeError:
-		ntiid = get_entry_ntiid_from_purchasable(purchasable)
-	return find_catalog_entry(ntiid) if ntiid else None
+    try:
+        ntiid = purchasable.CatalogEntryNTIID
+    except AttributeError:
+        ntiid = get_entry_ntiid_from_purchasable(purchasable)
+    return find_catalog_entry(ntiid) if ntiid else None
+
 
 @component.adapter(IPurchasableCourse)
 @interface.implementer(ICourseInstance)
 def _purchasable_to_course_instance(purchasable):
-	entry = ICourseCatalogEntry(purchasable, None)
-	return ICourseInstance(entry, None)
+    entry = ICourseCatalogEntry(purchasable, None)
+    return ICourseInstance(entry, None)
+
 
 def _purchase_attempt_transformer(purchase, user=None):
-	result = purchase
-	purchasables = get_purchase_purchasables(purchase)
-	if 	(	 len(purchasables) == 1
-		 and IPurchasableCourse.providedBy(purchasables[0])
-		 and not IPurchasableChoiceBundle.providedBy(purchasables[0])):
-		course = ICourseInstance(purchasables[0], None)
-		if user is not None and course is not None:
-			record = get_any_enrollment(course, user)
-			result = record if record is not None else purchase
-	return result
+    result = purchase
+    purchasables = get_purchase_purchasables(purchase)
+    if (     len(purchasables) == 1
+        and IPurchasableCourse.providedBy(purchasables[0])
+        and not IPurchasableChoiceBundle.providedBy(purchasables[0])):
+        course = ICourseInstance(purchasables[0], None)
+        if user is not None and course is not None:
+            record = get_any_enrollment(course, user)
+            result = record if record is not None else purchase
+    return result
+
 
 @component.adapter(IPurchaseAttempt)
 @interface.implementer(IObjectTransformer)
 def _purchase_object_transformer(obj):
-	return _purchase_attempt_transformer
+    return _purchase_attempt_transformer

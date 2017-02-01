@@ -13,14 +13,18 @@ generation = 3
 
 from zope.generations.generations import SchemaManager
 
+
 class _CoursewareStoreSchemaManager(SchemaManager):
-	"""
-	A schema manager that we can register as a utility in ZCML.
-	"""
-	def __init__(self):
-		super(_CoursewareStoreSchemaManager, self).__init__(
-									generation=generation,
-									minimum_generation=generation,
-									package_name='nti.app.products.courseware_store.generations')
+    """
+    A schema manager that we can register as a utility in ZCML.
+    """
+
+    def __init__(self):
+        super(_CoursewareStoreSchemaManager, self).__init__(
+            generation=generation,
+            minimum_generation=generation,
+            package_name='nti.app.products.courseware_store.generations')
+
+
 def evolve(context):
-	pass
+    pass

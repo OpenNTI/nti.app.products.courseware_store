@@ -48,70 +48,74 @@ ITEMS = StandardExternalFields.ITEMS
 TOTAL = StandardExternalFields.TOTAL
 ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
+
 def _tx_string(s):
-	if s and isinstance(s, unicode):
-		s = s.encode('utf-8')
-	return s
+    if s and isinstance(s, unicode):
+        s = s.encode('utf-8')
+    return s
+
 
 def _parse_course(params):
-	ntiid = params.get('ntiid') or params.get('course')
-	entry = find_catalog_entry(ntiid) if ntiid else None
-	return entry
+    ntiid = params.get('ntiid') or params.get('course')
+    entry = find_catalog_entry(ntiid) if ntiid else None
+    return entry
+
 
 @view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
-				renderer='rest',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			 	name='VendorUpdatesPurchasedCourse')
+               renderer='rest',
+               permission=nauth.ACT_NTI_ADMIN,
+               name='VendorUpdatesPurchasedCourse')
 class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 
-	def __call__(self):
-		params = CaseInsensitiveDict(self.request.params)
-		entry = _parse_course(params)
-		if entry is None:
-			raise hexc.HTTPUnprocessableEntity(detail=_('Course not found or specified.'))
+    def __call__(self):
+        params = CaseInsensitiveDict(self.request.params)
+        entry = _parse_course(params)
+        if entry is None:
+            raise hexc.HTTPUnprocessableEntity(_('Course not found or specified.'))
 
-		bio = BytesIO()
-		csv_writer = csv.writer(bio)
+        bio = BytesIO()
+        csv_writer = csv.writer(bio)
 
-		# header
-		header = ['username', 'name', 'email']
-		csv_writer.writerow(header)
+        # header
+        header = ['username', 'name', 'email']
+        csv_writer.writerow(header)
 
-		purchases = find_allow_vendor_updates_purchases(entry)
-		for purchase in purchases:
-			creator = purchase.creator
-			username = getattr(creator, 'username', creator)
-			profile = purchase.Profile
-			email = getattr(profile, 'email', None)
-			name = getattr(profile, 'realname', None) or username
-			# write data
-			row_data = [username, name, email]
-			csv_writer.writerow([_tx_string(x) for x in row_data])
+        purchases = find_allow_vendor_updates_purchases(entry)
+        for purchase in purchases:
+            creator = purchase.creator
+            username = getattr(creator, 'username', creator)
+            profile = purchase.Profile
+            email = getattr(profile, 'email', None)
+            name = getattr(profile, 'realname', None) or username
+            # write data
+            row_data = [username, name, email]
+            csv_writer.writerow([_tx_string(x) for x in row_data])
 
-		response = self.request.response
-		response.body = bio.getvalue()
-		response.content_disposition = b'attachment; filename="updates.csv"'
-		return response
+        response = self.request.response
+        response.body = bio.getvalue()
+        response.content_disposition = b'attachment; filename="updates.csv"'
+        return response
+
 
 @view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
-				renderer='rest',
-			 	permission=nauth.ACT_NTI_ADMIN,
-			 	name='SyncPurchasableCourseChoiceBundles')
+               renderer='rest',
+               permission=nauth.ACT_NTI_ADMIN,
+               name='SyncPurchasableCourseChoiceBundles')
 class SyncPurchasableCourseChoiceBundlesView(AbstractAuthenticatedView):
 
-	def __call__(self):
-		# sync in all hierarchy sites
-		for name in get_component_hierarchy_names():
-			site = get_host_site(name)
-			with current_site(site):
-				sync_purchasable_course_choice_bundles()
+    def __call__(self):
+        # sync in all hierarchy sites
+        for name in get_component_hierarchy_names():
+            site = get_host_site(name)
+            with current_site(site):
+                sync_purchasable_course_choice_bundles()
 
-		result = LocatedExternalDict()
-		bundles = get_registered_choice_bundles()
-		items = result[ITEMS] = list(bundles.values())
-		result[TOTAL] = result[ITEM_COUNT] = len(items)
-		return result
+        result = LocatedExternalDict()
+        bundles = get_registered_choice_bundles()
+        items = result[ITEMS] = list(bundles.values())
+        result[TOTAL] = result[ITEM_COUNT] = len(items)
+        return result

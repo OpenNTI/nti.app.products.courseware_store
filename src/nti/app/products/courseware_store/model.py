@@ -25,24 +25,25 @@ from nti.schema.field import SchemaConfigured
 
 from nti.schema.fieldproperty import createDirectFieldProperties
 
+
 @WithRepr
 @total_ordering
 @EqHash('Amount', 'Currency')
 @interface.implementer(ICoursePrice)
 class CoursePrice(SchemaConfigured):
-	createDirectFieldProperties(ICoursePrice)
+    createDirectFieldProperties(ICoursePrice)
 
-	amount = alias('Amount')
-	currency = alias('Currency')
+    amount = alias('Amount')
+    currency = alias('Currency')
 
-	def __lt__(self, other):
-		try:
-			return (self.Amount, self.Currency) < (self.Amount, self.Currency)
-		except AttributeError:  # pragma: no cover
-			return NotImplemented
+    def __lt__(self, other):
+        try:
+            return (self.Amount, self.Currency) < (self.Amount, self.Currency)
+        except AttributeError:  # pragma: no cover
+            return NotImplemented
 
-	def __gt__(self, other):
-		try:
-			return (self.Amount, self.Currency) > (self.Amount, self.Currency)
-		except AttributeError:  # pragma: no cover
-			return NotImplemented
+    def __gt__(self, other):
+        try:
+            return (self.Amount, self.Currency) > (self.Amount, self.Currency)
+        except AttributeError:  # pragma: no cover
+            return NotImplemented

@@ -36,55 +36,61 @@ from nti.store.interfaces import IGiftPurchaseAttempt
 
 from nti.store.purchasable import get_purchasable
 
+
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IExternalObjectDecorator)
 class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
-	def _predicate(self, context, result):
-		return self._is_authenticated
+    def _predicate(self, context, result):
+        return self._is_authenticated
 
-	@classmethod
-	def _get_enrollment_record(cls, context, remoteUser):
-		entry = get_catalog_entry(context.CatalogEntryNTIID)
-		return get_enrollment_record(entry, remoteUser)
+    @classmethod
+    def _get_enrollment_record(cls, context, remoteUser):
+        entry = get_catalog_entry(context.CatalogEntryNTIID)
+        return get_enrollment_record(entry, remoteUser)
 
-	def _do_decorate_external(self, context, result):
-		record = self._get_enrollment_record(context, self.remoteUser)
-		result['IsEnrolled'] = bool(record is not None and record.Scope == ES_PURCHASED)
-		isAvailable = (record is None or record.Scope == ES_PUBLIC) and context.IsEnabled
-		result['Enabled'] = result['IsAvailable'] = isAvailable # alias property
-		result.pop('IsEnabled', None)  # redundant
+    def _do_decorate_external(self, context, result):
+        record = self._get_enrollment_record(context, self.remoteUser)
+        result['IsEnrolled'] = bool(    record is not None 
+                                    and record.Scope == ES_PURCHASED)
+        isAvailable = bool((record is None or record.Scope == ES_PUBLIC) \
+                            and context.IsEnabled)
+        result['Enabled'] = result['IsAvailable'] = isAvailable  # alias property
+        result.pop('IsEnabled', None)  # redundant
+
 
 @component.adapter(IGiftPurchaseAttempt)
 @interface.implementer(IExternalMappingDecorator)
 class _VendorThankYouInfoDecorator(object):
-	"""
-	Decorate the thank you page information for gifts.
-	"""
+    """
+    Decorate the thank you page information for gifts.
+    """
 
-	__metaclass__ = SingletonDecorator
+    __metaclass__ = SingletonDecorator
 
-	thank_you_context_key = 'Gifting'
+    thank_you_context_key = 'Gifting'
 
-	def _predicate(self, context, result):
-		return self._is_authenticated
+    def _predicate(self, context, result):
+        return self._is_authenticated
 
-	def get_course(self, purchase_attempt):
-		purchaseables = purchase_attempt.Items
-		catalog = component.getUtility(ICourseCatalog)
-		for item in purchaseables or ():
-			purchasable = get_purchasable(item)
-			if not IPurchasableCourse.providedBy(purchasable):
-				continue
-			for catalog_ntiid in purchasable.Items:
-				try:
-					entry = catalog.getCatalogEntry(catalog_ntiid)
-					return ICourseInstance(entry)
-				except (KeyError, LookupError):
-					logger.error("Could not find course entry %s", catalog_ntiid)
+    def get_course(self, purchase_attempt):
+        purchaseables = purchase_attempt.Items
+        catalog = component.getUtility(ICourseCatalog)
+        for item in purchaseables or ():
+            purchasable = get_purchasable(item)
+            if not IPurchasableCourse.providedBy(purchasable):
+                continue
+            for catalog_ntiid in purchasable.Items:
+                try:
+                    entry = catalog.getCatalogEntry(catalog_ntiid)
+                    return ICourseInstance(entry)
+                except (KeyError, LookupError):
+                    logger.error(
+                        "Could not find course entry %s", catalog_ntiid)
 
-	def decorateExternalMapping(self, context, result):
-		course = self.get_course(context)
-		thank_you_page = get_vendor_thank_you_page(course, self.thank_you_context_key)
-		if thank_you_page:
-			result['VendorThankYouPage'] = thank_you_page
+    def decorateExternalMapping(self, context, result):
+        course = self.get_course(context)
+        thank_you_page = get_vendor_thank_you_page(course, 
+                                                   self.thank_you_context_key)
+        if thank_you_page:
+            result['VendorThankYouPage'] = thank_you_page
