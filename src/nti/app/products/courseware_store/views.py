@@ -12,6 +12,8 @@ logger = __import__('logging').getLogger(__name__)
 import csv
 from io import BytesIO
 
+from requests.structures import CaseInsensitiveDict
+
 from zope.component.hooks import site as current_site
 
 from pyramid import httpexceptions as hexc
@@ -30,8 +32,6 @@ from nti.app.products.courseware_store.purchasable import sync_purchasable_cours
 
 from nti.app.products.courseware_store.utils import find_catalog_entry
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_purchases
-
-from nti.common.maps import CaseInsensitiveDict
 
 from nti.dataserver import authorization as nauth
 
