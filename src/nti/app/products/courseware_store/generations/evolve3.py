@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -65,7 +65,7 @@ def register_purchasables():
     for site in get_all_host_sites():
         with current_site(site):
             registry = site.getSiteManager()
-            result.extend(register_site_purchasables(registry=registry, 
+            result.extend(register_site_purchasables(registry=registry,
                                                      seen=seen))
     return result
 
@@ -75,10 +75,10 @@ def do_evolve(context, generation=generation):
     conn = context.connection
     ds_folder = conn.root()['nti.dataserver']
     with current_site(ds_folder):
-        assert   component.getSiteManager() == ds_folder.getSiteManager(), \
-                "Hooks not installed?"
+        assert component.getSiteManager() == ds_folder.getSiteManager(), \
+               "Hooks not installed?"
         result = register_purchasables()
-    logger.info('courseware-store %s generation completed, %s purchasables registered',
+    logger.info('Generation completed, %s purchasables registered',
                 generation, len(result))
 
 
