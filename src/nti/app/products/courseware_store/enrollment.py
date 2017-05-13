@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -15,6 +15,7 @@ from zope import interface
 from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 
 from nti.app.products.courseware.enrollment import EnrollmentOption
+
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
@@ -27,6 +28,8 @@ from nti.app.products.courseware_store.utils import get_purchasable_course_bundl
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseSubInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
+from nti.contenttypes.courses.utils import get_parent_course
 
 from nti.externalization.representation import WithRepr
 
@@ -47,7 +50,8 @@ def get_entry_context(context):
     # with mapped courses
     if      (purchasable is None or not purchasable.isPublic()) \
         and ICourseSubInstance.providedBy(course):
-        result = ICourseCatalogEntry(course.__parent__.__parent__)
+        parent = get_parent_course(course)
+        result = ICourseCatalogEntry(parent)
     else:
         result = context
     return result
@@ -89,7 +93,9 @@ class StoreEnrollmentOptionProvider(object):
         if purchasables:
             result = StoreEnrollmentOption()
             result.Purchasables = purchasables
-            IsEnabled = reduce(lambda x, y: x or y.isPublic(), purchasables, False)
+            IsEnabled = reduce(lambda x, y: x or y.isPublic(), 
+                               purchasables, 
+                               False)
             result.IsEnabled = IsEnabled
             # CS: We want to use the original data
             result.CatalogEntryNTIID = self.context.ntiid

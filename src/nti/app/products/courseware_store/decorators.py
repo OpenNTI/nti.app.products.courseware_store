@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -53,7 +53,7 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
         record = self._get_enrollment_record(context, self.remoteUser)
         result['IsEnrolled'] = bool(    record is not None 
                                     and record.Scope == ES_PURCHASED)
-        isAvailable = bool((record is None or record.Scope == ES_PUBLIC) \
+        isAvailable = bool((    record is None or record.Scope == ES_PUBLIC) \
                             and context.IsEnabled)
         result['Enabled'] = result['IsAvailable'] = isAvailable  # alias property
         result.pop('IsEnabled', None)  # redundant
@@ -85,12 +85,12 @@ class _VendorThankYouInfoDecorator(object):
                     entry = catalog.getCatalogEntry(catalog_ntiid)
                     return ICourseInstance(entry)
                 except (KeyError, LookupError):
-                    logger.error(
-                        "Could not find course entry %s", catalog_ntiid)
+                    logger.error("Could not find course entry %s", 
+                                 catalog_ntiid)
 
     def decorateExternalMapping(self, context, result):
         course = self.get_course(context)
-        thank_you_page = get_vendor_thank_you_page(course, 
-                                                   self.thank_you_context_key)
+        key = self.thank_you_context_key # vendor info key
+        thank_you_page = get_vendor_thank_you_page(course, key)
         if thank_you_page:
             result['VendorThankYouPage'] = thank_you_page
