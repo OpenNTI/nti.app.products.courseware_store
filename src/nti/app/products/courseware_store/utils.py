@@ -42,9 +42,9 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
-from nti.dataserver.metadata_index import IX_CREATOR
-from nti.dataserver.metadata_index import IX_MIMETYPE
-from nti.dataserver.metadata_index import CATALOG_NAME as METADATA_CATALOG_NAME
+from nti.dataserver.metadata.index import IX_CREATOR
+from nti.dataserver.metadata.index import IX_MIMETYPE
+from nti.dataserver.metadata.index import CATALOG_NAME as METADATA_CATALOG_NAME
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
