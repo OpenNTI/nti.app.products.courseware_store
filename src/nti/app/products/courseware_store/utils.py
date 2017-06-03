@@ -79,7 +79,7 @@ def is_course_giftable(context):
 
 def is_course_redeemable(context):
     vendor_info = get_vendor_info(context)
-    return traverse(vendor_info, 'NTI/Purchasable/Giftable', default=False)
+    return traverse(vendor_info, 'NTI/Purchasable/Redeemable', default=False)
 
 
 def get_course_purchasable_provider(context):
