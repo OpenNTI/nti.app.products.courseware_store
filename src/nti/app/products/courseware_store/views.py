@@ -4,12 +4,13 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
 
 import csv
+import six
 from io import BytesIO
 
 from requests.structures import CaseInsensitiveDict
@@ -35,8 +36,6 @@ from nti.app.products.courseware_store.utils import find_allow_vendor_updates_pu
 
 from nti.dataserver import authorization as nauth
 
-from nti.dataserver.interfaces import IDataserverFolder
-
 from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 
@@ -50,7 +49,7 @@ ITEM_COUNT = StandardExternalFields.ITEM_COUNT
 
 
 def _tx_string(s):
-    if s and isinstance(s, unicode):
+    if s and isinstance(s, six.text_type):
         s = s.encode('utf-8')
     return s
 
@@ -61,7 +60,6 @@ def _parse_course(params):
     return entry
 
 
-@view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
@@ -73,7 +71,8 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
         params = CaseInsensitiveDict(self.request.params)
         entry = _parse_course(params)
         if entry is None:
-            raise hexc.HTTPUnprocessableEntity(_('Course not found or specified.'))
+            msg = _(u'Course not found or specified.')
+            raise hexc.HTTPUnprocessableEntity(msg)
 
         bio = BytesIO()
         csv_writer = csv.writer(bio)
@@ -83,10 +82,10 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
         csv_writer.writerow(header)
 
         purchases = find_allow_vendor_updates_purchases(entry)
-        for purchase in purchases:
+        for purchase in purchases or ():
+            profile = purchase.Profile
             creator = purchase.creator
             username = getattr(creator, 'username', creator)
-            profile = purchase.Profile
             email = getattr(profile, 'email', None)
             name = getattr(profile, 'realname', None) or username
             # write data
@@ -95,11 +94,10 @@ class VendorUpdatesPurchasedCourseView(AbstractAuthenticatedView):
 
         response = self.request.response
         response.body = bio.getvalue()
-        response.content_disposition = b'attachment; filename="updates.csv"'
+        response.content_disposition = 'attachment; filename="updates.csv"'
         return response
 
 
-@view_config(context=IDataserverFolder)
 @view_config(context=CourseAdminPathAdapter)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
@@ -113,7 +111,6 @@ class SyncPurchasableCourseChoiceBundlesView(AbstractAuthenticatedView):
             site = get_host_site(name)
             with current_site(site):
                 sync_purchasable_course_choice_bundles()
-
         result = LocatedExternalDict()
         bundles = get_registered_choice_bundles()
         items = result[ITEMS] = list(bundles.values())

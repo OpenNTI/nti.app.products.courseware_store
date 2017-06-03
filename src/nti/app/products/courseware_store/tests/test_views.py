@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -10,11 +10,7 @@ __docformat__ = "restructuredtext en"
 from hamcrest import is_
 from hamcrest import assert_that
 
-from zope import component
-
 from zope.event import notify
-
-from nti.contenttypes.courses.interfaces import ICourseCatalog
 
 from nti.dataserver.users import User
 
@@ -44,18 +40,12 @@ class TestViews(ApplicationLayerTest):
 
     layer = InstructedCourseApplicationTestLayer
 
-    processor = 'stripe'
+    processor = u'stripe'
 
-    default_origin = str('http://janux.ou.edu')
+    default_origin = 'http://janux.ou.edu'
 
-    course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
-    purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
-
-    def catalog_entry(self):
-        catalog = component.getUtility(ICourseCatalog)
-        for entry in catalog.iterCatalogEntries():
-            if entry.ntiid == self.course_ntiid:
-                return entry
+    course_ntiid = u'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
+    purchasable_id = u'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
 
     def create_purchase_attempt(self, item, quantity=None, state=None):
         state = state or PA_STATE_STARTED
@@ -64,7 +54,7 @@ class TestViews(ApplicationLayerTest):
         pricing = create_pricing_results(purchase_price=999.99,
                                          non_discounted_price=0.0)
         result = create_purchase_attempt(order, processor=self.processor, state=state,
-                                         context={"AllowVendorUpdates": True})
+                                         context={u"AllowVendorUpdates": True})
         result.Pricing = pricing
         return result
 
@@ -75,15 +65,14 @@ class TestViews(ApplicationLayerTest):
             purchase = self.create_purchase_attempt(self.purchasable_id)
             user = User.get_user(self.default_username)
             register_purchase_attempt(purchase, user)
-
             notify(PurchaseAttemptSuccessful(purchase))
             assert_that(purchase.State, is_(PA_STATE_SUCCESS))
 
-        res = self.testapp.get('/dataserver2/@@VendorUpdatesPurchasedCourse',
+        res = self.testapp.get('/dataserver2/CourseAdmin/@@VendorUpdatesPurchasedCourse',
                                params={'ntiid': self.course_ntiid})
         assert_that(res.body,
-                    is_(b'username,name,email\r\n'
-                        b'sjohnson@nextthought.com,sjohnson@nextthought.com,\r\n'))
+                    is_('username,name,email\r\n'
+                        'sjohnson@nextthought.com,sjohnson@nextthought.com,\r\n'))
 
         assert_that(res.content_disposition,
                     is_('attachment; filename="updates.csv"'))
