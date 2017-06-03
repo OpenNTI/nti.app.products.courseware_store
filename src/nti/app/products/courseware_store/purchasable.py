@@ -40,6 +40,8 @@ from nti.app.products.courseware_store.utils import get_entry_purchasable_provid
 from nti.app.products.courseware_store.utils import is_course_enabled_for_purchase
 from nti.app.products.courseware_store.utils import get_purchasable_redeem_cutoff_date
 
+from nti.base._compat import text_
+
 from nti.contentlibrary.interfaces import IContentUnitHrefMapper
 
 from nti.contenttypes.courses.common import get_course_packages
@@ -66,6 +68,7 @@ from nti.store.store import register_purchasable
 
 from nti.store.utils import to_list
 from nti.store.utils import to_frozenset
+
 
 # Purchasable courses
 
@@ -109,23 +112,26 @@ def create_purchasable_from_course(context):
             icon = IContentUnitHrefMapper(icon).href if icon else None
         if thumbnail is None and packages:
             thumbnail = packages[0].thumbnail
-            thumbnail = IContentUnitHrefMapper(thumbnail).href if thumbnail else None
+            if thumbnail:
+                thumbnail = IContentUnitHrefMapper(thumbnail).href 
+            else:
+                thumbnail = None
 
     if isinstance(entry.StartDate, datetime):
-        start_date = unicode(isodate.datetime_isoformat(entry.StartDate))
+        start_date = str(isodate.datetime_isoformat(entry.StartDate))
     elif isinstance(entry.StartDate, date):
-        start_date = unicode(isodate.date_isoformat(entry.StartDate))
+        start_date = str(isodate.date_isoformat(entry.StartDate))
     else:
-        start_date = unicode(entry.StartDate) if entry.StartDate else None
+        start_date = str(entry.StartDate) if entry.StartDate else None
 
     purchase_cutoff_date = get_purchasable_cutoff_date(course)
     redeem_cutoff_date = get_purchasable_redeem_cutoff_date(course)
 
-    if      purchase_cutoff_date \
-        and redeem_cutoff_date \
-        and purchase_cutoff_date > redeem_cutoff_date:
-        raise ValueError(
-            'RedeemCutOffDate cannot be before PurchaseCutOffDate')
+    if purchase_cutoff_date \
+            and redeem_cutoff_date \
+            and purchase_cutoff_date > redeem_cutoff_date:
+        msg = u'RedeemCutOffDate cannot be before PurchaseCutOffDate'
+        raise ValueError(msg)
 
     name = get_course_purchasable_name(course) or entry.title
     title = get_course_purchasable_title(course) or entry.title
@@ -144,13 +150,13 @@ def create_purchasable_from_course(context):
                            redeemable=redeemable,
                            vendor_info=vendor_info,
                            description=entry.description,
-                           purchase_cutoff_date=purchase_cutoff_date,
                            redeem_cutoff_date=redeem_cutoff_date,
+                           purchase_cutoff_date=purchase_cutoff_date,
                            # deprecated/legacy
                            icon=icon,
                            preview=preview,
                            thumbnail=thumbnail,
-                           startdate=start_date,
+                           startdate=text_(start_date),
                            signature=entry.InstructorsSignature,
                            department=entry.ProviderDepartmentTitle,
                            # initializer
@@ -377,8 +383,8 @@ def sync_purchasable_course_choice_bundles(registry=component):
                 stored.Public = False
                 lifecycleevent.modified(stored)
         elif stored is not None:  # update
-            update_purchasable_course_choice_bundle(stored, 
-                                                    processed, 
+            update_purchasable_course_choice_bundle(stored,
+                                                    processed,
                                                     validated)
             lifecycleevent.modified(stored)
         else:  # new
