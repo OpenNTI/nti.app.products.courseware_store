@@ -18,8 +18,6 @@ from zope.intid.interfaces import IIntIds
 
 from zope import component
 
-from zope.catalog.interfaces import ICatalog
-
 from zope.traversing.api import traverse
 
 from zope.security.interfaces import IPrincipal
@@ -37,14 +35,9 @@ from nti.contenttypes.courses.interfaces import NTIID_ENTRY_TYPE
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_PROVIDER
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
-from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
-
-from nti.dataserver.metadata.index import IX_CREATOR
-from nti.dataserver.metadata.index import IX_MIMETYPE
-from nti.dataserver.metadata.index import CATALOG_NAME as METADATA_CATALOG_NAME
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
@@ -56,6 +49,10 @@ from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
+
+from nti.store.purchase_index import IX_CREATOR
+from nti.store.purchase_index import IX_MIMETYPE
+from nti.store.purchase_index import get_purchase_catalog
 
 from nti.store.store import get_purchasables
 
@@ -133,9 +130,9 @@ def get_course_price(context, *names):
 def get_course_purchasable_ntiid(context, name=None):
     entry = ICourseCatalogEntry(context)
     parts = get_parts(entry.ntiid)
-    ntiid = make_ntiid(date=parts.date, 
+    ntiid = make_ntiid(date=parts.date,
                        provider=parts.provider,
-                       nttype=PURCHASABLE_COURSE, 
+                       nttype=PURCHASABLE_COURSE,
                        specific=parts.specific)
     return ntiid
 get_entry_purchasable_ntiid = get_course_purchasable_ntiid
@@ -144,9 +141,9 @@ get_entry_purchasable_ntiid = get_course_purchasable_ntiid
 def get_entry_ntiid_from_purchasable(context, provider=NTIID_ENTRY_PROVIDER):
     purchasable = IPurchasable(context)
     parts = get_parts(purchasable.NTIID)
-    ntiid = make_ntiid(date=parts.date, 
+    ntiid = make_ntiid(date=parts.date,
                        provider=provider,
-                       nttype=NTIID_ENTRY_TYPE, 
+                       nttype=NTIID_ENTRY_TYPE,
                        specific=parts.specific)
     return ntiid
 
@@ -163,8 +160,8 @@ def get_nti_course_price(context):
 
 def allow_vendor_updates(context):
     vendor_info = get_vendor_info(context)
-    result = traverse(vendor_info, 
-                      'NTI/Purchasable/AllowVendorUpdates', 
+    result = traverse(vendor_info,
+                      'NTI/Purchasable/AllowVendorUpdates',
                       default=False)
     return bool(result) if result is not None else False
 
@@ -179,24 +176,11 @@ def get_nti_choice_bundles(context):
 def find_catalog_entry(context):
     if isinstance(context, six.string_types):
         result = find_object_with_ntiid(context)
-        if result is None:
-            try:
-                catalog = component.getUtility(ICourseCatalog)
-                result = catalog.getCatalogEntry(context)
-            except (LookupError, KeyError):
-                result = None
     else:
         result = context
     result = ICourseCatalogEntry(result, None)
     return result
-
-
-def safe_find_catalog_entry(context):
-    try:
-        result = find_catalog_entry(context)
-    except Exception:
-        result = None
-    return result
+safe_find_catalog_entry = find_catalog_entry
 
 
 def find_allow_vendor_updates_purchases(entry, invitation=False):
@@ -204,9 +188,10 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
     if entry is None:
         return ()
 
-    mime_types = PURCHASE_ATTEMPT_MIME_TYPES
-    catalog = component.getUtility(ICatalog, METADATA_CATALOG_NAME)
-    intids_purchases = catalog[IX_MIMETYPE].apply({'any_of': mime_types})
+    catalog = get_purchase_catalog()
+    intids_purchases = catalog[IX_MIMETYPE].apply({
+        'any_of': PURCHASE_ATTEMPT_MIME_TYPES
+    })
     if not intids_purchases:
         return ()
 
@@ -226,7 +211,7 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
 
     result = []
     intids = component.getUtility(IIntIds)
-    for uid in intids_purchases:
+    for uid in intids_purchases or ():
         try:
             purchase = intids.queryObject(uid)
             # filter any invalid object
