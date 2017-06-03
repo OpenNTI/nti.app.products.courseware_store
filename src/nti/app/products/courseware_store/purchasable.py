@@ -248,7 +248,7 @@ def get_common_vendor_info(purchasables):
 
     for k, s in data.items():
         if len(s) == 1:
-            result[k] = s.__iter__().next()
+            result[k] = next(iter(s))
 
     result = IPurchasableVendorInfo(result, None)
     return result
@@ -263,20 +263,19 @@ class PurchasableCourseChoiceBundle(StorePurchasableCourseChoiceBundle):
         return self.Name
 
 
-def get_course_choice_bundle_ntiid(name, purchasables):
-    purchasables = to_list(purchasables)
-    reference_purchasable = purchasables[0]
-    specific = make_specific_safe(name)
-    ntiid = make_ntiid(provider=reference_purchasable.Provider,
-                       nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
-                       specific=specific)
-    return ntiid
-
-
 def get_reference_purchasable(purchasables):
     purchasables = to_list(purchasables)
     reference_purchasable = purchasables[0]
     return reference_purchasable
+
+
+def get_course_choice_bundle_ntiid(name, purchasables):
+    specific = make_specific_safe(name)
+    reference_purchasable = get_reference_purchasable(purchasables)
+    ntiid = make_ntiid(provider=reference_purchasable.Provider,
+                       nttype=PURCHASABLE_COURSE_CHOICE_BUNDLE,
+                       specific=specific)
+    return ntiid
 
 
 def create_course_choice_bundle(name, purchasables):
