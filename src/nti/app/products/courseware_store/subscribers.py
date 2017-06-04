@@ -21,6 +21,8 @@ import pytz
 from zope import component
 from zope import lifecycleevent
 
+from zope.component.hooks import getSite
+
 from zope.dottedname import resolve as dottedname
 
 from zope.event import notify
@@ -344,6 +346,7 @@ def on_course_instance_removed(course, event):
         purchasable = IPurchasableCourse(course, None)
         if purchasable is not None:
             purchasable.Public = False
+            purchasable.__parent__ = getSite()
             lifecycleevent.modified(purchasable)
 
 

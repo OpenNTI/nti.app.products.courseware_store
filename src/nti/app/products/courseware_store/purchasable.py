@@ -24,6 +24,8 @@ from zope import lifecycleevent
 
 from zope.cachedescriptors.property import readproperty
 
+from zope.component.hooks import getSite
+
 from nti.app.products.courseware_store.interfaces import get_course_publishable_vendor_info
 
 from nti.app.products.courseware_store.utils import get_course_fee
@@ -113,7 +115,7 @@ def create_purchasable_from_course(context):
         if thumbnail is None and packages:
             thumbnail = packages[0].thumbnail
             if thumbnail:
-                thumbnail = IContentUnitHrefMapper(thumbnail).href 
+                thumbnail = IContentUnitHrefMapper(thumbnail).href
             else:
                 thumbnail = None
 
@@ -208,7 +210,9 @@ def sync_purchasable_course(context):
         if purchasable is not None:
             lifecycleevent.created(purchasable)
             register_purchasable(purchasable)
+            purchasable.__parent__ = ICourseInstance(context)
     return purchasable
+
 
 # purchasable course choice bundles
 
@@ -389,3 +393,4 @@ def sync_purchasable_course_choice_bundles(registry=component):
         else:  # new
             lifecycleevent.created(processed)
             register_purchasable(processed)
+            processed.__parent__ = getSite()  # folder
