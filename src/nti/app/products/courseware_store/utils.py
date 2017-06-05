@@ -45,14 +45,14 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import PURCHASABLE_COURSE
 
+from nti.store.index import IX_CREATOR
+from nti.store.index import IX_MIMETYPE
+from nti.store.index import get_purchase_catalog
+
 from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.interfaces import IPurchasableCourseChoiceBundle
-
-from nti.store.purchase_index import IX_CREATOR
-from nti.store.purchase_index import IX_MIMETYPE
-from nti.store.purchase_index import get_purchase_catalog
 
 from nti.store.store import get_purchasables
 
