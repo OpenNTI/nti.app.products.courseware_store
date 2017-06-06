@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -26,7 +26,7 @@ from zope.cachedescriptors.property import readproperty
 
 from zope.component.hooks import getSite
 
-from nti.app.products.courseware_store.interfaces import get_course_publishable_vendor_info
+from nti.app.products.courseware.interfaces import get_course_publishable_vendor_info
 
 from nti.app.products.courseware_store.utils import get_course_fee
 from nti.app.products.courseware_store.utils import get_course_price

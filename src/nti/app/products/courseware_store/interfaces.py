@@ -17,8 +17,6 @@ from zope.interface.interfaces import IObjectEvent
 from pyramid.interfaces import IRequest
 
 from nti.app.products.courseware.interfaces import IEnrollmentOption
-from nti.app.products.courseware.interfaces import ICoursePublishableVendorInfo
-from nti.app.products.courseware.interfaces import get_course_publishable_vendor_info
 
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
@@ -29,10 +27,6 @@ from nti.schema.field import Number
 from nti.schema.field import Object
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidTextLine
-
-# re/export
-ICoursePublishableVendorInfo = ICoursePublishableVendorInfo
-get_course_publishable_vendor_info = get_course_publishable_vendor_info
 
 
 class ICoursePrice(interface.Interface):
@@ -90,3 +84,11 @@ class StoreEnrollmentEvent(ObjectEvent):
     @property
     def record(self):
         return self.object
+
+
+import zope.deferredimport
+zope.deferredimport.initialize()
+zope.deferredimport.deprecated(
+    "Import from nti.app.products.courseware.interfaces instead",
+    ICoursePublishableVendorInfo='nti.app.products.courseware.interfaces:ICoursePublishableVendorInfo',
+    get_course_publishable_vendor_info='nti.app.products.courseware.interfaces:get_course_publishable_vendor_info')
