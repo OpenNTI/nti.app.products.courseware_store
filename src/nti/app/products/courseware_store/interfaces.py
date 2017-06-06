@@ -11,6 +11,9 @@ logger = __import__('logging').getLogger(__name__)
 
 from zope import interface
 
+from zope.interface.interfaces import ObjectEvent
+from zope.interface.interfaces import IObjectEvent
+
 from pyramid.interfaces import IRequest
 
 from nti.app.products.courseware.interfaces import IEnrollmentOption
@@ -27,13 +30,15 @@ from nti.schema.field import Object
 from nti.schema.field import ListOrTuple
 from nti.schema.field import ValidTextLine
 
-# [re]export
+# re/export
 ICoursePublishableVendorInfo = ICoursePublishableVendorInfo
 get_course_publishable_vendor_info = get_course_publishable_vendor_info
 
 
 class ICoursePrice(interface.Interface):
+
     Amount = Number(title=u"The price amount", required=True)
+
     Currency = ValidTextLine(title=u"The currency",
                              required=False,
                              default=u'USD')
@@ -46,6 +51,7 @@ class ICoursePriceFinder(interface.Interface):
 
 
 class IStoreEnrollmentOption(IEnrollmentOption):
+
     IsEnabled = Bool(title=u"Is enabled flag",
                      required=False,
                      default=True)
@@ -60,7 +66,8 @@ class IStoreEnrollmentOption(IEnrollmentOption):
                               default=False)
 
 
-class IStoreEnrollmentEvent(interface.Interface):
+class IStoreEnrollmentEvent(IObjectEvent):
+
     request = Object(IRequest, title=u"the request", required=False)
 
     purchasable = Object(IPurchasableCourse,
@@ -73,9 +80,13 @@ class IStoreEnrollmentEvent(interface.Interface):
 
 
 @interface.implementer(IStoreEnrollmentEvent)
-class StoreEnrollmentEvent(object):
+class StoreEnrollmentEvent(ObjectEvent):
 
     def __init__(self, record, purchasable=None, request=None):
-        self.record = record
+        ObjectEvent.__init__(self, record)
         self.request = request
         self.purchasable = purchasable
+    
+    @property
+    def record(self):
+        return self.object

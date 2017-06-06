@@ -218,7 +218,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
     else:
         send_event = False
 
-    if send_event:
+    if send_event and enrollment is not None:
         # notify store based enrollment
         request = request or get_current_request()
         notify(StoreEnrollmentEvent(enrollment, purchasable, request))
@@ -663,31 +663,26 @@ def _build_enrollment_args(event, user, profile, catalog_entry):
     return args
 
 
-@component.adapter(IStoreEnrollmentEvent)
-def _user_enrolled(event):
-    record = event.record
-    if record is not None and record.Scope == ES_PURCHASED:
-        creator = record.Principal
-        creator = get_user(creator)
-        profile = IUserProfile(creator)
-        email = getattr(profile, 'email', None)
+@component.adapter(ICourseInstanceEnrollmentRecord, IStoreEnrollmentEvent)
+def _user_enrolled(record, event):
+    if record.Scope != ES_PURCHASED:
+        return
+    creator = record.Principal
+    creator = get_user(creator)
+    profile = IUserProfile(creator)
+    email = getattr(profile, 'email', None)
 
-        course = record.CourseInstance
-        catalog_entry = ICourseCatalogEntry(course)
+    course = record.CourseInstance
+    catalog_entry = ICourseCatalogEntry(course)
 
-        base_template = 'enrollment_confirmation_email'
-        template, package = get_template(catalog_entry,
-                                         base_template,
-                                         DEFAULT_ENROLL_PACKAGE)
+    base_template = 'enrollment_confirmation_email'
+    template, package = get_template(catalog_entry,
+                                     base_template,
+                                     DEFAULT_ENROLL_PACKAGE)
 
-        args = _build_enrollment_args(event, creator, profile, catalog_entry)
-        subject = args.pop('subject')
+    args = _build_enrollment_args(event, creator, profile, catalog_entry)
+    subject = args.pop('subject')
 
-        _send_email(event,
-                    creator,
-                    profile,
-                    email,
-                    args,
-                    template,
-                    subject,
-                    package)
+    _send_email(event, creator, profile,
+                email, args, template,
+                subject, package)
