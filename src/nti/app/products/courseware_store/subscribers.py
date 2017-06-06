@@ -4,7 +4,7 @@
 .. $Id$
 """
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
@@ -67,7 +67,6 @@ from nti.contenttypes.courses.interfaces import ES_PURCHASED
 
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -90,6 +89,8 @@ from nti.externalization.externalization import to_external_object
 from nti.invitations.interfaces import IInvitationAcceptedEvent
 
 from nti.mailer.interfaces import ITemplatedMailer
+
+from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import RedemptionException
 
@@ -114,16 +115,19 @@ DEFAULT_ENROLL_PACKAGE = 'nti.app.products.courseware'
 
 
 def _get_redeem_cutoff_date(purchase):
-    purchaseables = get_purchasables(purchase)
-    now = datetime.utcnow()
     result = None
-    for purchasable in purchaseables:
+    now = datetime.utcnow()
+    purchaseables = get_purchasables(purchase)
+    for purchasable in purchaseables or ():
         if purchasable.RedeemCutOffDate is not None:
             redeem_date = isodate.parse_datetime(purchasable.RedeemCutOffDate)
             redeem_date = redeem_date.replace(tzinfo=None)
-            result = redeem_date if result is None else max(result, redeem_date)
+            if result is None:
+                result = redeem_date 
+            else:
+                result = max(result, redeem_date)
     if result and now > result:
-        raise RedemptionException(_("Gift cannot be redeemed at this time."))
+        raise RedemptionException(_(u"Gift cannot be redeemed at this time."))
     if result:
         result = result.strftime('%B %d, %Y')
     return result
@@ -174,7 +178,7 @@ def get_template(catalog_entry, base_template, default_package=None):
 
 def get_user(user):
     if user and not IUser.providedBy(user):
-        user = User.get_user(str(user)) 
+        user = User.get_user(str(user))
     return user
 
 
@@ -192,8 +196,8 @@ def _parent_course_instance_enrollemnt(course, user):
 def _enroll(course, user, purchasable=None, request=None, check_enrollment=False):
     enrollment = get_enrollment_record(course, user)
     if enrollment is not None and enrollment.Scope == ES_PURCHASED and check_enrollment:
-        raise AlreadyEnrolledException(
-            _("You are already enrolled in this course."))
+        msg = _(u"You are already enrolled in this course.")
+        raise AlreadyEnrolledException(msg)
 
     send_event = True
     if enrollment is None or enrollment.Scope != ES_PURCHASED:
@@ -232,18 +236,15 @@ def _unenroll(course, user, purchasable=None):
 
 
 def _get_courses_from_purchasables(purchasables=()):
-    catalog = component.getUtility(ICourseCatalog)
     for item in purchasables or ():
         purchasable = get_purchasable(item)
         if not IPurchasableCourse.providedBy(purchasable):
             continue
         for name in purchasable.Items:
-            try:
-                entry = catalog.getCatalogEntry(name)
-                course = ICourseInstance(entry)
+            entry = find_object_with_ntiid(name)
+            course = ICourseInstance(entry, None)
+            if course is not None:
                 yield course, purchasable
-            except KeyError:
-                logger.error("Could not find course entry %s", name)
 
 
 def _to_sequence(items=(), unique=True):
@@ -257,10 +258,10 @@ def _process_successful_purchase(purchasables, user=None, request=None, check=Fa
     if user is not None:
         purchasables = _to_sequence(purchasables)
         for course, purchasable in _get_courses_from_purchasables(purchasables):
-            _enroll(course, 
-                    user, 
-                    purchasable, 
-                    request=request, 
+            _enroll(course,
+                    user,
+                    purchasable,
+                    request=request,
                     check_enrollment=check)
             result = True
     return result
@@ -314,7 +315,8 @@ def _redeemed_purchase_attempt_refunded(purchase, event):
 def _gift_purchase_attempt_redeemed(purchase, event):
     user = event.user
     request = event.request
-    # CS: use Items property of the purchase object  in case it has been proxied
+    # CS: use Items property of the purchase object  in case it has been
+    # proxied
     if _process_successful_purchase(purchase.Items, user, request=request, check=True):
         code = event.code or get_gift_code(purchase)
         logger.info("Course gift %s has been redeemed", code)
@@ -324,6 +326,7 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 def _enrollment_record_dropped(record, event):
     if record.Scope == ES_PURCHASED and queryInteraction() is not None:
         raise hexc.HTTPForbidden('Cannot drop a purchased course.')
+
 
 # course subscribers
 
@@ -355,13 +358,13 @@ def _build_base_args(event, user, profile):
 
     if IUser.providedBy(user):
         user_ext = to_external_object(user)
-        informal_username = user_ext.get(
-            'NonI18NFirstName', profile.realname) or user.username
+        informal_username = user_ext.get('NonI18NFirstName', profile.realname) \
+                         or user.username
     else:
         informal_username = profile.realname or str(user)
 
-    for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
     site_alias = getattr(policy, 'COM_ALIAS', '')
+    for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
 
     args = {'profile': profile,
             'context': event,
@@ -380,17 +383,17 @@ def _queue_email(request, username, profile, args, template, subject,
     try:
         mailer = component.getUtility(ITemplatedMailer)
         mailer.queue_simple_html_text_email(
-                        template,
-                        subject=subject,
-                        recipients=[profile],
-                        template_args=args,
-                        request=request,
-                        package=package,
-                        text_template_extension=text_template_extension)
+            template,
+            subject=subject,
+            recipients=[profile],
+            template_args=args,
+            request=request,
+            package=package,
+            text_template_extension=text_template_extension)
         return True
     except Exception:
-        logger.exception(
-            'Error while sending store enrollment email to %s', username)
+        logger.exception('Error while sending store enrollment email to %s', 
+                         username)
         return False
 
 
@@ -416,21 +419,19 @@ def _send_email(event, user, profile, email, args, template, subject, package):
                  text_template_extension='.mak')
 
 
-def _get_start_date(catalog_entry, request):
+def _get_start_date(entry, request):
     course_start_date = ''
-    if catalog_entry.StartDate:
+    if entry is not None and entry.StartDate:
         locale = IBrowserRequest(request).locale
         dates = locale.dates
         formatter = dates.getFormatter('date', length='long')
-        course_start_date = formatter.format(catalog_entry.StartDate)
-
+        course_start_date = formatter.format(entry.StartDate)
     return course_start_date
 
 
 def _get_course_start_date(course_ntiid, request):
-    catalog = component.getUtility(ICourseCatalog)
-    catalog_entry = catalog.getCatalogEntry(course_ntiid)
-    return _get_start_date(catalog_entry, request)
+    entry = find_object_with_ntiid(course_ntiid)
+    return _get_start_date(entry, request)
 
 
 def _get_purchase_args(attempt, purchasable, request):
@@ -441,16 +442,16 @@ def _get_purchase_args(attempt, purchasable, request):
     redeem_by_clause = None
 
     if IGiftPurchaseAttempt.providedBy(attempt):
-        purchase_item_suffix = _(' - Gift')
-
+        purchase_item_suffix = _(u' - Gift')
         redeem_by_date = _get_redeem_cutoff_date(attempt)
         if redeem_by_date:
-            redeem_by_clause = translate(_("Must redeem by ${redeem_by}",
+            redeem_by_clause = translate(_(u"Must redeem by ${redeem_by}",
                                            mapping={'redeem_by': redeem_by_date}))
 
-    args = {'purchase_item_suffix': purchase_item_suffix,
-            'redeem_by_clause': redeem_by_clause}
-
+    args = {
+        'purchase_item_suffix': purchase_item_suffix,
+        'redeem_by_clause': redeem_by_clause
+    }
     return args
 
 
@@ -490,7 +491,7 @@ def _web_root():
 def _get_redeem_link(request, catalog_entry, redemption_code):
     ntiid = catalog_entry.ntiid
     # Clients remove the prefix.
-    ntiid = ntiid.replace('tag:nextthought.com,2011-10:', '')
+    ntiid = ntiid.replace(u'tag:nextthought.com,2011-10:', u'')
     url = 'library/courses/available/%s/redeem/%s' % (ntiid, redemption_code)
 
     app_url = request.application_url
@@ -531,21 +532,15 @@ def _get_session_length_args(catalog_entry):
 
 
 def _get_gift_args(entry_ntiid, redemption_code, event, request):
-    try:
-        catalog = component.getUtility(ICourseCatalog)
-        catalog_entry = catalog.getCatalogEntry(entry_ntiid)
-    except KeyError:
-        logger.error("Could not find catalog entry %s", entry_ntiid)
-        return
-
-    course_args = _build_course_args(event, catalog_entry)
-    redemption_link = _get_redeem_link(request, catalog_entry, redemption_code)
-    course_session_length, course_session_date = _get_session_length_args(catalog_entry)
+    entry = find_object_with_ntiid(entry_ntiid)
+    course_args = _build_course_args(event, entry)
+    redemption_link = _get_redeem_link(request, entry, redemption_code)
+    session_length, session_date = _get_session_length_args(entry)
     course_args.update({'redemption_link': redemption_link,
-                        'catalog_entry': catalog_entry,
-                        'course_session_length': course_session_length,
-                        'course_session_date': course_session_date})
-    result = catalog_entry, course_args
+                        'catalog_entry': entry,
+                        'course_session_length': session_length,
+                        'course_session_date': session_date})
+    result = entry, course_args
     return result
 
 
@@ -565,12 +560,12 @@ def _send_entry_gift_email(purchase, purchase_ntiids, event, request):
     template, package = get_template(first_catalog_entry, base_template)
 
     if len(purchase_options) > 1:
-        gift_subject = translate(_("Janux Gift Certificate"))
+        gift_subject = translate(_(u"Janux Gift Certificate"))
     else:
-        gift_subject = translate(_("Janux Gift Certificate: ${course_title}",
+        gift_subject = translate(_(u"Janux Gift Certificate: ${course_title}",
                                    mapping={'course_title': first_catalog_entry.title}))
 
-    gift_subject_copy = translate(_("${gift_subject} (copy)",
+    gift_subject_copy = translate(_(u"${gift_subject} (copy)",
                                     mapping={'gift_subject': gift_subject}))
 
     outbound_params = []
@@ -578,21 +573,21 @@ def _send_entry_gift_email(purchase, purchase_ntiids, event, request):
     if receiver_email and creator_email != receiver_email:
         # Two different email addresses; two different emails.
         outbound_params.append((receiver_email, gift_subject, None))
-        header_msg = _("Below is a copy of the gift certificate that was sent to ${rec_email}.",
+        header_msg = _(u"Below is a copy of the gift certificate that was sent to ${rec_email}.",
                        mapping={'rec_email': receiver_email})
 
         outbound_params.append((creator_email, gift_subject_copy, header_msg))
     else:
         # We do not have a receiver or the two emails are the same; just send
         # to buyer.
-        header_msg = _("""Please forward this gift certificate to the email address of your
+        header_msg = _(u"""Please forward this gift certificate to the email address of your
                         intended recipient.  You can also print this certificate out
                         and pass it to a person of your choosing.""")
         outbound_params.append((creator_email, gift_subject, header_msg))
 
     policy = component.getUtility(ISitePolicyUserEventListener)
-    for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
     site_alias = getattr(policy, 'COM_ALIAS', '')
+    for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
 
     gift_options = sorted(purchase_options, key=lambda x: x[0].StartDate)
     gift_options = [x[1] for x in gift_options]
@@ -646,12 +641,12 @@ def _build_course_args(event, catalog_entry):
 
     html_sig = catalog_entry.InstructorsSignature.replace('\n', "<br />")
 
-    course_args = { 'course': catalog_entry,
-                    'today': datetime.utcnow(),
-                    'instructors_html_signature': html_sig,
-                    'course_preview': course_preview,
-                    'course_archived': course_archived,
-                    'course_start_date': course_start_date}
+    course_args = {'course': catalog_entry,
+                   'today': datetime.utcnow(),
+                   'instructors_html_signature': html_sig,
+                   'course_preview': course_preview,
+                   'course_archived': course_archived,
+                   'course_start_date': course_start_date}
     return course_args
 
 
@@ -660,7 +655,7 @@ def _build_enrollment_args(event, user, profile, catalog_entry):
     course_args = _build_course_args(event, catalog_entry)
     args.update(course_args)
 
-    subject = translate(_("Welcome to ${title}",
+    subject = translate(_(u"Welcome to ${title}",
                           mapping={'title': catalog_entry.Title}))
 
     course_args = {'subject': subject}
@@ -688,11 +683,11 @@ def _user_enrolled(event):
         args = _build_enrollment_args(event, creator, profile, catalog_entry)
         subject = args.pop('subject')
 
-        _send_email(event, 
+        _send_email(event,
                     creator,
-                    profile, 
-                    email, 
-                    args, 
-                    template, 
-                    subject, 
+                    profile,
+                    email,
+                    args,
+                    template,
+                    subject,
                     package)
