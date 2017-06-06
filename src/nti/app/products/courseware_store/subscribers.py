@@ -29,8 +29,6 @@ from zope.event import notify
 
 from zope.i18n import translate
 
-from zope.lifecycleevent.interfaces import IObjectRemovedEvent
-
 from zope.publisher.interfaces.browser import IBrowserRequest
 
 from zope.security.interfaces import IPrincipal
@@ -343,7 +341,7 @@ def on_course_catalog_did_sync(course, event):
         sync_purchasable_course_choice_bundles()
 
 
-@component.adapter(ICourseInstance, IObjectRemovedEvent)
+@component.adapter(ICourseInstance, IBeforeIdRemovedEvent)
 def on_course_instance_removed(course, event):
     if component.getSiteManager() != component.getGlobalSiteManager():
         purchasable = IPurchasableCourse(course, None)
