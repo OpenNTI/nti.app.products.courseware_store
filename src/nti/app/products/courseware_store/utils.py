@@ -22,21 +22,20 @@ from zope.traversing.api import traverse
 
 from zope.security.interfaces import IPrincipal
 
-from ZODB.POSException import POSError
-
 from nti.app.products.courseware_store.interfaces import ICoursePrice
 
 from nti.app.products.courseware_store.model import CoursePrice
-
-from nti.contenttypes.courses import get_course_vendor_info
 
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_TYPE
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_PROVIDER
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
+
+from nti.contenttypes.courses.utils import get_course_enrollments
+from nti.contenttypes.courses.utils import get_course_vendor_info
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
@@ -195,8 +194,9 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
         return ()
 
     usernames = []
-    enrollments = ICourseEnrollments(ICourseInstance(entry))
-    for enrollment in enrollments.iter_enrollments():
+    for enrollment in get_course_enrollments(entry):
+        if not ICourseInstanceEnrollmentRecord.providedBy(enrollment):
+            continue
         principal = IPrincipal(enrollment.Principal, None)
         if principal is not None and enrollment.Scope == ES_PURCHASED:
             usernames.append(principal.id.lower())
@@ -211,25 +211,22 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
     result = []
     intids = component.getUtility(IIntIds)
     for uid in intids_purchases or ():
-        try:
-            purchase = intids.queryObject(uid)
-            # filter any invalid object
-            if     purchase is None \
-                or not IPurchaseAttempt.providedBy(purchase):
-                continue
-            # invitations may not be required
-            if not invitation and IInvitationPurchaseAttempt.providedBy(purchase):
-                continue
-            # check the purchasable is in the purchase
-            if ntiid not in purchase.Items:
-                continue
-            # check vendor updates
-            context = CaseInsensitiveDict(purchase.Context or {})
-            if not context.get('AllowVendorUpdates', False):
-                continue
-            result.append(purchase)
-        except (TypeError, POSError):
+        purchase = intids.queryObject(uid)
+        # filter any invalid object
+        if     purchase is None \
+            or not IPurchaseAttempt.providedBy(purchase):
             continue
+        # invitations may not be required
+        if not invitation and IInvitationPurchaseAttempt.providedBy(purchase):
+            continue
+        # check the purchasable is in the purchase
+        if ntiid not in purchase.Items:
+            continue
+        # check vendor updates
+        context = CaseInsensitiveDict(purchase.Context or {})
+        if not context.get('AllowVendorUpdates', False):
+            continue
+        result.append(purchase)
     return result
 
 

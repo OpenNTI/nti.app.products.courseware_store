@@ -71,11 +71,11 @@
 
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseInstance"
-				provides=".interfaces.ICoursePublishableVendorInfo"/>
+				provides="nti.app.products.courseware.interfaces.ICoursePublishableVendorInfo"/>
 
 	<subscriber	factory=".vendorinfo._CourseCatalogPublishableVendorInfo"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
-				provides=".interfaces.ICoursePublishableVendorInfo"/>
+				provides="nti.app.products.courseware.interfaces.ICoursePublishableVendorInfo"/>
 
 	<subscriber	factory=".enrollment.StoreEnrollmentOptionProvider"
 				for="nti.contenttypes.courses.interfaces.ICourseCatalogEntry"
