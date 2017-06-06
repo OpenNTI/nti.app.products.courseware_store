@@ -22,7 +22,6 @@ from zope.traversing.api import traverse
 
 from zope.security.interfaces import IPrincipal
 
-from ZODB.interfaces import IBroken
 from ZODB.POSException import POSError
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
@@ -216,7 +215,6 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
             purchase = intids.queryObject(uid)
             # filter any invalid object
             if     purchase is None \
-                or IBroken.providedBy(purchase) \
                 or not IPurchaseAttempt.providedBy(purchase):
                 continue
             # invitations may not be required
