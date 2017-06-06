@@ -358,9 +358,9 @@ def update_purchasable_course_choice_bundle(stored, source, validated):
     # update non-public properties
     stored.Bundle = source.Bundle  # alias
     stored.Purchasables = source.Purchasables
+    reference_purchasable = get_reference_purchasable(validated)
     # update public properties
     stored.Items = source.Items
-    reference_purchasable = get_reference_purchasable(validated)
     stored.Fee = reference_purchasable.Fee
     stored.Amount = reference_purchasable.Amount
     stored.Currency = reference_purchasable.Currency
