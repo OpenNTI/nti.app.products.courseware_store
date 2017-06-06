@@ -129,9 +129,9 @@ def create_purchasable_from_course(context):
     purchase_cutoff_date = get_purchasable_cutoff_date(course)
     redeem_cutoff_date = get_purchasable_redeem_cutoff_date(course)
 
-    if purchase_cutoff_date \
-            and redeem_cutoff_date \
-            and purchase_cutoff_date > redeem_cutoff_date:
+    if      purchase_cutoff_date \
+        and redeem_cutoff_date \
+        and purchase_cutoff_date > redeem_cutoff_date:
         msg = u'RedeemCutOffDate cannot be before PurchaseCutOffDate'
         raise ValueError(msg)
 
