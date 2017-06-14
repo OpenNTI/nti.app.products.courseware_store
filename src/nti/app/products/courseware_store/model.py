@@ -38,12 +38,12 @@ class CoursePrice(SchemaConfigured):
 
     def __lt__(self, other):
         try:
-            return (self.Amount, self.Currency) < (self.Amount, self.Currency)
+            return (self.Amount, self.Currency) < (other.Amount, other.Currency)
         except AttributeError:  # pragma: no cover
             return NotImplemented
 
     def __gt__(self, other):
         try:
-            return (self.Amount, self.Currency) > (self.Amount, self.Currency)
+            return (self.Amount, self.Currency) > (other.Amount, other.Currency)
         except AttributeError:  # pragma: no cover
             return NotImplemented
