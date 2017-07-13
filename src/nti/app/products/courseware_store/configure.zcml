@@ -102,6 +102,10 @@
 			 for=".interfaces.IStoreEnrollmentOption"
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer" />
 
+	<!-- Resolvers -->
+	<utility factory=".ntiids._PurchasableCourseResolver" name="purchasable_course" />
+	<utility factory=".ntiids._PurchasableCourseResolver" name="purchasable_course_choice_bundle" />
+
 	<!-- Keys -->
 	<configure zcml:condition="have testmode">
 		<include package="nti.store.payments.stripe" file="meta.zcml" />

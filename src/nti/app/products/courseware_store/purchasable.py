@@ -28,6 +28,8 @@ from zope.component.hooks import getSite
 
 from nti.app.products.courseware.interfaces import get_course_publishable_vendor_info
 
+from nti.app.products.courseware_store import PURCHASABLE_COURSE_CHOICE_BUNDLE
+
 from nti.app.products.courseware_store.utils import get_course_fee
 from nti.app.products.courseware_store.utils import get_course_price
 from nti.app.products.courseware_store.utils import is_course_giftable
@@ -51,12 +53,11 @@ from nti.contenttypes.courses.common import get_course_packages
 from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
+
 from nti.contenttypes.courses.legacy_catalog import ICourseCatalogLegacyEntry
 
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import make_specific_safe
-
-from nti.store import PURCHASABLE_COURSE_CHOICE_BUNDLE
 
 from nti.store.course import create_course
 from nti.store.course import PurchasableCourse as StorePurchasableCourse

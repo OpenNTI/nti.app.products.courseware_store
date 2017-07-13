@@ -22,6 +22,8 @@ from zope.traversing.api import traverse
 
 from zope.security.interfaces import IPrincipal
 
+from nti.app.products.courseware_store import PURCHASABLE_COURSE
+
 from nti.app.products.courseware_store.interfaces import ICoursePrice
 
 from nti.app.products.courseware_store.model import CoursePrice
@@ -40,8 +42,6 @@ from nti.contenttypes.courses.utils import get_course_vendor_info
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
 from nti.ntiids.ntiids import find_object_with_ntiid
-
-from nti.store import PURCHASABLE_COURSE
 
 from nti.store.index import IX_CREATOR
 from nti.store.index import IX_MIMETYPE
