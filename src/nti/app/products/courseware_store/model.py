@@ -17,7 +17,7 @@ from zope import interface
 from zope.cachedescriptors.property import readproperty
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
-from nti.app.products.courseware_store.interfaces import IPurchasableCourse2
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.externalization.representation import WithRepr
@@ -42,11 +42,11 @@ class CoursePrice(Price):
 
 @WithRepr
 @EqHash('NTIID',)
-@interface.implementer(IPurchasableCourse2)
+@interface.implementer(IPurchasableCourse)
 class PurchasableCourse(Purchasable):
-    createDirectFieldProperties(IPurchasableCourse2)
+    createDirectFieldProperties(IPurchasableCourse)
 
-    Description = AdaptingFieldProperty(IPurchasableCourse2['Description'])
+    Description = AdaptingFieldProperty(IPurchasableCourse['Description'])
 
     @readproperty
     def Label(self):

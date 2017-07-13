@@ -17,15 +17,15 @@ from zope import interface
 from zope.component.hooks import setHooks
 from zope.component.hooks import site as current_site
 
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
+from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoiceBundle
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 
 from nti.dataserver.interfaces import IDataserver
 from nti.dataserver.interfaces import IOIDResolver
 
 from nti.site.hostpolicy import get_all_host_sites
-
-from nti.store.interfaces import IPurchasableCourse
-from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
 
 @interface.implementer(IDataserver)

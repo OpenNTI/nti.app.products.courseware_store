@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -14,12 +14,14 @@ from hamcrest import contains
 from hamcrest import assert_that
 from hamcrest import has_entries
 from hamcrest import has_property
+
 from nti.testing.matchers import verifiably_provides
+
+from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.app.products.courseware_store.purchasable import create_course_choice_bundle
 
 from nti.store.purchasable import get_purchasable
-from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
 
@@ -36,14 +38,15 @@ class TestPurchasable(ApplicationLayerTest):
 
     layer = InstructedCourseApplicationTestLayer
 
-    purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
+    purchasable_id = u'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_create_course_choice_bundle(self):
+
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
             purchasables = (get_purchasable(self.purchasable_id),)
 
-            bundle = create_course_choice_bundle("LAW", purchasables)
+            bundle = create_course_choice_bundle(u"LAW", purchasables)
             assert_that(bundle, is_not(none()))
 
             assert_that(bundle,
@@ -51,6 +54,7 @@ class TestPurchasable(ApplicationLayerTest):
             assert_that(bundle,
                         has_property('NTIID',
                                      'tag:nextthought.com,2011-10:Janux-purchasable_course_choice_bundle-LAW'))
+
             assert_that(bundle, has_property('Giftable', is_(True)))
             assert_that(bundle, has_property('Provider', is_('Janux')))
             assert_that(bundle, has_property('Description', is_('LAW')))
@@ -66,5 +70,5 @@ class TestPurchasable(ApplicationLayerTest):
                                      contains('tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice')))
 
             assert_that(bundle,
-                        externalizes(has_entries('Class', u'PurchasableCourseChoiceBundle',
+                        externalizes(has_entries('Class', 'PurchasableCourseChoiceBundle',
                                                  'MimeType', 'application/vnd.nextthought.store.purchasablecoursechoicebundle')))

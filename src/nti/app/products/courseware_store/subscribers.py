@@ -45,6 +45,7 @@ from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
 
 from nti.app.products.courseware_store import MessageFactory as _
 
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentEvent
 
 from nti.app.products.courseware_store.interfaces import StoreEnrollmentEvent
@@ -93,7 +94,6 @@ from nti.ntiids.ntiids import find_object_with_ntiid
 from nti.store import RedemptionException
 
 from nti.store.interfaces import IPurchaseAttempt
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IGiftPurchaseAttempt
 from nti.store.interfaces import IPurchaseAttemptRefunded
 from nti.store.interfaces import IRedeemedPurchaseAttempt

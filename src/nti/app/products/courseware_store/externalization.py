@@ -12,7 +12,9 @@ logger = __import__('logging').getLogger(__name__)
 from zope import component
 from zope import interface
 
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
+from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.externalization.externalization import to_external_object
 
@@ -20,10 +22,28 @@ from nti.externalization.interfaces import LocatedExternalDict
 from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IInternalObjectExternalizer
 
+from nti.store.externalization import PurchasableSummaryExternalizer
+
 CLASS = StandardExternalFields.CLASS
 ITEMS = StandardExternalFields.ITEMS
 MIMETYPE = StandardExternalFields.MIMETYPE
 
+
+@component.adapter(IPurchasableCourse)
+class _PurchasableCourseSummaryExternalizer(PurchasableSummaryExternalizer):
+
+    fields_to_remove = PurchasableSummaryExternalizer.fields_to_remove + \
+                        ('Featured', 'Preview', 'StartDate', 'Department',
+                         'Signature', 'Communities', 'Duration', 'EndDate')
+
+    interface = IPurchasableCourse
+
+
+@component.adapter(IPurchasableCourseChoiceBundle)
+@interface.implementer(IInternalObjectExternalizer)
+class _PurchasableCourseChoiceBundleSummaryExternalizer(PurchasableSummaryExternalizer):
+    interface = IPurchasableCourseChoiceBundle
+    
 
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IInternalObjectExternalizer)

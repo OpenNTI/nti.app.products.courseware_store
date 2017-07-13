@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -24,6 +24,8 @@ from zope import interface
 from nti.app.products.courseware.interfaces import ICoursePublishableVendorInfo
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
+
 from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -31,7 +33,6 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
 from nti.store.interfaces import IRedemptionError
-from nti.store.interfaces import IPurchasableCourse
 
 from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
 
@@ -46,8 +47,8 @@ class TestAdapters(ApplicationLayerTest):
 
     layer = InstructedCourseApplicationTestLayer
 
-    default_origin = str('http://janux.ou.edu')
-    course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
+    default_origin = 'http://janux.ou.edu'
+    course_ntiid = u'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
 
     @classmethod
     def catalog_entry(self):
@@ -57,8 +58,7 @@ class TestAdapters(ApplicationLayerTest):
                 return entry
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
-    @fudge.patch(
-        'nti.app.products.courseware_store.purchasable.is_course_enabled_for_purchase')
+    @fudge.patch('nti.app.products.courseware_store.purchasable.is_course_enabled_for_purchase')
     def test_adapter(self, mock_isce):
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
             # is enabled
@@ -99,7 +99,7 @@ class TestAdapters(ApplicationLayerTest):
                 "NTI": {
                     "Purchasable": {
                         'Price': 300,
-                        'Currency': 'COP'
+                        'Currency': u'COP'
                     }
                 }
             })

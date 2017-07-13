@@ -22,7 +22,6 @@ from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
 from nti.store.interfaces import IPrice
 from nti.store.interfaces import IPurchasable
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableVendorInfo
 from nti.store.interfaces import IPurchasableChoiceBundle
 
@@ -47,7 +46,7 @@ class ICoursePriceFinder(interface.Interface):
     """
 
 
-class IPurchasableCourse2(IPurchasable):
+class IPurchasableCourse(IPurchasable):
 
     Name = ValidTextLine(title=u'Course Name', 
                          required=False)

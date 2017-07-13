@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 # disable: accessing protected members, too many methods
@@ -21,6 +21,8 @@ from zope.event import notify
 
 from nti.appserver.interfaces import IApplicationSettings
 
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
+
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
@@ -37,7 +39,6 @@ from nti.store.interfaces import PA_STATE_STARTED
 from nti.store.interfaces import PA_STATE_SUCCESS
 from nti.store.interfaces import PA_STATE_REFUNDED
 from nti.store.interfaces import PA_STATE_REDEEMED
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import PurchaseAttemptRefunded
 from nti.store.interfaces import PurchaseAttemptSuccessful
 from nti.store.interfaces import GiftPurchaseAttemptRedeemed
@@ -47,13 +48,12 @@ from nti.store.pricing import create_pricing_results
 from nti.store.purchasable import get_purchasable
 
 from nti.store.purchase_attempt import create_purchase_attempt
+from nti.store.purchase_attempt import create_gift_purchase_attempt
 
 from nti.store.purchase_order import create_purchase_item
 from nti.store.purchase_order import create_purchase_order
 
 from nti.store.purchase_history import register_purchase_attempt
-
-from nti.store.purchase_attempt import create_gift_purchase_attempt
 
 from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
 
@@ -68,12 +68,12 @@ class TestPurchase(ApplicationLayerTest):
 
     layer = InstructedCourseApplicationTestLayer
 
-    processor = 'stripe'
-    default_username = 'ichigo'
+    processor = u'stripe'
+    default_username = u'ichigo'
 
-    default_origin = str('http://janux.ou.edu')
-    purchasable_id = 'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
-    course_ntiid = 'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
+    default_origin = 'http://janux.ou.edu'
+    purchasable_id = u'tag:nextthought.com,2011-10:NTI-purchasable_course-Fall2013_CLC3403_LawAndJustice'
+    course_ntiid = u'tag:nextthought.com,2011-10:NTI-CourseInfo-Fall2013_CLC3403_LawAndJustice'
 
     def catalog_entry(self):
         catalog = component.getUtility(ICourseCatalog)
@@ -88,7 +88,7 @@ class TestPurchase(ApplicationLayerTest):
         pricing = create_pricing_results(purchase_price=999.99,
                                          non_discounted_price=0.0)
         result = create_purchase_attempt(order, processor=self.processor, state=state,
-                                         context={"AllowVendorUpdates": True})
+                                         context={u"AllowVendorUpdates": True})
         result.Pricing = pricing
         return result
 
@@ -100,15 +100,14 @@ class TestPurchase(ApplicationLayerTest):
                                          non_discounted_price=0.0)
         result = create_gift_purchase_attempt(order=order, processor=self.processor,
                                               state=state, creator=creator,
-                                              context={"AllowVendorUpdates": True})
+                                              context={u"AllowVendorUpdates": True})
         result.Pricing = pricing
         return result
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_enrollment(self):
         settings = component.getUtility(IApplicationSettings)
-        settings[
-            'purchase_additional_confirmation_addresses'] = 'foo@bar.com\nbiz@baz.com'
+        settings['purchase_additional_confirmation_addresses'] = u'foo@bar.com\nbiz@baz.com'
 
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
             p = get_purchasable(self.purchasable_id)
@@ -145,7 +144,7 @@ class TestPurchase(ApplicationLayerTest):
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_gift_redeemed(self):
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
-            ichigo = 'ichigo@bleach.org'
+            ichigo = u'ichigo@bleach.org'
             gift = self.create_gift_attempt(ichigo, self.purchasable_id,
                                             state=PA_STATE_SUCCESS)
             gid = register_gift_purchase_attempt(ichigo, gift)

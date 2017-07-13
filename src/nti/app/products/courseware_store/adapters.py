@@ -13,6 +13,7 @@ from zope import component
 from zope import interface
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 
 from nti.app.products.courseware_store.utils import find_catalog_entry
 from nti.app.products.courseware_store.utils import get_nti_course_price
@@ -26,7 +27,6 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IObjectTransformer
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IPurchasableChoiceBundle
 
 from nti.store.store import get_purchasable

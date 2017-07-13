@@ -87,20 +87,36 @@
 				for=".interfaces.IStoreEnrollmentOption
 					 pyramid.interfaces.IRequest" />
 
+	<subscriber factory=".decorators._VendorThankYouInfoDecorator"
+				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+
+	<subscriber factory=".decorators.PurchasableCourseDecorator"
+				for=".interfaces.IPurchasableCourse"
+				provides="nti.externalization.interfaces.IExternalObjectDecorator"/>
+
 	<!-- Externalization -->
 	<include package="nti.externalization" file="meta.zcml" />
 	<include package="nti.externalization" />
 
 	<ext:registerAutoPackageIO
-		root_interfaces=".interfaces.IStoreEnrollmentOption"
-		modules=".enrollment" />
-
-	<subscriber factory=".decorators._VendorThankYouInfoDecorator"
-				provides="nti.externalization.interfaces.IExternalMappingDecorator" />
+		root_interfaces=".interfaces.IPurchasableCourse
+						 .interfaces.IPurchasableCourseChoiceBundle
+						 .interfaces.IStoreEnrollmentOption"
+		modules=".model .enrollment" />
 
 	<adapter factory=".externalization._StoreEnrollmentOptionExternalizer"
 			 for=".interfaces.IStoreEnrollmentOption"
 			 provides="nti.externalization.interfaces.IInternalObjectExternalizer" />
+
+	<adapter factory=".externalization._PurchasableCourseSummaryExternalizer"
+			 for=".interfaces.IPurchasableCourse"
+			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
+			 name="summary" />
+
+	<adapter factory=".externalization._PurchasableCourseChoiceBundleSummaryExternalizer"
+			 for=".interfaces.IPurchasableCourseChoiceBundle"
+			 provides="nti.externalization.interfaces.IInternalObjectExternalizer"
+			 name="summary" />
 
 	<!-- Resolvers -->
 	<utility factory=".ntiids._PurchasableCourseResolver" name="purchasable_course" />

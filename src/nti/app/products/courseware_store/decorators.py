@@ -14,6 +14,7 @@ from zope import interface
 
 from nti.app.products.courseware.utils import get_vendor_thank_you_page
 
+from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
@@ -31,7 +32,6 @@ from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.externalization.singleton import SingletonDecorator
 
-from nti.store.interfaces import IPurchasableCourse
 from nti.store.interfaces import IGiftPurchaseAttempt
 
 from nti.store.purchasable import get_purchasable
@@ -94,3 +94,18 @@ class _VendorThankYouInfoDecorator(object):
         thank_you_page = get_vendor_thank_you_page(course, key)
         if thank_you_page:
             result['VendorThankYouPage'] = thank_you_page
+
+
+@component.adapter(IPurchasableCourse)
+@interface.implementer(IExternalObjectDecorator)
+class PurchasableCourseDecorator(object):
+
+    __metaclass__ = SingletonDecorator
+
+    def decorateExternalObject(self, original, external):
+        # remove deprecated / legacy if no value is specified
+        for name in ('Featured', 'Preview', 'StartDate', 'Department',
+                     'Signature', 'Communities', 'Duration', 'EndDate'):
+            value = external.get(name)
+            if not value:
+                external.pop(name, None)

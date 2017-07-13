@@ -25,6 +25,7 @@ from zope.security.interfaces import IPrincipal
 from nti.app.products.courseware_store import PURCHASABLE_COURSE
 
 from nti.app.products.courseware_store.interfaces import ICoursePrice
+from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.app.products.courseware_store.model import CoursePrice
 
@@ -50,7 +51,6 @@ from nti.store.index import get_purchase_catalog
 from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
-from nti.store.interfaces import IPurchasableCourseChoiceBundle
 
 from nti.store.store import get_purchasables
 
