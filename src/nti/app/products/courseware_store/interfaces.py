@@ -20,22 +20,16 @@ from nti.app.products.courseware.interfaces import IEnrollmentOption
 
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
+from nti.store.interfaces import IPrice
 from nti.store.interfaces import IPurchasableCourse
 
 from nti.schema.field import Bool
-from nti.schema.field import Number
 from nti.schema.field import Object
 from nti.schema.field import ListOrTuple
-from nti.schema.field import ValidTextLine
 
 
-class ICoursePrice(interface.Interface):
-
-    Amount = Number(title=u"The price amount", required=True)
-
-    Currency = ValidTextLine(title=u"The currency",
-                             required=False,
-                             default=u'USD')
+class ICoursePrice(IPrice):
+    pass
 
 
 class ICoursePriceFinder(interface.Interface):
