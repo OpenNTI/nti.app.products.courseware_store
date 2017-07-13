@@ -124,8 +124,6 @@
 
 	<!-- Keys -->
 	<configure zcml:condition="have testmode">
-		<include package="nti.store.payments.stripe" file="meta.zcml" />
-		<include package="nti.store.payments.payeezy" file="meta.zcml" />
 
 		<stripe:registerStripeKey
 				alias="Janux"
