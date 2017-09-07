@@ -7,13 +7,13 @@ __docformat__ = "restructuredtext en"
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
-from hamcrest import is_
 from hamcrest import is_not
 from hamcrest import has_key
 from hamcrest import has_entry
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_entries
+from hamcrest import greater_than_or_equal_to
 does_not = is_not
 
 from nti.app.products.courseware_store.model import create_course
@@ -58,7 +58,8 @@ class TestPurchasableCourse(ApplicationLayerTest):
                                 'Title', u'A History of the United States',
                                 'PurchaseCutOffDate', default_date_str,
                                 'RedeemCutOffDate', default_date_str,
-                                'VendorInfo', is_({u'CRN': 34846, u'Term': 201410})))
+                                'VendorInfo', has_entries('CRN', 34846, 
+                                                          'Term', 201410)))
 
         ext = to_external_object(course, name="summary")
         assert_that(ext, does_not(has_key('Icon')))
@@ -74,4 +75,5 @@ class TestPurchasableCourse(ApplicationLayerTest):
         assert_that(ext, does_not(has_key('Signature')))
         assert_that(ext, does_not(has_key('Department')))
         assert_that(ext, does_not(has_key('Communities')))
-        assert_that(ext, has_entry('VendorInfo', has_length(2)))
+        assert_that(ext, 
+                    has_entry('VendorInfo', has_length(greater_than_or_equal_to(2))))
