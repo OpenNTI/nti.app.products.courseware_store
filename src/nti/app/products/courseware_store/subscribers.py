@@ -79,9 +79,10 @@ from nti.contenttypes.courses.utils import drop_any_other_enrollments
 
 from nti.dataserver.interfaces import IUser
 
-from nti.dataserver.users import User
 from nti.dataserver.users.interfaces import IUserProfile
 from nti.dataserver.users.interfaces import IEmailAddressable
+
+from nti.dataserver.users.users import User
 
 from nti.externalization.externalization import to_external_object
 

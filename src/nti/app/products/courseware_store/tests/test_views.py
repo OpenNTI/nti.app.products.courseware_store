@@ -12,7 +12,7 @@ from hamcrest import assert_that
 
 from zope.event import notify
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.store.interfaces import PA_STATE_STARTED
 from nti.store.interfaces import PA_STATE_SUCCESS

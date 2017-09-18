@@ -31,7 +31,7 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
-from nti.dataserver.users import User
+from nti.dataserver.users.users import User
 
 from nti.store.gift_registry import register_gift_purchase_attempt
 
