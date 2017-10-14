@@ -53,7 +53,7 @@ class _StoreEnrollmentOptionExternalizer(object):
     def __init__(self, obj):
         self.obj = obj
 
-    def toExternalObject(self, *args, **kwargs):
+    def toExternalObject(self, *unused_args, **unused_kwargs):
         result = LocatedExternalDict()
         result[MIMETYPE] = self.obj.mimeType
         result[CLASS] =  getattr(self.obj, '__external_class_name__', None) \
