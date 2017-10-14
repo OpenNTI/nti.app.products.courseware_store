@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -23,24 +24,24 @@ from zope import interface
 
 from nti.app.products.courseware.interfaces import ICoursePublishableVendorInfo
 
+from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
+
 from nti.app.products.courseware_store.interfaces import ICoursePrice
 from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 
 from nti.app.products.courseware_store.vendorinfo import _CourseCatalogPublishableVendorInfo
 
-from nti.contenttypes.courses.interfaces import ICourseCatalog
-from nti.contenttypes.courses.interfaces import ICourseInstance
-from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
-
-from nti.store.interfaces import IRedemptionError
-
-from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
-
 from nti.app.testing.application_webtest import ApplicationLayerTest
 
 from nti.app.testing.decorators import WithSharedApplicationMockDS
 
+from nti.contenttypes.courses.interfaces import ICourseCatalog
+from nti.contenttypes.courses.interfaces import ICourseInstance
+from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
+
 from nti.dataserver.tests import mock_dataserver
+
+from nti.store.interfaces import IRedemptionError
 
 
 class TestAdapters(ApplicationLayerTest):

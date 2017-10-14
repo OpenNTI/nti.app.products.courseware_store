@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
@@ -21,9 +22,15 @@ from zope.event import notify
 
 from nti.appserver.interfaces import IApplicationSettings
 
+from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
+
 from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_users
+
+from nti.app.testing.application_webtest import ApplicationLayerTest
+
+from nti.app.testing.decorators import WithSharedApplicationMockDS
 
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -32,6 +39,8 @@ from nti.contenttypes.courses.interfaces import ICourseEnrollments
 from nti.contenttypes.courses.interfaces import AlreadyEnrolledException
 
 from nti.dataserver.users.users import User
+
+from nti.dataserver.tests import mock_dataserver
 
 from nti.store.gift_registry import register_gift_purchase_attempt
 
@@ -54,14 +63,6 @@ from nti.store.purchase_order import create_purchase_item
 from nti.store.purchase_order import create_purchase_order
 
 from nti.store.purchase_history import register_purchase_attempt
-
-from nti.app.products.courseware.tests import InstructedCourseApplicationTestLayer
-
-from nti.app.testing.application_webtest import ApplicationLayerTest
-
-from nti.app.testing.decorators import WithSharedApplicationMockDS
-
-from nti.dataserver.tests import mock_dataserver
 
 
 class TestPurchase(ApplicationLayerTest):

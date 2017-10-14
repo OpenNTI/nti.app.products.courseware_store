@@ -4,12 +4,12 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import interface
+from zope import deferredimport
 
 from zope.interface.interfaces import ObjectEvent
 from zope.interface.interfaces import IObjectEvent
@@ -143,9 +143,9 @@ class StoreEnrollmentEvent(ObjectEvent):
         return self.object
 
 
-import zope.deferredimport
-zope.deferredimport.initialize()
-zope.deferredimport.deprecated(
+
+deferredimport.initialize()
+deferredimport.deprecated(
     "Import from nti.app.products.courseware.interfaces instead",
     ICoursePublishableVendorInfo='nti.app.products.courseware.interfaces:ICoursePublishableVendorInfo',
     get_course_publishable_vendor_info='nti.app.products.courseware.interfaces:get_course_publishable_vendor_info')

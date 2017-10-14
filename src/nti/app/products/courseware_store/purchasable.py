@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import six
 from datetime import date
@@ -72,6 +71,8 @@ from nti.store.store import register_purchasable
 
 from nti.store.utils import to_list
 from nti.store.utils import to_frozenset
+
+logger = __import__('logging').getLogger(__name__)
 
 
 # Purchasable courses

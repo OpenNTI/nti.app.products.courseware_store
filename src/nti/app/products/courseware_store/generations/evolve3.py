@@ -4,12 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
-
-generation = 3
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from collections import defaultdict
 
@@ -28,6 +25,10 @@ from nti.contenttypes.courses.interfaces import ICourseCatalog
 from nti.site.hostpolicy import get_all_host_sites
 
 from nti.store.store import register_purchasable as store_register_purchasable
+
+generation = 3
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def register_site_purchasables(registry=None, seen=None):
