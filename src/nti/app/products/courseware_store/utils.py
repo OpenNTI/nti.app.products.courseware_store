@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import six
 from itertools import chain
@@ -55,6 +54,8 @@ from nti.store.interfaces import IInvitationPurchaseAttempt
 from nti.store.store import get_purchasables
 
 from nti.store.utils import PURCHASE_ATTEMPT_MIME_TYPES
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def get_vendor_info(context):

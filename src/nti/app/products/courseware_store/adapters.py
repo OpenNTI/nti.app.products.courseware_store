@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 from zope import interface
@@ -31,6 +30,8 @@ from nti.store.interfaces import IPurchasableChoiceBundle
 
 from nti.store.store import get_purchasable
 from nti.store.store import get_purchase_purchasables
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @interface.implementer(ICoursePrice)
@@ -84,5 +85,5 @@ def _purchase_attempt_transformer(purchase, user=None):
 
 @component.adapter(IPurchaseAttempt)
 @interface.implementer(IObjectTransformer)
-def _purchase_object_transformer(obj):
+def _purchase_object_transformer(unused_obj):
     return _purchase_attempt_transformer

@@ -4,17 +4,16 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import six
-import isodate
-
-from urlparse import urljoin
 from datetime import datetime
+from six.moves import urllib_parse
+
+import isodate
 
 import pytz
 
@@ -111,6 +110,8 @@ from nti.store.purchase_attempt import get_purchasables
 
 #: The package to find enrollment templates.
 DEFAULT_ENROLL_PACKAGE = 'nti.app.products.courseware'
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def _get_redeem_cutoff_date(purchase):
@@ -224,7 +225,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
     return send_event
 
 
-def _unenroll(course, user, purchasable=None):
+def _unenroll(course, user, unused_purchasable=None):
     enrollments = ICourseEnrollments(course)
     enrollment = enrollments.get_enrollment_for_principal(user)
     if enrollment is not None:
@@ -299,14 +300,14 @@ def _process_refunded_purchase(purchase, user=None):
 
 
 @component.adapter(IPurchaseAttempt, IPurchaseAttemptRefunded)
-def _purchase_attempt_refunded(purchase, event):
+def _purchase_attempt_refunded(purchase, unused_event):
     if      not IGiftPurchaseAttempt.providedBy(purchase) \
         and _process_refunded_purchase(purchase):
         logger.info("Course purchase %s was refunded", purchase.id)
 
 
 @component.adapter(IRedeemedPurchaseAttempt, IPurchaseAttemptRefunded)
-def _redeemed_purchase_attempt_refunded(purchase, event):
+def _redeemed_purchase_attempt_refunded(purchase, unused_event):
     _process_refunded_purchase(purchase)
 
 
@@ -322,7 +323,7 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 
 
 @component.adapter(ICourseInstanceEnrollmentRecord, IBeforeIdRemovedEvent)
-def _enrollment_record_dropped(record, event):
+def _enrollment_record_dropped(record, unused_event):
     if record.Scope == ES_PURCHASED and queryInteraction() is not None:
         raise hexc.HTTPForbidden('Cannot drop a purchased course.')
 
@@ -331,19 +332,19 @@ def _enrollment_record_dropped(record, event):
 
 
 @component.adapter(ICourseInstance, ICourseVendorInfoSynchronized)
-def on_course_vendor_info_synced(course, event):
+def on_course_vendor_info_synced(course, unused_event):
     if component.getSiteManager() != component.getGlobalSiteManager():
         sync_purchasable_course(course)
 
 
 @component.adapter(ICourseInstance, ICourseCatalogDidSyncEvent)
-def on_course_catalog_did_sync(course, event):
+def on_course_catalog_did_sync(unused_course, unused_event):
     if component.getSiteManager() != component.getGlobalSiteManager():
         sync_purchasable_course_choice_bundles()
 
 
 @component.adapter(ICourseInstance, IBeforeIdRemovedEvent)
-def on_course_instance_removed(course, event):
+def on_course_instance_removed(course, unused_event):
     if component.getSiteManager() != component.getGlobalSiteManager():
         purchasable = IPurchasableCourse(course, None)
         if purchasable is not None:
@@ -433,7 +434,7 @@ def _get_course_start_date(course_ntiid, request):
     return _get_start_date(entry, request)
 
 
-def _get_purchase_args(attempt, purchasable, request):
+def _get_purchase_args(attempt, unused_purchasable, unused_request):
     """
     Add gift specific args for purchase email.
     """
@@ -494,8 +495,8 @@ def _get_redeem_link(request, catalog_entry, redemption_code):
     url = 'library/courses/available/%s/redeem/%s' % (ntiid, redemption_code)
 
     app_url = request.application_url
-    redemption_link = urljoin(app_url, _web_root())
-    redemption_link = urljoin(redemption_link, url)
+    redemption_link = urllib_parse.urljoin(app_url, _web_root())
+    redemption_link = urllib_parse.urljoin(redemption_link, url)
     return redemption_link
 
 

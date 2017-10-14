@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 from zope import interface
@@ -30,18 +29,20 @@ from nti.contenttypes.courses.utils import get_enrollment_record
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
-from nti.externalization.singleton import SingletonDecorator
+from nti.externalization.singleton import Singleton
 
 from nti.store.interfaces import IGiftPurchaseAttempt
 
 from nti.store.purchasable import get_purchasable
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IExternalObjectDecorator)
 class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator):
 
-    def _predicate(self, context, result):
+    def _predicate(self, unused_context, unused_result):
         return self._is_authenticated
 
     @classmethod
@@ -61,16 +62,14 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 
 @component.adapter(IGiftPurchaseAttempt)
 @interface.implementer(IExternalMappingDecorator)
-class _VendorThankYouInfoDecorator(object):
+class _VendorThankYouInfoDecorator(Singleton):
     """
     Decorate the thank you page information for gifts.
     """
 
-    __metaclass__ = SingletonDecorator
-
     thank_you_context_key = 'Gifting'
 
-    def _predicate(self, context, result):
+    def _predicate(self, unused_context, unused_result):
         return self._is_authenticated
 
     def get_course(self, purchase_attempt):
@@ -98,11 +97,9 @@ class _VendorThankYouInfoDecorator(object):
 
 @component.adapter(IPurchasableCourse)
 @interface.implementer(IExternalObjectDecorator)
-class PurchasableCourseDecorator(object):
+class PurchasableCourseDecorator(Singleton):
 
-    __metaclass__ = SingletonDecorator
-
-    def decorateExternalObject(self, original, external):
+    def decorateExternalObject(self, unused_original, external):
         # remove deprecated / legacy if no value is specified
         for name in ('Featured', 'Preview', 'StartDate', 'Department',
                      'Signature', 'Communities', 'Duration', 'EndDate'):

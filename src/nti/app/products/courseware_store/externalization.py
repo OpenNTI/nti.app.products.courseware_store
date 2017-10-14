@@ -4,10 +4,9 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from zope import component
 from zope import interface
@@ -27,6 +26,8 @@ from nti.store.externalization import PurchasableSummaryExternalizer
 CLASS = StandardExternalFields.CLASS
 ITEMS = StandardExternalFields.ITEMS
 MIMETYPE = StandardExternalFields.MIMETYPE
+
+logger = __import__('logging').getLogger(__name__)
 
 
 @component.adapter(IPurchasableCourse)
@@ -52,7 +53,7 @@ class _StoreEnrollmentOptionExternalizer(object):
     def __init__(self, obj):
         self.obj = obj
 
-    def toExternalObject(self, *args, **kwargs):
+    def toExternalObject(self, *unused_args, **unused_kwargs):
         result = LocatedExternalDict()
         result[MIMETYPE] = self.obj.mimeType
         result[CLASS] =  getattr(self.obj, '__external_class_name__', None) \

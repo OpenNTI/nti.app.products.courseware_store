@@ -4,14 +4,15 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
-logger = __import__('logging').getLogger(__name__)
+from zope.generations.generations import SchemaManager
 
 generation = 4
 
-from zope.generations.generations import SchemaManager
+logger = __import__('logging').getLogger(__name__)
 
 
 class _CoursewareStoreSchemaManager(SchemaManager):
