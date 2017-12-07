@@ -18,6 +18,7 @@ import isodate
 import pytz
 
 from zope import component
+from zope import interface
 from zope import lifecycleevent
 
 from zope.component.hooks import getSite
@@ -77,6 +78,7 @@ from nti.contenttypes.courses.utils import get_enrollment_record
 from nti.contenttypes.courses.utils import drop_any_other_enrollments
 
 from nti.dataserver.interfaces import IUser
+from nti.dataserver.interfaces import ILinkExternalHrefOnly
 
 from nti.dataserver.users.interfaces import IUserProfile
 from nti.dataserver.users.interfaces import IEmailAddressable
@@ -86,6 +88,10 @@ from nti.dataserver.users.users import User
 from nti.externalization.externalization import to_external_object
 
 from nti.invitations.interfaces import IInvitationAcceptedEvent
+
+from nti.links.externalization import render_link
+
+from nti.links.links import Link
 
 from nti.mailer.interfaces import ITemplatedMailer
 
@@ -123,7 +129,7 @@ def _get_redeem_cutoff_date(purchase):
             redeem_date = isodate.parse_datetime(purchasable.RedeemCutOffDate)
             redeem_date = redeem_date.replace(tzinfo=None)
             if result is None:
-                result = redeem_date 
+                result = redeem_date
             else:
                 result = max(result, redeem_date)
     if result and now > result:
@@ -392,7 +398,7 @@ def _queue_email(request, username, profile, args, template, subject,
             text_template_extension=text_template_extension)
         return True
     except Exception:
-        logger.exception('Error while sending store enrollment email to %s', 
+        logger.exception('Error while sending store enrollment email to %s',
                          username)
         return False
 
@@ -489,10 +495,10 @@ def _web_root():
 
 
 def _get_redeem_link(request, catalog_entry, redemption_code):
-    ntiid = catalog_entry.ntiid
-    # Clients remove the prefix.
-    ntiid = ntiid.replace(u'tag:nextthought.com,2011-10:', u'')
-    url = 'library/courses/available/%s/redeem/%s' % (ntiid, redemption_code)
+    link = Link(catalog_entry)
+    interface.alsoProvides(link, ILinkExternalHrefOnly)
+    entry_href = render_link(link)
+    url = 'catalog/object/%s/redeem/%s' % (entry_href, redemption_code)
 
     app_url = request.application_url
     redemption_link = urllib_parse.urljoin(app_url, _web_root())
