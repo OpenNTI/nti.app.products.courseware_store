@@ -95,6 +95,7 @@ from nti.links.links import Link
 
 from nti.mailer.interfaces import ITemplatedMailer
 
+from nti.ntiids.ntiids import make_specific_safe
 from nti.ntiids.ntiids import find_object_with_ntiid
 
 from nti.store import RedemptionException
@@ -163,6 +164,8 @@ def get_template(catalog_entry, base_template, default_package=None):
 
     package = dottedname.resolve(package)
     provider_unique_id = _get_entry_id(catalog_entry)
+    # Safe ascii path
+    provider_unique_id = make_specific_safe(provider_unique_id)
     full_provider_id = provider_unique_id.replace('-', '')
     template = full_provider_id + "_" + base_template
 
