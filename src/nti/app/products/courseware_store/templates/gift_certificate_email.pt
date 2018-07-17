@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:metal="http://xml.zope.org/namespaces/metal"
+		xmlns:tal="http://xml.zope.org/namespaces/tal">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>Welcome To NextThought</title>
+
+		<style metal:use-macro="macro:style" >
+		</style>
+	</head>
+	<body>
+		<div id="wrapper-top">
+			<div id="top">
+				<p 	class="left" tal:condition="options/header | nothing"
+					tal:content="options/header">Congratulations!</p>
+			</div>
+		</div>
+
+		<div id="green-bar" style="background-color: #89be3c; width: 100%; height: 6px;"></div>
+
+		<div id="wrapper">
+
+		<table style="width:100%">
+			<tr>
+				<td class="header">TO:</td>
+				<td tal:condition="options/receiver_name | nothing" tal:content="options/receiver_name">
+					Michael McLaughlin
+				</td>
+			</tr>
+			<tr>
+				<td class="header">FROM:</td>
+				<!-- If there is not a TO address, let them fill in the FROM address manually. -->
+				<td tal:condition="options/receiver_name | nothing" tal:content="options/sender_name">Sancho Panza</td>
+			</tr>
+			<!-- Single gift -->
+			<tr tal:condition="python: len( options['gift_options'] ) == 1"
+				tal:define="gift_option python: options['gift_options'][0]">
+				<td class="header">GIFT:</td>
+				<td class="course"><span class="course-name" tal:content="gift_option/course/Title | default">
+					NextThought Course</span>
+				</td>
+			</tr>
+		</table>
+
+		<!-- Multiple gift options -->
+		<!-- At least for history, these choices all have the same title,etc -->
+		<tal:block tal:condition="python: len( options['gift_options'] ) > 1">
+			<p class="caption">Please choose a session below and use your access key to
+				redeem your gift. <strong>Access Key: <span tal:content="options/redemption_code">UZ6njBPSWtx</span></strong><br><br>
+			</p>
+			<table style="width: 100%">
+				<tr class="noborder">
+					<td class="header" width="20%">GIFT OPTION:</td>
+					<td class="course" width="80%"><span class="course-name" tal:content="gift_option/course/Title | default">
+						NextThought Course</span>
+					</td>
+				</tr>
+				<tr class="noborder" tal:repeat="gift_option options/gift_options">
+					<td class="header" width="20%"></td>
+					<td width="80%">
+						<table bgcolor="F5F5F5" width="100%">
+							<tr class="nested">
+								<td width="60%">
+									<div class="wrap">
+									<span class="course-name" tal:content="gift_option/course_session_date">
+										June 8-July 2, 2015
+									</span>
+									<br>
+									<span tal:content="gift_option/course_session_length">4 WEEK SESSION</span>
+									</div>
+								</td>
+								<td width="40%" >
+									<!-- In the mobile Mail app, these buttons get word wrapped and distorted
+										 without table-cell -->
+									<div class="but-cont topper">
+										<a 	href="http://nextthought.com" class="but" style="display: table-cell;"
+											tal:attributes="href gift_option/redemption_link">REDEEM GIFT
+										</a>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</tal:block>
+
+		<h1 class="message" tal:condition="options/gift_message" tal:content="options/gift_message">
+			Congratulations! Enjoy full access to an interactive online course like no other.
+		</h1>
+
+		<h1 class="message" tal:condition="not:options/gift_message">
+			Congratulations! Enjoy full access to an interactive online course like no other.
+		</h1>
+
+		<!-- Single redeem link if we just have one course -->
+		<div class="but-cont topper" style="float: center;"
+			 tal:condition="python: len( options['gift_options'] ) == 1">
+			<a 	href="http://nextthought.com" class="but" style="display: inline;"
+				tal:attributes="href python: options['gift_options'][0].get( 'redemption_link' )">REDEEM NOW
+			</a>
+		</div>
+
+		<p class="caption">
+			<tal:block tal:condition="python: len( options['gift_options'] ) == 1" >
+				<strong>Access Key: <span tal:content="options/redemption_code">UZ6njBPSWtx</span></strong><br>
+			</tal:block>
+			<tal:block tal:condition="options/redeem_by_date" >
+				This gift must be redeemed by <span tal:content="options/redeem_by_date">January 12, 2015</span>.
+			</tal:block>
+			If you feel this email was sent in error, you may email
+			<a href="mailto:support@nextthought.com"
+				tal:attributes="href string:mailto:${options/support_email|default}"
+				tal:content="options/support_email">support@nextthought.com</a>.
+		</p>
+		</div>
+
+	</body>
+</html>

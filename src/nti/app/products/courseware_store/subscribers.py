@@ -518,7 +518,7 @@ def _get_session_length_args(catalog_entry):
     course_session_length = ''
 
     duration = catalog_entry.Duration
-    if duration.days:
+    if duration is not None and duration.days is not None:
         duration_days = duration.days // 7
         course_session_length = '%s WEEK SESSION' % duration_days
 
