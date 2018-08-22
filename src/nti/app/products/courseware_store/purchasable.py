@@ -8,8 +8,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import six
-
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -18,6 +16,8 @@ from collections import defaultdict
 from numbers import Number
 
 import isodate
+
+import six
 
 from zope import component
 from zope import lifecycleevent
@@ -49,6 +49,7 @@ from nti.app.products.courseware_store.utils import get_course_purchasable_ntiid
 from nti.app.products.courseware_store.utils import get_course_purchasable_title
 from nti.app.products.courseware_store.utils import get_entry_purchasable_provider
 from nti.app.products.courseware_store.utils import is_course_enabled_for_purchase
+from nti.app.products.courseware_store.utils import get_course_purchasable_provider
 from nti.app.products.courseware_store.utils import get_purchasable_redeem_cutoff_date
 
 from nti.base._compat import text_
@@ -179,14 +180,16 @@ def update_purchasable_course(purchasable, entry):
     price = get_course_price(entry, provider)
     if price is None:  # price removed
         purchasable.Public = False
-        logger.warn('Could not find price for %s', purchasable.NTIID)
+        logger.warning('Could not find price for %s', purchasable.NTIID)
     else:
         name = get_course_purchasable_name(entry) or entry.title
         title = get_course_purchasable_title(entry) or entry.title
+        provider = get_course_purchasable_provider(entry) or purchasable.Provider
 
         purchasable.Name = name
         purchasable.Title = title
         purchasable.Public = True
+        purchasable.Provider = provider
 
         # Update price properties
         purchasable.Amount = price.Amount
