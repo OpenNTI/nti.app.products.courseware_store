@@ -9,13 +9,20 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import six
 from datetime import datetime
-from six.moves import urllib_parse
 
 import isodate
 
+from pyramid import httpexceptions as hexc
+
+from pyramid.threadlocal import get_current_request
+
 import pytz
+
+import six
+from six.moves import urllib_parse
+
+from zc.intid.interfaces import IBeforeIdRemovedEvent
 
 from zope import component
 from zope import interface
@@ -33,12 +40,6 @@ from zope.publisher.interfaces.browser import IBrowserRequest
 
 from zope.security.interfaces import IPrincipal
 from zope.security.management import queryInteraction
-
-from zc.intid.interfaces import IBeforeIdRemovedEvent
-
-from pyramid import httpexceptions as hexc
-
-from pyramid.threadlocal import get_current_request
 
 from nti.app.products.courseware.interfaces import ICoursesWorkspace
 from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
@@ -213,6 +214,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
         drop_any_other_enrollments(course, user)
         if enrollment is None:  # Never before been enrolled
             enrollment_manager = ICourseEnrollmentManager(course)
+            # pylint: disable=redundant-keyword-arg
             enrollment = enrollment_manager.enroll(user, scope=ES_PURCHASED,
                                                    context=purchasable)
             _parent_course_instance_enrollemnt(course, user)
@@ -235,6 +237,7 @@ def _enroll(course, user, purchasable=None, request=None, check_enrollment=False
 
 
 def _unenroll(course, user, unused_purchasable=None):
+    # pylint: disable=too-many-function-args
     enrollments = ICourseEnrollments(course)
     enrollment = enrollments.get_enrollment_for_principal(user)
     if enrollment is not None:
@@ -400,7 +403,7 @@ def _queue_email(request, username, profile, args, template, subject,
             package=package,
             text_template_extension=text_template_extension)
         return True
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         logger.exception('Error while sending store enrollment email to %s',
                          username)
         return False
@@ -410,8 +413,8 @@ def _send_email(event, user, profile, email, args, template, subject, package):
 
     request = getattr(event, 'request', get_current_request())
     if not request or not email:
-        logger.warn("Not sending an enrollment email because of no email or request "
-                    "(user=%s) (email=%s) (request=%s)", user, email, request is None)
+        logger.warning("Not sending an enrollment email because of no email or request "
+                       "(user=%s) (email=%s) (request=%s)", user, email, request is None)
         return
 
     username = user.username
@@ -431,6 +434,7 @@ def _send_email(event, user, profile, email, args, template, subject, package):
 def _get_start_date(entry, request):
     course_start_date = ''
     if entry is not None and entry.StartDate:
+        # pylint: disable=no-member
         locale = IBrowserRequest(request).locale
         dates = locale.dates
         formatter = dates.getFormatter('date', length='long')
