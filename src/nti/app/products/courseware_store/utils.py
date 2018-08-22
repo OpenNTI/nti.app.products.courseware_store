@@ -8,10 +8,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-import six
 from itertools import chain
 
 from requests.structures import CaseInsensitiveDict
+
+import six
 
 from zope.intid.interfaces import IIntIds
 
@@ -126,7 +127,7 @@ def get_course_price(context, *names):
     return None
 
 
-def get_course_purchasable_ntiid(context, name=None):
+def get_course_purchasable_ntiid(context):
     entry = ICourseCatalogEntry(context)
     parts = get_parts(entry.ntiid)
     ntiid = make_ntiid(date=parts.date,
@@ -200,14 +201,14 @@ def find_allow_vendor_updates_purchases(entry, invitation=False):
             continue
         principal = IPrincipal(enrollment.Principal, None)
         if principal is not None and enrollment.Scope == ES_PURCHASED:
+            # pylint: disable=no-member
             usernames.append(principal.id.lower())
 
     creator_intids = catalog[IX_CREATOR].apply({'any_of': usernames})
     intids_purchases = catalog.family.IF.intersection(intids_purchases,
                                                       creator_intids)
 
-    provider = get_entry_purchasable_provider(entry)
-    ntiid = get_entry_purchasable_ntiid(entry, provider)
+    ntiid = get_entry_purchasable_ntiid(entry)
 
     result = []
     intids = component.getUtility(IIntIds)

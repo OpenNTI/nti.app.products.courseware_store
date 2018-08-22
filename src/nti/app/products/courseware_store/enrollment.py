@@ -21,7 +21,6 @@ from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
 
 from nti.app.products.courseware_store.utils import allow_vendor_updates
 from nti.app.products.courseware_store.utils import get_entry_purchasable_ntiid
-from nti.app.products.courseware_store.utils import get_entry_purchasable_provider
 from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
@@ -38,8 +37,7 @@ logger = __import__('logging').getLogger(__name__)
 
 
 def get_entry_purchasable(context):
-    provider = get_entry_purchasable_provider(context)
-    ntiid = get_entry_purchasable_ntiid(context, provider)
+    ntiid = get_entry_purchasable_ntiid(context)
     return get_purchasable(ntiid) if ntiid else None
 
 
