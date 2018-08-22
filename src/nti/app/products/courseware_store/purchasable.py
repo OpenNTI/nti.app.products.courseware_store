@@ -91,6 +91,8 @@ def create_purchasable_from_course(context):
     giftable = is_course_giftable(course)
     redeemable = is_course_redeemable(course)
     public = is_course_enabled_for_purchase(course)
+    # get the purchasable provider either from the vendor info
+    # or the catalog entry
     provider = get_entry_purchasable_provider(entry)
 
     # find course price
@@ -102,7 +104,9 @@ def create_purchasable_from_course(context):
     currency = price.Currency
     fee = float(fee) if fee is not None else fee
 
-    ntiid = get_course_purchasable_ntiid(entry, provider)
+    # the NTIID of the purchasable is based on the NTIID
+    # of the catalog entry
+    ntiid = get_course_purchasable_ntiid(entry)
 
     preview = False
     icon = thumbnail = None
