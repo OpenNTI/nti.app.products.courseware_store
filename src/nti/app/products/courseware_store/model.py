@@ -94,7 +94,7 @@ def create_course(ntiid, name=None, provider=None, amount=None, currency=u'USD',
         vendor = None
 
     result = factory()
-
+    # pylint: disable=attribute-defined-outside-init
     # basic info
     result.Name = name
     result.NTIID = ntiid
