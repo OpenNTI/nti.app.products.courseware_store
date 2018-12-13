@@ -39,7 +39,8 @@ from zope.i18n import translate
 from zope.publisher.interfaces.browser import IBrowserRequest
 
 from zope.security.interfaces import IPrincipal
-from zope.security.management import queryInteraction
+
+from nti.app.authentication import get_remote_user
 
 from nti.app.products.courseware.interfaces import ICoursesWorkspace
 from nti.app.products.courseware.interfaces import ICourseInstanceEnrollment
@@ -336,7 +337,10 @@ def _gift_purchase_attempt_redeemed(purchase, event):
 
 @component.adapter(ICourseInstanceEnrollmentRecord, IBeforeIdRemovedEvent)
 def _enrollment_record_dropped(record, unused_event):
-    if record.Scope == ES_PURCHASED and queryInteraction() is not None:
+    user = IUser(record, None)
+    remote_user = get_remote_user()
+    # Users cannot drop purchased courses, but admins can on their behalf.
+    if record.Scope == ES_PURCHASED and remote_user == user:
         raise hexc.HTTPForbidden('Cannot drop a purchased course.')
 
 
