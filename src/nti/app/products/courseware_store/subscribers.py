@@ -60,6 +60,8 @@ from nti.app.store.subscribers import store_purchase_attempt_successful
 
 from nti.appserver.interfaces import IApplicationSettings
 
+from nti.appserver.brand.interfaces import ISiteBrand
+
 from nti.appserver.policies.interfaces import ISitePolicyUserEventListener
 
 from nti.appserver.workspaces.interfaces import IUserService
@@ -381,6 +383,8 @@ def _build_base_args(event, user, profile):
 
     site_alias = getattr(policy, 'COM_ALIAS', '')
     for_credit_url = getattr(policy, 'FOR_CREDIT_URL', '')
+    brand = component.queryUtility(ISiteBrand)
+    brand = getattr(brand, 'brand_name', 'NextThought')
 
     args = {'profile': profile,
             'context': event,
@@ -388,7 +392,7 @@ def _build_base_args(event, user, profile):
             'for_credit_url': for_credit_url,
             'site_alias': site_alias,
             'support_email': policy.SUPPORT_EMAIL,
-            'brand': policy.BRAND,
+            'brand': brand,
             'informal_username': informal_username,
             'today': isodate.date_isoformat(datetime.now())}
     return args
