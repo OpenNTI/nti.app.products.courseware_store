@@ -11,10 +11,16 @@ from __future__ import absolute_import
 from zope import component
 from zope import interface
 
+from zope.location.interfaces import ILocation
+
 from nti.app.products.courseware.utils import get_vendor_thank_you_page
 
 from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
+
+from nti.app.products.courseware_store.utils import has_store_connect_keys
+from nti.app.products.courseware_store.utils import can_edit_course_purchasable
+from nti.app.products.courseware_store.utils import can_course_have_editable_purchasable
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
@@ -26,16 +32,21 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.utils import get_catalog_entry
 from nti.contenttypes.courses.utils import get_enrollment_record
 
+from nti.externalization.interfaces import StandardExternalFields
 from nti.externalization.interfaces import IExternalObjectDecorator
 from nti.externalization.interfaces import IExternalMappingDecorator
 
 from nti.externalization.singleton import Singleton
+
+from nti.links.links import Link
 
 from nti.store.interfaces import IGiftPurchaseAttempt
 
 from nti.store.purchasable import get_purchasable
 
 logger = __import__('logging').getLogger(__name__)
+
+LINKS = StandardExternalFields.LINKS
 
 
 @component.adapter(IStoreEnrollmentOption)
@@ -52,7 +63,7 @@ class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator
 
     def _do_decorate_external(self, context, result):
         record = self._get_enrollment_record(context, self.remoteUser)
-        result['IsEnrolled'] = bool(    record is not None 
+        result['IsEnrolled'] = bool(    record is not None
                                     and record.Scope == ES_PURCHASED)
         isAvailable = bool((    record is None or record.Scope == ES_PUBLIC) \
                             and context.IsEnabled)
@@ -84,7 +95,7 @@ class _VendorThankYouInfoDecorator(Singleton):
                     entry = catalog.getCatalogEntry(catalog_ntiid)
                     return ICourseInstance(entry)
                 except (KeyError, LookupError):
-                    logger.error("Could not find course entry %s", 
+                    logger.error("Could not find course entry %s",
                                  catalog_ntiid)
 
     def decorateExternalMapping(self, context, result):
@@ -106,3 +117,51 @@ class PurchasableCourseDecorator(Singleton):
             value = external.get(name)
             if not value:
                 external.pop(name, None)
+
+
+@component.adapter(IPurchasableCourse)
+@interface.implementer(IExternalObjectDecorator)
+class _PurchasableCourseDecorator(AbstractAuthenticatedRequestAwareDecorator):
+    """
+    Decorate the purchasable course for deletion, where appropriate.
+    """
+
+    def _predicate(self, context, unused_result):
+        return  self._is_authenticated \
+            and can_edit_course_purchasable(context, self.remoteUser)
+
+    def _do_decorate_external(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        link = Link(context,
+                    rel='delete')
+        interface.alsoProvides(link, ILocation)
+        link.__name__ = ''
+        link.__parent__ = context
+
+
+@component.adapter(ICourseInstance)
+@interface.implementer(IExternalObjectDecorator)
+class _CoursePurchasableDecorator(AbstractAuthenticatedRequestAwareDecorator):
+    """
+    Only decorate the course as being able to have a course
+    purchasable if it does not already have one, it has connect
+    key(s), it does not have a vendor info purchasable, and it
+    does not already have a purchasable.
+    """
+
+    def _predicate(self, context, unused_result):
+        return  self._is_authenticated \
+            and not IPurchasableCourse(context, None) \
+            and has_store_connect_keys() \
+            and can_course_have_editable_purchasable(context) \
+            and can_edit_course_purchasable(context, self.remoteUser)
+
+    def _do_decorate_external(self, context, result):
+        _links = result.setdefault(LINKS, [])
+        link = Link(context,
+                    rel='CreateCoursePurchasable',
+                    elements=('@@CreateCoursePurchasable',))
+        interface.alsoProvides(link, ILocation)
+        link.__name__ = ''
+        link.__parent__ = context
+        _links.append(link)

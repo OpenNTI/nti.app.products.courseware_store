@@ -82,10 +82,20 @@
 				provides="nti.app.products.courseware.interfaces.IEnrollmentOptionProvider"/>
 
 	<!-- Decorators -->
-	<subscriber factory=".decorators._StoreEnrollmentOptionDecorator"
+	<subscriber factory=".decorators._PurchasableCourseDecorator"
 				provides="nti.externalization.interfaces.IExternalObjectDecorator"
-				for=".interfaces.IStoreEnrollmentOption
+				for=".interfaces.IPurchasableCourse
 					 pyramid.interfaces.IRequest" />
+
+	<subscriber factory=".decorators._CoursePurchasableDecorator"
+                provides="nti.externalization.interfaces.IExternalObjectDecorator"
+                for="nti.contenttypes.courses.interfaces.ICourseInstance
+                     pyramid.interfaces.IRequest" />
+
+    <subscriber factory=".decorators._StoreEnrollmentOptionDecorator"
+                provides="nti.externalization.interfaces.IExternalObjectDecorator"
+                for=".interfaces.IStoreEnrollmentOption
+                     pyramid.interfaces.IRequest" />
 
 	<subscriber factory=".decorators._VendorThankYouInfoDecorator"
 				provides="nti.externalization.interfaces.IExternalMappingDecorator" />

@@ -37,8 +37,13 @@ from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
+from nti.contenttypes.courses.utils import is_course_editor
+from nti.contenttypes.courses.utils import is_course_instructor
 from nti.contenttypes.courses.utils import get_course_enrollments
 from nti.contenttypes.courses.utils import get_course_vendor_info
+
+from nti.dataserver.authorization import is_admin
+from nti.dataserver.authorization import is_site_admin
 
 from nti.ntiids.ntiids import get_parts
 from nti.ntiids.ntiids import make_ntiid
@@ -51,6 +56,8 @@ from nti.store.index import get_purchase_catalog
 from nti.store.interfaces import IPurchasable
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IInvitationPurchaseAttempt
+
+from nti.store.payments.interfaces import IConnectKey
 
 from nti.store.store import get_purchasables
 
@@ -245,3 +252,39 @@ def get_purchasable_course_bundles(entry):
         if purchasable.Public and ntiid in purchasable.Items:
             result.append(purchasable)
     return result
+
+
+def can_edit_course_purchasable(course, user):
+    """
+    Validates whether the give user can add, edit, or delete
+    a course purchaseable. Currently this is NT admins, site
+    admins, and users that are both instructors *and* editors.
+    """
+    return is_admin(user) \
+        or is_site_admin(user) \
+        or (    is_course_instructor(course, user) \
+            and is_course_editor(course, user))
+
+
+def can_course_have_editable_purchasable(course):
+    """
+    For the given course, validate that it can have
+    a purchasable. This will only return True if the course
+    does not have a vendor-info backed purchasable.
+    """
+    return not get_nti_course_price(course)
+
+
+def has_store_connect_keys():
+    """
+    Returns a boolean whether this site has :class:`IConnectKey`
+    objects registered.
+    """
+    return bool(component.getAllUtilitiesRegisteredFor(IConnectKey))
+
+
+def is_valid_store_provider(provider):
+    """
+    Validate the purchasable provider has a valid store connect key.
+    """
+    return component.queryUtility(IConnectKey, name=provider)
