@@ -15,6 +15,7 @@ from io import BytesIO
 
 from requests.structures import CaseInsensitiveDict
 
+from zope import component
 from zope import lifecycleevent
 
 from zope.cachedescriptors.property import Lazy
@@ -49,6 +50,8 @@ from nti.app.products.courseware_store.utils import can_edit_course_purchasable
 from nti.app.products.courseware_store.utils import get_course_purchasable_ntiid
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_purchases
 from nti.app.products.courseware_store.utils import can_course_have_editable_purchasable
+
+from nti.app.store.interfaces import IPurchasableDefaultFieldProvider
 
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
@@ -147,16 +150,13 @@ class SyncPurchasableCourseChoiceBundlesView(AbstractAuthenticatedView):
 @view_config(context=ICourseCatalogEntry)
 @view_defaults(route_name='objects.generic.traversal',
                renderer='rest',
+               request_method='POST',
                name='CreateCoursePurchasable')
 class CreateCoursePurchasableView(AbstractAuthenticatedView,
                                   ModeledContentUploadRequestUtilsMixin):
     """
-    Creates or updates a course purchasable
+    Creates a course purchasable
     """
-
-    DEFAULT_FEE = None
-    DEFAULT_CURRENCY = u'USD'
-    DEFAULT_STRIPE_PROVIDER = u'default'
 
     VALID_FIELDS = ('Currency', 'Provider', 'Amount')
 
@@ -181,16 +181,17 @@ class CreateCoursePurchasableView(AbstractAuthenticatedView,
         return result
 
     def create_purchasable(self):
-        # TODO: utility for default fees/currency
         entry = self._catalog_entry
         ntiid = get_course_purchasable_ntiid(entry)
+        # Use the default fields; will be overridden by user input later.
+        default_fields = component.getUtility(IPurchasableDefaultFieldProvider)
         result = create_course(ntiid=ntiid,
                                items=(entry.ntiid,),
                                name=entry.title,
                                title=entry.title,
-                               provider=self.DEFAULT_STRIPE_PROVIDER,
-                               fee=self.DEFAULT_FEE,
-                               currency=self.DEFAULT_CURRENCY,
+                               provider=default_fields.get_default_provider(),
+                               fee=default_fields.get_default_fee(),
+                               currency=default_fields.get_default_currency(),
                                description=entry.description)
         return result
 
