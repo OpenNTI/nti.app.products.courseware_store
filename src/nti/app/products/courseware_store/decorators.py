@@ -24,6 +24,8 @@ from nti.app.products.courseware_store.utils import can_course_have_editable_pur
 
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
+from nti.app.store.license_utils import can_create_purchasable
+
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -139,20 +141,20 @@ class _PurchasableCourseDecorator(AbstractAuthenticatedRequestAwareDecorator):
         link.__parent__ = context
 
 
-@component.adapter(ICourseInstance)
 @interface.implementer(IExternalObjectDecorator)
 class _CoursePurchasableDecorator(AbstractAuthenticatedRequestAwareDecorator):
     """
     Only decorate the course as being able to have a course
     purchasable if it does not already have one, it has connect
-    key(s), it does not have a vendor info purchasable, and it
-    does not already have a purchasable.
+    key(s), it does not have a vendor info purchasable, it
+    does not already have a purchasable, and license permitted.
     """
 
     def _predicate(self, context, unused_result):
         return  self._is_authenticated \
             and not IPurchasableCourse(context, None) \
             and has_store_connect_keys() \
+            and can_create_purchasable() \
             and can_course_have_editable_purchasable(context) \
             and can_edit_course_purchasable(context, self.remoteUser)
 

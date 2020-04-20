@@ -53,6 +53,8 @@ from nti.app.products.courseware_store.utils import can_course_have_editable_pur
 
 from nti.app.store.interfaces import IPurchasableDefaultFieldProvider
 
+from nti.app.store.license_utils import can_create_purchasable
+
 from nti.contenttypes.courses.interfaces import ICourseInstance
 from nti.contenttypes.courses.interfaces import ICourseCatalogEntry
 
@@ -228,8 +230,16 @@ class CreateCoursePurchasableView(AbstractAuthenticatedView,
                              },
                              None)
 
+        if not can_create_purchasable():
+            raise_json_error(self.request,
+                             hexc.HTTPForbidden,
+                             {
+                                'message': _(u"This site can create purchasables."),
+                                'field': 'SiteLicenseRestrictionError'
+                             },
+                             None)
+
     def __call__(self):
-        # TODO: License restrictions
         self.validate()
         externalValue = self.readInput()
         result = self.create_purchasable()
