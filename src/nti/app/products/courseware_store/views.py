@@ -198,7 +198,7 @@ class CreateCoursePurchasableView(AbstractAuthenticatedView,
         return result
 
     def validate(self):
-        purchasable = IPurchasableCourse(self._entry, None)
+        purchasable = IPurchasableCourse(self._catalog_entry, None)
         if purchasable is not None:
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
