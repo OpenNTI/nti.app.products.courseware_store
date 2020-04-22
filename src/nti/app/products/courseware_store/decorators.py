@@ -26,6 +26,8 @@ from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecora
 
 from nti.app.store.license_utils import can_create_purchasable
 
+from nti.appserver.pyramid_renderers_edit_link_decorator import EditLinkRemoverDecorator
+
 from nti.contenttypes.courses.interfaces import ES_PUBLIC
 from nti.contenttypes.courses.interfaces import ES_PURCHASED
 from nti.contenttypes.courses.interfaces import ICourseCatalog
@@ -139,6 +141,18 @@ class _PurchasableCourseDecorator(AbstractAuthenticatedRequestAwareDecorator):
         interface.alsoProvides(link, ILocation)
         link.__name__ = ''
         link.__parent__ = context
+
+
+@component.adapter(IPurchasableCourse)
+@interface.implementer(IExternalObjectDecorator)
+class _PurchasableCourseEditLinkRemoverDecorator(EditLinkRemoverDecorator):
+    """
+    Ensure only our specified users can edit purchasable course objects.
+    """
+
+    def _predicate(self, context, unused_result):
+        return  self._is_authenticated \
+            and not can_edit_course_purchasable(context, self.remoteUser)
 
 
 @interface.implementer(IExternalObjectDecorator)

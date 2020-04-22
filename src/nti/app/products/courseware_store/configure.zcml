@@ -87,6 +87,11 @@
 				for=".interfaces.IPurchasableCourse
 					 pyramid.interfaces.IRequest" />
 
+    <subscriber factory=".decorators._PurchasableCourseEditLinkRemoverDecorator"
+                provides="nti.externalization.interfaces.IExternalObjectDecorator"
+                for=".interfaces.IPurchasableCourse
+                     pyramid.interfaces.IRequest" />
+
 	<subscriber factory=".decorators._CoursePurchasableDecorator"
                 provides="nti.externalization.interfaces.IExternalObjectDecorator"
                 for="nti.contenttypes.courses.interfaces.ICourseInstance
