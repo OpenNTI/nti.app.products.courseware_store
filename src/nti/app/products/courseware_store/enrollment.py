@@ -13,6 +13,8 @@ from zope import interface
 
 from zope.schema.fieldproperty import FieldPropertyStoredThroughField as FP
 
+from nti.app.authentication import get_remote_user
+
 from nti.app.products.courseware.enrollment import EnrollmentOption
 
 from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
@@ -79,10 +81,11 @@ class StoreEnrollmentOptionProvider(object):
     def get_purchasables(self, context):
         result = []
         direct = get_entry_purchasable(context)
+        user = get_remote_user()
         # Return if visible or editor.
         if      direct is not None \
             and (   direct.isPublic() \
-                 or can_edit_course_purchasable()):
+                 or can_edit_course_purchasable(context, user)):
             result.append(direct)
         result.extend(get_purchasable_course_bundles(context))
         return result
