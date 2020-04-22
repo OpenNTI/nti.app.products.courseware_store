@@ -20,6 +20,7 @@ from nti.app.products.courseware.interfaces import IEnrollmentOptionProvider
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
 
 from nti.app.products.courseware_store.utils import allow_vendor_updates
+from nti.app.products.courseware_store.utils import can_edit_course_purchasable
 from nti.app.products.courseware_store.utils import get_entry_purchasable_ntiid
 from nti.app.products.courseware_store.utils import get_purchasable_course_bundles
 
@@ -78,7 +79,10 @@ class StoreEnrollmentOptionProvider(object):
     def get_purchasables(self, context):
         result = []
         direct = get_entry_purchasable(context)
-        if direct is not None and direct.isPublic():  # direct purchasable
+        # Return if visible or editor.
+        if      direct is not None \
+            and (   direct.isPublic() \
+                 or can_edit_course_purchasable()):
             result.append(direct)
         result.extend(get_purchasable_course_bundles(context))
         return result
@@ -92,8 +96,8 @@ class StoreEnrollmentOptionProvider(object):
         if purchasables:
             result = StoreEnrollmentOption()
             result.Purchasables = purchasables
-            IsEnabled = reduce(lambda x, y: x or y.isPublic(), 
-                               purchasables, 
+            IsEnabled = reduce(lambda x, y: x or y.isPublic(),
+                               purchasables,
                                False)
             result.IsEnabled = IsEnabled
             # CS: We want to use the original data
