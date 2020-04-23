@@ -182,10 +182,7 @@ def update_purchasable_course(purchasable, entry):
     fee = get_course_fee(entry)
     provider = get_entry_purchasable_provider(entry)
     price = get_course_price(entry, provider)
-    if price is None:  # price removed
-        purchasable.Public = False
-        logger.warning('Could not find price for %s', purchasable.NTIID)
-    else:
+    if price is not None:
         name = get_course_purchasable_name(entry) or entry.title
         title = get_course_purchasable_title(entry) or entry.title
         provider = get_course_purchasable_provider(entry) or purchasable.Provider
