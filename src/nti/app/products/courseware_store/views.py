@@ -45,7 +45,7 @@ from nti.app.products.courseware_store.purchasable import get_registered_choice_
 from nti.app.products.courseware_store.purchasable import sync_purchasable_course_choice_bundles
 
 from nti.app.products.courseware_store.utils import find_catalog_entry
-from nti.app.products.courseware_store.utils import has_store_connect_keys
+from nti.app.products.courseware_store.utils import has_default_store_key
 from nti.app.products.courseware_store.utils import can_edit_course_purchasable
 from nti.app.products.courseware_store.utils import get_course_purchasable_ntiid
 from nti.app.products.courseware_store.utils import find_allow_vendor_updates_purchases
@@ -207,7 +207,7 @@ class CreateCoursePurchasableView(AbstractAuthenticatedView,
                                 'field': 'CourseAlreadyPurchasableError'
                              },
                              None)
-        if not has_store_connect_keys():
+        if not has_default_store_key():
             raise_json_error(self.request,
                              hexc.HTTPUnprocessableEntity,
                              {

@@ -18,7 +18,7 @@ from nti.app.products.courseware.utils import get_vendor_thank_you_page
 from nti.app.products.courseware_store.interfaces import IPurchasableCourse
 from nti.app.products.courseware_store.interfaces import IStoreEnrollmentOption
 
-from nti.app.products.courseware_store.utils import has_store_connect_keys
+from nti.app.products.courseware_store.utils import has_default_store_key
 from nti.app.products.courseware_store.utils import can_edit_course_purchasable
 from nti.app.products.courseware_store.utils import can_course_have_editable_purchasable
 
@@ -167,7 +167,7 @@ class _CoursePurchasableDecorator(AbstractAuthenticatedRequestAwareDecorator):
     def _predicate(self, context, unused_result):
         return  self._is_authenticated \
             and not IPurchasableCourse(context, None) \
-            and has_store_connect_keys() \
+            and has_default_store_key() \
             and can_create_purchasable() \
             and can_course_have_editable_purchasable(context) \
             and can_edit_course_purchasable(context, self.remoteUser)

@@ -29,6 +29,8 @@ from nti.app.products.courseware_store.interfaces import IPurchasableCourseChoic
 
 from nti.app.products.courseware_store.model import CoursePrice
 
+from nti.app.store.interfaces import IPurchasableDefaultFieldProvider
+
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_TYPE
 from nti.contenttypes.courses.interfaces import NTIID_ENTRY_PROVIDER
 
@@ -281,6 +283,24 @@ def has_store_connect_keys():
     objects registered.
     """
     return bool(component.getAllUtilitiesRegisteredFor(IConnectKey))
+
+
+def has_named_store_key(name):
+    """
+    Returns a boolean whether this site has the named
+    :class:`IConnectKey`.
+    """
+    return component.queryUtility(name=name) is not None
+
+
+def has_default_store_key():
+    """
+    Returns a boolean whether this site has the default provider
+    :class:`IConnectKey`.
+    """
+    default_fields = component.getUtility(IPurchasableDefaultFieldProvider)
+    provider = default_fields.get_default_provider()
+    return has_named_store_key(provider)
 
 
 def is_valid_store_provider(provider):
