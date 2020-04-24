@@ -290,7 +290,7 @@ def has_named_store_key(name):
     Returns a boolean whether this site has the named
     :class:`IConnectKey`.
     """
-    return component.queryUtility(name=name) is not None
+    return component.queryUtility(IConnectKey, name=name) is not None
 
 
 def has_default_store_key():
