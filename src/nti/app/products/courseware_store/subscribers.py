@@ -615,6 +615,7 @@ def _send_entry_gift_email(purchase, purchase_ntiids, event, request):
 
     args = {
         'sender_name': purchase.SenderName,
+        'context': event,
         'receiver_name': purchase.ReceiverName,
         'gift_message': purchase.Message,
         'for_credit_url': for_credit_url,
