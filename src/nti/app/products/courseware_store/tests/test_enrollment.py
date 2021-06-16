@@ -65,7 +65,7 @@ class TestEnrollmentOptions(ApplicationLayerTest):
             assert_that(ext_obj,
                         has_entry('Items',
                                   has_entry('StoreEnrollment',
-                                            has_entries('IsEnabled', is_(True),
+                                            has_entries('Enabled', is_(True),
                                                         'RequiresAdmission', is_(False),
                                                         'AllowVendorUpdates', is_(True),
                                                         'MimeType', 'application/vnd.nextthought.courseware.storeenrollmentoption',

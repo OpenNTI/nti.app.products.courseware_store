@@ -13,6 +13,8 @@ from zope import interface
 
 from zope.location.interfaces import ILocation
 
+from nti.app.authentication import get_remote_user
+
 from nti.app.products.courseware.utils import get_vendor_thank_you_page
 
 from nti.app.products.courseware_store.interfaces import IPurchasableCourse
@@ -22,6 +24,7 @@ from nti.app.products.courseware_store.utils import has_default_store_key
 from nti.app.products.courseware_store.utils import can_edit_course_purchasable
 from nti.app.products.courseware_store.utils import can_course_have_editable_purchasable
 
+from nti.app.renderers.decorators import AbstractRequestAwareDecorator
 from nti.app.renderers.decorators import AbstractAuthenticatedRequestAwareDecorator
 
 from nti.app.store.license_utils import can_create_purchasable
@@ -55,18 +58,18 @@ LINKS = StandardExternalFields.LINKS
 
 @component.adapter(IStoreEnrollmentOption)
 @interface.implementer(IExternalObjectDecorator)
-class _StoreEnrollmentOptionDecorator(AbstractAuthenticatedRequestAwareDecorator):
-
-    def _predicate(self, unused_context, unused_result):
-        return self._is_authenticated
+class _StoreEnrollmentOptionDecorator(AbstractRequestAwareDecorator):
 
     @classmethod
-    def _get_enrollment_record(cls, context, remoteUser):
-        entry = get_catalog_entry(context.CatalogEntryNTIID)
-        return get_enrollment_record(entry, remoteUser)
+    def _get_enrollment_record(cls, context):
+        remote_user = get_remote_user()
+        if remote_user is not None:
+            entry = get_catalog_entry(context.CatalogEntryNTIID)
+            return get_enrollment_record(entry, remote_user)
+        return None
 
     def _do_decorate_external(self, context, result):
-        record = self._get_enrollment_record(context, self.remoteUser)
+        record = self._get_enrollment_record(context)
         result['IsEnrolled'] = bool(    record is not None
                                     and record.Scope == ES_PURCHASED)
         isAvailable = bool((    record is None or record.Scope == ES_PUBLIC) \
