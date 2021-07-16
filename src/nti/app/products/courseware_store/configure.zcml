@@ -51,6 +51,7 @@
 			 name="nti" />
 
 	<!-- Subscribers -->
+	<subscriber handler=".subscribers._purchase_attempt_started" />
 	<subscriber handler=".subscribers._enrollment_record_dropped" />
 	<subscriber handler=".subscribers._purchase_attempt_refunded" />
 	<subscriber handler=".subscribers._purchase_attempt_successful" />

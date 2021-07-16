@@ -102,10 +102,12 @@ from nti.mailer.interfaces import ITemplatedMailer
 from nti.ntiids.ntiids import make_specific_safe
 from nti.ntiids.ntiids import find_object_with_ntiid
 
+from nti.store import PurchaseException
 from nti.store import RedemptionException
 
 from nti.store.interfaces import IPurchaseAttempt
 from nti.store.interfaces import IGiftPurchaseAttempt
+from nti.store.interfaces import IPurchaseAttemptStarted
 from nti.store.interfaces import IPurchaseAttemptRefunded
 from nti.store.interfaces import IRedeemedPurchaseAttempt
 from nti.store.interfaces import IStorePurchaseInvitation
@@ -266,6 +268,23 @@ def _to_sequence(items=(), unique=True):
     result = items.split() if isinstance(items, six.string_types) else items
     return set(result or ()) if unique else result
 
+
+@component.adapter(IPurchaseAttempt, IPurchaseAttemptStarted)
+def _purchase_attempt_started(purchase, unused_event):
+    """
+    Raise exception during purchase if course seat capacity reached.
+    """
+    for course, unused_purchasable in _get_courses_from_purchasables(purchase.Items):
+        entry = ICourseCatalogEntry(course, None)
+        if      entry \
+            and entry.seat_limit \
+            and not entry.seat_limit.can_user_enroll():
+            logger.info("Cannot purchase course because seat capacity reached (%s/%s)",
+                        entry.seat_limit.used_seats,
+                        entry.seat_limit.max_seats)
+            msg = _(u"Item(s) seat capacity reached.")
+            raise PurchaseException(msg)
+    
 
 def _process_successful_purchase(purchasables, user=None, request=None, check=False):
     result = False

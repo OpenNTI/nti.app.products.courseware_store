@@ -15,6 +15,7 @@ from hamcrest import is_not
 from hamcrest import has_length
 from hamcrest import assert_that
 from hamcrest import has_property
+from hamcrest import contains_string
 
 from zope import component
 
@@ -44,7 +45,7 @@ from nti.dataserver.tests import mock_dataserver
 
 from nti.store.gift_registry import register_gift_purchase_attempt
 
-from nti.store.interfaces import PA_STATE_STARTED
+from nti.store.interfaces import PA_STATE_STARTED, PurchaseAttemptStarted
 from nti.store.interfaces import PA_STATE_SUCCESS
 from nti.store.interfaces import PA_STATE_REFUNDED
 from nti.store.interfaces import PA_STATE_REDEEMED
@@ -63,6 +64,8 @@ from nti.store.purchase_order import create_purchase_item
 from nti.store.purchase_order import create_purchase_order
 
 from nti.store.purchase_history import register_purchase_attempt
+from nti.contenttypes.courses.courses import CourseSeatLimit
+from nti.store import PurchaseException
 
 
 class TestPurchase(ApplicationLayerTest):
@@ -110,6 +113,9 @@ class TestPurchase(ApplicationLayerTest):
         settings = component.getUtility(IApplicationSettings)
         settings['purchase_additional_confirmation_addresses'] = u'foo@bar.com\nbiz@baz.com'
 
+        with mock_dataserver.mock_db_trans(self.ds):
+            self._create_user(u'jamesmcnulty')
+
         with mock_dataserver.mock_db_trans(self.ds, site_name='platform.ou.edu'):
             p = get_purchasable(self.purchasable_id)
             assert_that(p, is_not(none()))
@@ -141,6 +147,31 @@ class TestPurchase(ApplicationLayerTest):
             enrollments = ICourseEnrollments(course)
             enrollment = enrollments.get_enrollment_for_principal(user)
             assert_that(enrollment, is_(none()))
+            
+            # Now with seat limit
+            entry.seat_limit = CourseSeatLimit(max_seats=1)
+            entry.seat_limit.__parent__ = entry
+            assert_that(entry.seat_limit.used_seats, is_(0))
+            notify(PurchaseAttemptStarted(purchase))
+            
+            notify(PurchaseAttemptSuccessful(purchase))
+            assert_that(entry.seat_limit.used_seats, is_(1))
+            
+            # Capacity reached
+            with self.assertRaises(PurchaseException) as exc:
+                notify(PurchaseAttemptStarted(purchase))
+            assert_that(exc.exception.message, contains_string(u"capacity reached"))
+            
+            purchase2 = self.create_purchase_attempt(self.purchasable_id)
+            user = User.get_user('jamesmcnulty')
+            register_purchase_attempt(purchase2, user)
+            with self.assertRaises(PurchaseException):
+                notify(PurchaseAttemptStarted(purchase2))
+            # But once attempt is successful, we do not check against
+            # capacity.
+            notify(PurchaseAttemptSuccessful(purchase2))
+            assert_that(entry.seat_limit.used_seats, is_(2))
+            
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
     def test_gift_redeemed(self):
