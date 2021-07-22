@@ -66,6 +66,7 @@ class TestEnrollmentOptions(ApplicationLayerTest):
                         has_entry('Items',
                                   has_entry('StoreEnrollment',
                                             has_entries('Enabled', is_(True),
+                                                        'IsSeatAvailable', is_(True),
                                                         'RequiresAdmission', is_(False),
                                                         'AllowVendorUpdates', is_(True),
                                                         'MimeType', 'application/vnd.nextthought.courseware.storeenrollmentoption',
