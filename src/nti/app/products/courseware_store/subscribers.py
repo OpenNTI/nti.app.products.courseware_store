@@ -78,7 +78,8 @@ from nti.contenttypes.courses.interfaces import ICourseCatalogDidSyncEvent
 from nti.contenttypes.courses.interfaces import ICourseVendorInfoSynchronized
 from nti.contenttypes.courses.interfaces import ICourseInstanceEnrollmentRecord
 
-from nti.contenttypes.courses.utils import get_enrollment_record
+from nti.contenttypes.courses.utils import get_enrollment_record,\
+    can_user_enroll
 from nti.contenttypes.courses.utils import drop_any_other_enrollments
 
 from nti.dataserver.interfaces import IUser
@@ -277,8 +278,7 @@ def _purchase_attempt_started(purchase, unused_event):
     for course, unused_purchasable in _get_courses_from_purchasables(purchase.Items):
         entry = ICourseCatalogEntry(course, None)
         if      entry \
-            and entry.seat_limit \
-            and not entry.seat_limit.can_user_enroll():
+            and not can_user_enroll(entry.seat_limit, entry):
             logger.info("Cannot purchase course because seat capacity reached (%s/%s)",
                         entry.seat_limit.used_seats,
                         entry.seat_limit.max_seats)
