@@ -278,9 +278,8 @@ def _purchase_attempt_started(purchase, unused_event):
     for course, unused_purchasable in _get_courses_from_purchasables(purchase.Items):
         entry = ICourseCatalogEntry(course, None)
         if      entry \
-            and not can_user_enroll(entry.seat_limit, entry):
-            logger.info("Cannot purchase course because seat capacity reached (%s/%s)",
-                        entry.seat_limit.used_seats,
+            and not can_user_enroll(entry.seat_limit):
+            logger.info("Cannot purchase course because seat capacity reached (%s)",
                         entry.seat_limit.max_seats)
             msg = _(u"Item(s) seat capacity reached.")
             raise PurchaseException(msg)
