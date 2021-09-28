@@ -10,6 +10,7 @@ entry_points = {
 }
 
 TESTS_REQUIRE = [
+    'nti.app.products.courseware[test]',
     'nti.app.testing',
     'nti.testing',
     'zope.testrunner',
