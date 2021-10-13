@@ -43,6 +43,8 @@ from nti.dataserver.users.users import User
 
 from nti.dataserver.tests import mock_dataserver
 
+from nti.externalization import to_external_object
+
 from nti.store.gift_registry import register_gift_purchase_attempt
 
 from nti.store.interfaces import PA_STATE_STARTED, PurchaseAttemptStarted
@@ -155,7 +157,8 @@ class TestPurchase(ApplicationLayerTest):
             notify(PurchaseAttemptStarted(purchase))
             
             notify(PurchaseAttemptSuccessful(purchase))
-            assert_that(entry.seat_limit.used_seats, is_(1))
+            ext_entry = to_external_object(entry)
+            assert_that(ext_entry['seat_limit']['used_seats'], is_(1))
             
             # Capacity reached
             with self.assertRaises(PurchaseException) as exc:
@@ -170,7 +173,8 @@ class TestPurchase(ApplicationLayerTest):
             # But once attempt is successful, we do not check against
             # capacity.
             notify(PurchaseAttemptSuccessful(purchase2))
-            assert_that(entry.seat_limit.used_seats, is_(2))
+            ext_entry = to_external_object(entry)
+            assert_that(ext_entry['seat_limit']['used_seats'], is_(2))
             
 
     @WithSharedApplicationMockDS(testapp=True, users=True)
